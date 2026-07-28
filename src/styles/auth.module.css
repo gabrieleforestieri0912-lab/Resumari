@@ -1,0 +1,163 @@
+.container {
+  --auth-easing: cubic-bezier(0.77, 0, 0.175, 1);
+  --auth-duration: 400ms;
+  --auth-bg-left: #ffffff;
+  --auth-bg-right: #f9fafb;
+  overflow-x: hidden;
+}
+
+.wrapper {
+  display: flex;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.wrapperRegister {
+  flex-direction: row-reverse;
+}
+
+.formPanel {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  min-height: 100vh;
+}
+
+.descPanel {
+  display: none;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--auth-bg-right);
+}
+
+.panelIdle {
+  opacity: 1;
+  transform: translateX(0) translateY(0);
+}
+
+.panelLeavingLeft {
+  animation: slideOutLeft var(--auth-duration) var(--auth-easing) forwards;
+}
+
+.panelLeavingRight {
+  animation: slideOutRight var(--auth-duration) var(--auth-easing) forwards;
+}
+
+.panelEnteringLeft {
+  animation: slideInFromLeft var(--auth-duration) var(--auth-easing) forwards;
+}
+
+.panelEnteringRight {
+  animation: slideInFromRight var(--auth-duration) var(--auth-easing) forwards;
+}
+
+@media (min-width: 768px) {
+  .formPanel {
+    width: 50%;
+  }
+
+  .descPanel {
+    display: flex;
+    width: 50%;
+    min-height: 100vh;
+  }
+}
+
+@media (max-width: 767px) {
+  .wrapper,
+  .wrapperRegister {
+    flex-direction: column;
+  }
+
+  .formPanel {
+    min-height: auto;
+    padding: 2rem 1.5rem;
+  }
+
+  .descPanel {
+    display: flex;
+    height: 180px;
+    min-height: 180px;
+    max-height: 180px;
+  }
+
+  .panelLeavingLeft,
+  .panelLeavingRight {
+    animation-name: slideOutUp;
+  }
+
+  .panelEnteringLeft,
+  .panelEnteringRight {
+    animation-name: slideInFromBottom;
+  }
+}
+
+@keyframes slideOutLeft {
+  to {
+    transform: translateX(-8%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideOutRight {
+  to {
+    transform: translateX(8%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(8%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-8%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutUp {
+  to {
+    transform: translateY(-8%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    transform: translateY(8%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panelLeavingLeft,
+  .panelLeavingRight,
+  .panelEnteringLeft,
+  .panelEnteringRight {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

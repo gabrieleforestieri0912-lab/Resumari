@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /settings/
+Disallow: /profile/
+
+# OpenAI GPTBot for AI training and browsing
+User-agent: GPTBot
+Allow: /
+Disallow: /api/
+
+# Google AI (Bard/Gemini) Crawler
+User-agent: CCBot
+Allow: /
+
+Sitemap: https://resumari.it/sitemap.xml
