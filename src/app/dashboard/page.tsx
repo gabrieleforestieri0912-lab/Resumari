@@ -164,23 +164,23 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="flex h-screen bg-white overflow-hidden">
+    <div className="flex h-screen bg-white dark:bg-zinc-950 overflow-hidden">
       <AnimatePresence mode="wait">
         {isLeftSidebarOpen && (
           <motion.aside
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 300, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
-            className="border-r border-gray-100 flex flex-col bg-gray-50/50"
+            className="border-r border-gray-100 dark:border-zinc-800 flex flex-col bg-gray-50/50 dark:bg-zinc-900/50"
           >
             <div className="p-4 flex flex-col gap-2">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">
+                <span className="text-[10px] font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest px-2">
                   Menu
                 </span>
                 <button
                   onClick={() => setIsLeftSidebarOpen(false)}
-                  className="p-1.5 rounded-lg hover:bg-gray-200 text-gray-500 transition-all"
+                  className="p-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-800 text-gray-500 dark:text-zinc-400 transition-all"
                   title="Chiudi sidebar"
                 >
                   <PanelLeftClose size={16} />
@@ -195,21 +195,21 @@ export default function Dashboard() {
                     href={item.href}
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm shadow-sm transition-all ${
                       isActive
-                        ? "bg-purple-50 border border-purple-200 text-purple-700"
-                        : "bg-white border border-gray-200 text-gray-700 hover:border-purple-300 hover:bg-purple-50"
+                        ? "bg-purple-50 dark:bg-purple-950/50 border border-purple-200 dark:border-purple-900 text-purple-700 dark:text-purple-300"
+                        : "bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-zinc-300 hover:border-purple-300 dark:hover:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-950/30"
                     }`}
                   >
                     <Icon
                       size={18}
-                      className={isActive ? "text-purple-600" : "text-gray-500"}
+                      className={isActive ? "text-purple-600 dark:text-purple-400" : "text-gray-500 dark:text-zinc-400"}
                     />
                     {item.label}
                   </Link>
                 );
               })}
             </div>
-            <div className="mt-auto p-4 border-t border-gray-100">
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-gray-100 hover:border-purple-200 hover:bg-purple-50/30 transition-all group">
+            <div className="mt-auto p-4 border-t border-gray-100 dark:border-zinc-800">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 hover:border-purple-200 dark:hover:border-purple-800 hover:bg-purple-50/30 dark:hover:bg-purple-950/30 transition-all group">
                 {user?.picture ? (
                   <img
                     src={user.picture}
@@ -222,13 +222,13 @@ export default function Dashboard() {
                   </div>
                 )}
                 <div className="min-w-0 flex-1 text-left">
-                  <p className="text-sm font-bold text-gray-900 truncate">{displayName}</p>
-                  <p className="text-[10px] font-bold text-gray-400 truncate">{user?.email}</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-zinc-100 truncate">{displayName}</p>
+                  <p className="text-[10px] font-bold text-gray-400 dark:text-zinc-500 truncate">{user?.email}</p>
                 </div>
               </div>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all mt-2"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 dark:text-zinc-400 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-600 dark:hover:text-red-400 transition-all mt-2"
               >
                 <LogOut size={16} />
                 <span className="font-bold text-sm">Esci</span>
@@ -241,25 +241,25 @@ export default function Dashboard() {
       {!isLeftSidebarOpen && (
         <button
           onClick={() => setIsLeftSidebarOpen(true)}
-          className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all"
+          className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all"
         >
           <PanelLeftClose size={18} className="text-gray-500" />
         </button>
       )}
 
       <main className="flex-1 overflow-auto scale-95 origin-top">
-        <header className="h-16 bg-white/80 backdrop-blur-sm border-b border-gray-100 flex items-center justify-between px-8">
+        <header className="h-16 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between px-8">
           <div>
-            <h1 className="text-xl font-black text-gray-900">
+            <h1 className="text-xl font-black text-gray-900 dark:text-zinc-100">
               Dashboard
             </h1>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-zinc-500">
               Panoramica della tua attività su Resumari
             </p>
           </div>
           <Link
             href="/chat"
-            className="px-5 py-2.5 bg-linear-to-r from-purple-600 to-red-500 text-white rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-lg shadow-purple-200"
+            className="px-5 py-2.5 bg-linear-to-r from-purple-600 to-red-500 text-white rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-lg shadow-purple-200 dark:shadow-purple-900/30"
           >
             Nuova Chat
           </Link>
@@ -276,17 +276,16 @@ export default function Dashboard() {
                       key={card.key}
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="bg-white rounded-2xl p-5 border border-gray-100 shadow-lg shadow-gray-100/50 hover:shadow-xl hover:shadow-purple-500/5 transition-all"
-                    >
-                      <div
-                        className={`w-11 h-11 rounded-xl bg-linear-to-br ${card.gradient} flex items-center justify-center mb-3`}
+                      className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-gray-100 dark:border-zinc-800 shadow-lg shadow-gray-100/50 dark:shadow-none hover:shadow-xl hover:shadow-purple-500/5 dark:hover:shadow-purple-900/20 transition-all"
+                    >                        <div
+                        className={`w-11 h-11 rounded-xl bg-linear-to-br ${card.gradient} dark:from-purple-900/40 dark:to-purple-900/10 flex items-center justify-center mb-3`}
                       >
-                        <Icon size={22} className={card.color} />
+                        <Icon size={22} className={`${card.color} dark:text-purple-300`} />
                       </div>
-                      <p className="text-2xl font-black text-gray-900">
+                      <p className="text-2xl font-black text-gray-900 dark:text-zinc-100">
                         {card.value}
                       </p>
-                      <p className="text-xs font-medium text-gray-500 mt-0.5">
+                      <p className="text-xs font-medium text-gray-500 dark:text-zinc-400 mt-0.5">
                         {card.label}
                       </p>
                     </motion.div>
@@ -298,9 +297,9 @@ export default function Dashboard() {
                 <motion.div
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-2xl p-6 border border-gray-100 shadow-lg shadow-gray-100/50"
+                  className="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-gray-100 dark:border-zinc-800 shadow-lg shadow-gray-100/50 dark:shadow-none"
                 >
-                  <h3 className="text-base font-black text-gray-900 mb-5 flex items-center gap-2">
+                  <h3 className="text-base font-black text-gray-900 dark:text-zinc-100 mb-5 flex items-center gap-2">
                     <BarChart3 size={18} className="text-purple-600" />
                     Attivit&agrave; ultimi 7 giorni
                   </h3>
@@ -316,7 +315,7 @@ export default function Dashboard() {
                             key={day.date}
                             className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end"
                           >
-                            <span className="text-[10px] font-bold text-gray-400">
+                            <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-500">
                               {day.count}
                             </span>
                             <div
@@ -324,11 +323,16 @@ export default function Dashboard() {
                               style={{
                                 height: `${height}%`,
                                 backgroundColor:
-                                  day.count > 0 ? "#7c3aed" : "#e5e7eb",
+                                  day.count > 0
+                                    ? "#7c3aed"
+                                    : typeof document !== "undefined" &&
+                                        document.documentElement.classList.contains("dark")
+                                      ? "#3f3f46"
+                                      : "#e5e7eb",
                                 opacity: day.count > 0 ? 0.8 : 0.5,
                               }}
                             />
-                            <span className="text-[9px] font-medium text-gray-400 uppercase">
+                            <span className="text-[9px] font-medium text-gray-400 dark:text-zinc-500 uppercase">
                               {day.label}
                             </span>
                           </div>
@@ -336,7 +340,7 @@ export default function Dashboard() {
                       })}
                     </div>
                   ) : (
-                    <div className="h-40 flex flex-col items-center justify-center text-gray-400">
+                    <div className="h-40 flex flex-col items-center justify-center text-gray-400 dark:text-zinc-500">
                       <BarChart3 size={32} className="mb-2 opacity-50" />
                       <p className="text-sm font-medium">
                         Nessuna attivit&agrave; nei ultimi 7 giorni
@@ -349,14 +353,14 @@ export default function Dashboard() {
                       </Link>
                     </div>
                   )}
-                  <div className="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100 text-xs text-gray-500">
+                  <div className="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100 dark:border-zinc-800 text-xs text-gray-500 dark:text-zinc-400">
                     <span>
                       Media giornaliera:{" "}
-                      <strong className="text-gray-900">{data.avgPerDay}</strong>
+                      <strong className="text-gray-900 dark:text-zinc-100">{data.avgPerDay}</strong>
                     </span>
                     <span>
                       Media per chat:{" "}
-                      <strong className="text-gray-900">{data.avgPerChat}</strong>
+                      <strong className="text-gray-900 dark:text-zinc-100">{data.avgPerChat}</strong>
                     </span>
                   </div>
                 </motion.div>
@@ -364,10 +368,10 @@ export default function Dashboard() {
                 <motion.div
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-2xl p-6 border border-gray-100 shadow-lg shadow-gray-100/50"
+                  className="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-gray-100 dark:border-zinc-800 shadow-lg shadow-gray-100/50 dark:shadow-none"
                 >
-                  <h3 className="text-base font-black text-gray-900 mb-4 flex items-center gap-2">
-                    <Sparkles size={18} className="text-purple-600" />
+                  <h3 className="text-base font-black text-gray-900 dark:text-zinc-100 mb-4 flex items-center gap-2">
+                    <Sparkles size={18} className="text-purple-600 dark:text-purple-400" />
                     Riepilogo Rapido
                   </h3>
                   <div className="space-y-3">
@@ -410,17 +414,17 @@ export default function Dashboard() {
                       return (
                         <div
                           key={item.label}
-                          className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gray-50"
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-zinc-800/60"
                         >
                           <div
-                            className={`w-8 h-8 rounded-lg ${item.bg} flex items-center justify-center shrink-0`}
+                            className={`w-8 h-8 rounded-lg ${item.bg} dark:bg-zinc-800 flex items-center justify-center shrink-0`}
                           >
-                            <Icon size={15} className={item.color} />
+                            <Icon size={15} className={`${item.color} dark:text-zinc-300`} />
                           </div>
-                          <span className="flex-1 text-sm font-medium text-gray-600">
+                          <span className="flex-1 text-sm font-medium text-gray-600 dark:text-zinc-400">
                             {item.label}
                           </span>
-                          <span className="text-sm font-black text-gray-900">
+                          <span className="text-sm font-black text-gray-900 dark:text-zinc-100">
                             {item.value}
                           </span>
                         </div>
@@ -433,10 +437,10 @@ export default function Dashboard() {
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl p-6 border border-gray-100 shadow-lg shadow-gray-100/50"
+                className="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-gray-100 dark:border-zinc-800 shadow-lg shadow-gray-100/50 dark:shadow-none"
               >
-                <h3 className="text-base font-black text-gray-900 mb-4 flex items-center gap-2">
-                  <MessageSquare size={18} className="text-purple-600" />
+                <h3 className="text-base font-black text-gray-900 dark:text-zinc-100 mb-4 flex items-center gap-2">
+                  <MessageSquare size={18} className="text-purple-600 dark:text-purple-400" />
                   Conversazioni Recenti
                 </h3>
                 {data.recentChats.length > 0 ? (
@@ -445,16 +449,16 @@ export default function Dashboard() {
                       <Link
                         key={chat.id}
                         href="/chat"
-                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100"
+                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-zinc-800/60 transition-colors border border-transparent hover:border-gray-100 dark:hover:border-zinc-700"
                       >
-                        <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
-                          <MessageSquare size={14} className="text-purple-600" />
+                        <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-950/50 flex items-center justify-center shrink-0">
+                          <MessageSquare size={14} className="text-purple-600 dark:text-purple-400" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-gray-900 truncate">
+                          <p className="text-sm font-bold text-gray-900 dark:text-zinc-100 truncate">
                             {chat.title}
                           </p>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs text-gray-400 dark:text-zinc-500">
                             {new Date(chat.createdAt).toLocaleDateString("it-IT", {
                               day: "numeric",
                               month: "short",
@@ -467,7 +471,7 @@ export default function Dashboard() {
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                  <div className="flex flex-col items-center justify-center py-8 text-gray-400 dark:text-zinc-500">
                     <MessageSquare size={32} className="mb-2 opacity-50" />
                     <p className="text-sm font-medium">
                       Nessuna conversazione recente

@@ -51,10 +51,10 @@ export default function MediaPanel({
   formatTimestamp
 }: MediaPanelProps) {
   return (
-    <aside className="hidden lg:flex w-96 border-l border-gray-100 flex-col bg-gray-50/50 overflow-y-auto shrink-0 h-full">
+    <aside className="hidden lg:flex w-96 border-l border-gray-100 dark:border-zinc-800 flex-col bg-gray-50/50 dark:bg-zinc-900/50 overflow-y-auto shrink-0 h-full">
       <div className="p-6">
         <div className="space-y-8">
-          <div className="aspect-video w-full rounded-xl bg-white border border-gray-100 overflow-hidden shadow-xl shadow-gray-200/50 group relative">
+          <div className="aspect-video w-full rounded-xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 overflow-hidden shadow-xl shadow-gray-200/50 dark:shadow-none group relative">
             {currentVideoId ? (
               <iframe
                 key={`${currentVideoId}-${currentVideoStartTime}`}
@@ -67,7 +67,7 @@ export default function MediaPanel({
                 allowFullScreen
               ></iframe>
             ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-300 p-6 text-center">
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-300 dark:text-zinc-600 p-6 text-center">
                 <Youtube
                   size={48}
                   strokeWidth={1.5}
@@ -85,16 +85,16 @@ export default function MediaPanel({
           {!currentVideoId && (
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-full p-8 bg-white border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-4 hover:border-purple-300 hover:bg-purple-50/30 transition-all group active:scale-98 shadow-sm text-center"
+              className="w-full p-8 bg-white dark:bg-zinc-900 border-2 border-dashed border-gray-200 dark:border-zinc-700 rounded-2xl flex flex-col items-center justify-center gap-4 hover:border-purple-300 dark:hover:border-purple-700 hover:bg-purple-50/30 dark:hover:bg-purple-950/30 transition-all group active:scale-98 shadow-sm text-center"
             >
-              <div className="p-4 rounded-xl bg-gray-50 text-gray-400 group-hover:bg-purple-100 group-hover:text-purple-600 transition-all inline-flex items-center justify-center">
+              <div className="p-4 rounded-xl bg-gray-50 dark:bg-zinc-800 text-gray-400 dark:text-zinc-500 group-hover:bg-purple-100 dark:group-hover:bg-purple-950 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-all inline-flex items-center justify-center">
                 <Upload size={28} />
               </div>
               <div>
-                <p className="text-sm font-black text-gray-900 mb-1">
+                <p className="text-sm font-black text-gray-900 dark:text-zinc-100 mb-1">
                   Carica Documenti
                 </p>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                <p className="text-[10px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">
                   PDF o file TXT
                 </p>
               </div>
@@ -109,8 +109,8 @@ export default function MediaPanel({
           )}
 
           {currentVideoId && messages.some((m) => m.transcript) && (
-            <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-lg">
-              <div className="p-4 border-b border-gray-100 bg-gray-50">
+            <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden shadow-lg">
+              <div className="p-4 border-b border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/60">
                 <p className="text-xs font-black text-purple-600 uppercase tracking-widest">
                   Trascrizione
                 </p>
@@ -122,15 +122,15 @@ export default function MediaPanel({
                     <div key={i} className="flex gap-2 text-xs">
                       <button
                         onClick={() => handleSeekTo(line.time)}
-                        className="shrink-0 text-purple-600 hover:text-purple-700 font-mono font-bold"
+                        className="shrink-0 text-purple-600 hover:text-purple-700 dark:hover:text-purple-400 font-mono font-bold"
                       >
                         {formatTimestamp(line.time)}
                       </button>
                       <span
                         className={
                           line.isKeyPoint
-                            ? "font-bold text-gray-900"
-                            : "text-gray-600"
+                            ? "font-bold text-gray-900 dark:text-zinc-100"
+                            : "text-gray-600 dark:text-zinc-400"
                         }
                       >
                         {line.text}

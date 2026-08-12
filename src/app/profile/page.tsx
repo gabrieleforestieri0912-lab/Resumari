@@ -220,21 +220,21 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col font-sans">
-      <div className="border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-20">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 flex flex-col font-sans">
+      <div className="border-b border-gray-100 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-20">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
               href="/dashboard"
-              className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-all"
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-500 dark:text-zinc-400 transition-all"
             >
               <ArrowLeft size={20} />
             </Link>
             <div>
-              <h1 className="font-black text-gray-900 text-lg">
+              <h1 className="font-black text-gray-900 dark:text-zinc-100 text-lg">
                 {t('profile')}
               </h1>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-zinc-500">
                 {locale === 'it' ? 'Gestisci le informazioni del tuo account' : 'Manage your account information'}
               </p>
             </div>
@@ -242,14 +242,14 @@ export default function Profile() {
           <div className="flex items-center gap-2">
             <Link
               href="/"
-              className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-all"
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-500 dark:text-zinc-400 transition-all"
               title="Home"
             >
               <Home size={18} />
             </Link>
             <Link
               href="/settings"
-              className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-all"
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-500 dark:text-zinc-400 transition-all"
               title={t('settings')}
             >
               <Settings size={18} />
@@ -262,7 +262,7 @@ export default function Profile() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-6 p-6 bg-gray-50 rounded-2xl border border-gray-100"
+          className="flex items-center gap-6 p-6 bg-gray-50 dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800"
         >
           <div className="relative">
             {user?.picture ? (
@@ -272,13 +272,13 @@ export default function Profile() {
                 {userInitial}
               </div>
             )}
-            <label className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:text-purple-600 hover:border-purple-300 transition-all shadow-sm cursor-pointer">
+            <label className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 flex items-center justify-center text-gray-500 dark:text-zinc-400 hover:text-purple-600 dark:hover:text-purple-400 hover:border-purple-300 dark:hover:border-purple-700 transition-all shadow-sm cursor-pointer">
               <Camera size={14} />
               <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
             </label>
           </div>
           <div>
-            <p className="font-black text-gray-900 text-lg">
+            <p className="font-black text-gray-900 dark:text-zinc-100 text-lg">
               {user?.name || (locale === 'it' ? "Utente" : "User")}
             </p>
             <p className="text-sm text-gray-500">{user?.email}</p>
@@ -289,17 +289,17 @@ export default function Profile() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.08 }}
-          className="bg-white rounded-2xl border border-gray-100 p-5"
+          className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-5"
         >
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
               <CreditCard size={20} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-gray-900 text-sm capitalize">
+              <p className="font-bold text-gray-900 dark:text-zinc-100 text-sm capitalize">
                 {user?.plan === "pro" ? "Piano Pro" : user?.plan === "premium" ? "Piano Premium" : "Piano Free"}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-zinc-500">
                 {user?.plan === "pro" || user?.plan === "premium"
                   ? (locale === 'it' ? 'Riassunti illimitati' : 'Unlimited summaries')
                   : (locale === 'it' ? `${user?.credits ?? 10} riassunti disponibili` : `${user?.credits ?? 10} summaries available`)}
@@ -321,16 +321,16 @@ export default function Profile() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.12 }}
         >
-          <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">
+          <h2 className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-4">
             {locale === 'it' ? 'Informazioni account' : 'Account info'}
           </h2>
-          <div className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-100">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 divide-y divide-gray-100 dark:divide-zinc-800">
             <div className="flex items-center gap-4 px-5 py-4">
-              <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-green-600 shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-950 flex items-center justify-center text-green-600 dark:text-green-400 shrink-0">
                 <ShieldCheck size={20} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-gray-900 text-sm">
+                <p className="font-bold text-gray-900 dark:text-zinc-100 text-sm">
                   {locale === 'it' ? 'Tipo account' : 'Account type'}
                 </p>
                 <p className="text-xs text-gray-500 capitalize">
@@ -344,14 +344,14 @@ export default function Profile() {
             </div>
             {user?.created_at && (
               <div className="flex items-center gap-4 px-5 py-4">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
                   <Calendar size={20} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-gray-900 text-sm">
+                  <p className="font-bold text-gray-900 dark:text-zinc-100 text-sm">
                     {locale === 'it' ? 'Membro dal' : 'Member since'}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-zinc-500">
                     {new Date(user.created_at).toLocaleDateString(locale === 'it' ? 'it-IT' : 'en-US', {
                       year: 'numeric', month: 'long', day: 'numeric'
                     })}
@@ -360,14 +360,14 @@ export default function Profile() {
               </div>
             )}
             <div className="flex items-center gap-4 px-5 py-4">
-              <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
                 <MessageSquare size={20} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-gray-900 text-sm">
+                <p className="font-bold text-gray-900 dark:text-zinc-100 text-sm">
                   {locale === 'it' ? 'Riassunti creati' : 'Summaries created'}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-zinc-500">
                   {chatCount}
                 </p>
               </div>
@@ -380,7 +380,7 @@ export default function Profile() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">
+          <h2 className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-4">
             {locale === 'it' ? 'Informazioni personali' : 'Personal information'}
           </h2>
 
@@ -390,8 +390,8 @@ export default function Profile() {
               animate={{ opacity: 1, x: 0 }}
               className={`mb-4 p-4 rounded-2xl flex items-center gap-3 text-sm font-bold ${
                 profileMessage.type === "error"
-                  ? "bg-red-50 text-red-600 border border-red-100"
-                  : "bg-green-50 text-green-600 border border-green-100"
+                  ? "bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900"
+                  : "bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400 border border-green-100 dark:border-green-900"
               }`}
             >
               {profileMessage.type === "error" ? (
@@ -405,7 +405,7 @@ export default function Profile() {
 
           <form
             onSubmit={handleSaveProfile}
-            className="space-y-5 p-6 bg-white rounded-2xl border border-gray-100"
+            className="space-y-5 p-6 bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800"
           >
             <div className="space-y-2">
               <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">
@@ -413,7 +413,7 @@ export default function Profile() {
               </label>
               <div className="relative group">
                 <User
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 group-focus-within:text-purple-600 dark:group-focus-within:text-purple-400 transition-colors"
                   size={20}
                 />
                 <input
@@ -421,7 +421,7 @@ export default function Profile() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={locale === 'it' ? "Il tuo nome" : "Your name"}
-                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-200 transition-all font-medium"
+                  className="w-full pl-12 pr-4 py-4 bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-200 dark:focus:border-purple-700 transition-all font-medium"
                 />
               </div>
             </div>
@@ -432,14 +432,14 @@ export default function Profile() {
               </label>
               <div className="relative group">
                 <Mail
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500"
                   size={20}
                 />
                 <input
                   type="email"
                   value={email}
                   readOnly
-                  className="w-full pl-12 pr-4 py-4 bg-gray-100 border border-gray-100 rounded-2xl text-gray-500 font-medium cursor-not-allowed"
+                  className="w-full pl-12 pr-4 py-4 bg-gray-100 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-2xl text-gray-500 dark:text-zinc-500 font-medium cursor-not-allowed"
                 />
               </div>
             </div>
@@ -447,7 +447,7 @@ export default function Profile() {
             <button
               type="submit"
               disabled={isSavingProfile}
-              className="w-full py-3.5 bg-gray-900 text-white font-black rounded-2xl hover:bg-purple-600 transition-all shadow-lg flex items-center justify-center gap-2 group disabled:opacity-50"
+              className="w-full py-3.5 bg-gray-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-black rounded-2xl hover:bg-purple-600 dark:hover:bg-purple-600 dark:hover:text-white transition-all shadow-lg flex items-center justify-center gap-2 group disabled:opacity-50"
             >
               <Save size={16} />
               {isSavingProfile ? (locale === 'it' ? "Salvataggio..." : "Saving...") : (locale === 'it' ? "Salva modifiche" : "Save changes")}
@@ -460,7 +460,7 @@ export default function Profile() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">
+          <h2 className="text-xs font-black text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-4">
             {locale === 'it' ? 'Cambio password' : 'Change password'}
           </h2>
 
@@ -470,8 +470,8 @@ export default function Profile() {
               animate={{ opacity: 1, x: 0 }}
               className={`mb-4 p-4 rounded-2xl flex items-center gap-3 text-sm font-bold ${
                 passwordMessage.type === "error"
-                  ? "bg-red-50 text-red-600 border border-red-100"
-                  : "bg-green-50 text-green-600 border border-green-100"
+                  ? "bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900"
+                  : "bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400 border border-green-100 dark:border-green-900"
               }`}
             >
               {passwordMessage.type === "error" ? (
@@ -485,7 +485,7 @@ export default function Profile() {
 
           <form
             onSubmit={handleChangePassword}
-            className="space-y-5 p-6 bg-white rounded-2xl border border-gray-100"
+            className="space-y-5 p-6 bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800"
           >
             <div className="space-y-2">
               <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">
@@ -493,7 +493,7 @@ export default function Profile() {
               </label>
               <div className="relative group">
                 <Lock
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 group-focus-within:text-purple-600 dark:group-focus-within:text-purple-400 transition-colors"
                   size={20}
                 />
                 <input
@@ -502,12 +502,12 @@ export default function Profile() {
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-12 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-200 transition-all font-medium"
+                  className="w-full pl-12 pr-12 py-4 bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-200 dark:focus:border-purple-700 transition-all font-medium"
                 />
                 <button
                   type="button"
                   onClick={() => setShowCurrentPw(!showCurrentPw)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
                 >
                   {showCurrentPw ? (
                     <EyeOff size={20} />
@@ -524,7 +524,7 @@ export default function Profile() {
               </label>
               <div className="relative group">
                 <Lock
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 group-focus-within:text-purple-600 dark:group-focus-within:text-purple-400 transition-colors"
                   size={20}
                 />
                 <input
@@ -533,12 +533,12 @@ export default function Profile() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder={locale === 'it' ? "Minimo 6 caratteri" : "Min 6 characters"}
-                  className="w-full pl-12 pr-12 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-200 transition-all font-medium"
+                  className="w-full pl-12 pr-12 py-4 bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-200 dark:focus:border-purple-700 transition-all font-medium"
                 />
                 <button
                   type="button"
                   onClick={() => setShowNewPw(!showNewPw)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
                 >
                   {showNewPw ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -551,7 +551,7 @@ export default function Profile() {
               </label>
               <div className="relative group">
                 <Lock
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 group-focus-within:text-purple-600 dark:group-focus-within:text-purple-400 transition-colors"
                   size={20}
                 />
                 <input
@@ -560,12 +560,12 @@ export default function Profile() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder={locale === 'it' ? "Ripeti la nuova password" : "Repeat the new password"}
-                  className="w-full pl-12 pr-12 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-200 transition-all font-medium"
+                  className="w-full pl-12 pr-12 py-4 bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-200 dark:focus:border-purple-700 transition-all font-medium"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPw(!showConfirmPw)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
                 >
                   {showConfirmPw ? (
                     <EyeOff size={20} />
@@ -579,7 +579,7 @@ export default function Profile() {
             <button
               type="submit"
               disabled={isSavingPassword}
-              className="w-full py-3.5 bg-gray-900 text-white font-black rounded-2xl hover:bg-purple-600 transition-all shadow-lg flex items-center justify-center gap-2 group disabled:opacity-50"
+              className="w-full py-3.5 bg-gray-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-black rounded-2xl hover:bg-purple-600 dark:hover:bg-purple-600 dark:hover:text-white transition-all shadow-lg flex items-center justify-center gap-2 group disabled:opacity-50"
             >
               <Lock size={16} />
               {isSavingPassword

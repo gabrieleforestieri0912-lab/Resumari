@@ -123,9 +123,9 @@ function FormatTimestampLinks({ text, videoId }: { text: string; videoId?: strin
               type="button"
               data-seconds={seconds}
               title={`Vai a ${part}`}
-              className="timestamp-link bg-red-50 border border-red-200 text-red-700 px-1.5 py-0.5 rounded-md font-mono font-bold hover:bg-red-100 transition-colors cursor-pointer inline-flex items-center gap-1"
+              className="timestamp-link bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 px-1.5 py-0.5 rounded-md font-mono font-bold hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors cursor-pointer inline-flex items-center gap-1"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-red-500 shrink-0"><path d="m7 4 12 8-12 8V4z" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-red-500 dark:text-red-400 shrink-0"><path d="m7 4 12 8-12 8V4z" /></svg>
               {part}
             </button>
           );
@@ -1347,25 +1347,25 @@ export default function Chat() {
     code: ({ className, children, ...props }: any) => {
       const isInline = !className;
       if (isInline) {
-        return <code className="bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded-md text-xs font-mono" {...props}>{children}</code>;
+        return <code className="bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300 px-1.5 py-0.5 rounded-md text-xs font-mono" {...props}>{children}</code>;
       }
       return (
-        <pre className="bg-gray-900 text-gray-100 rounded-xl p-4 my-3 overflow-x-auto text-sm font-mono leading-relaxed">
+        <pre className="bg-gray-900 dark:bg-zinc-900 dark:border dark:border-zinc-700/50 text-gray-100 rounded-xl p-4 my-3 overflow-x-auto text-sm font-mono leading-relaxed">
           <code className={className} {...props}>{children}</code>
         </pre>
       );
     },
     a: ({ href, children, ...props }: any) => (
-      <a href={href} target="_blank" rel="noopener noreferrer" className="text-purple-600 underline hover:text-purple-800" {...props}>{children}</a>
+      <a href={href} target="_blank" rel="noopener noreferrer" className="text-purple-600 dark:text-purple-400 underline hover:text-purple-800 dark:hover:text-purple-300" {...props}>{children}</a>
     ),
     ul: ({ children, ...props }: any) => <ul className="list-disc pl-5 my-2 space-y-1" {...props}>{children}</ul>,
     ol: ({ children, ...props }: any) => <ol className="list-decimal pl-5 my-2 space-y-1" {...props}>{children}</ol>,
-    li: ({ children, ...props }: any) => <li className="text-gray-800 leading-relaxed" {...props}>{children}</li>,
+    li: ({ children, ...props }: any) => <li className="text-gray-800 dark:text-zinc-200 leading-relaxed" {...props}>{children}</li>,
     p: ({ children, ...props }: any) => <p className="mb-2 last:mb-0" {...props}>{children}</p>,
     h1: ({ children, ...props }: any) => <h1 className="text-lg font-bold mt-4 mb-2" {...props}>{children}</h1>,
     h2: ({ children, ...props }: any) => <h2 className="text-base font-bold mt-3 mb-2" {...props}>{children}</h2>,
     h3: ({ children, ...props }: any) => <h3 className="text-sm font-bold mt-3 mb-1" {...props}>{children}</h3>,
-    strong: ({ children, ...props }: any) => <strong className="font-bold text-gray-900" {...props}>{children}</strong>,
+    strong: ({ children, ...props }: any) => <strong className="font-bold text-gray-900 dark:text-zinc-100" {...props}>{children}</strong>,
     em: ({ children, ...props }: any) => <em className="italic" {...props}>{children}</em>,
   };
 
@@ -1375,7 +1375,7 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex h-screen bg-white overflow-hidden">
+    <div className="flex h-screen bg-white dark:bg-zinc-950 overflow-hidden">
       <AnimatePresence mode="wait">
         {isLeftSidebarOpen && (
           <motion.div
@@ -1406,40 +1406,40 @@ export default function Chat() {
       {!isLeftSidebarOpen && (
         <button
           onClick={() => setIsLeftSidebarOpen(true)}
-          className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all"
+          className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all"
           title="Apri menu"
         >
-          <PanelLeftClose size={18} className="text-gray-500" />
+          <PanelLeftClose size={18} className="text-gray-500 dark:text-zinc-400" />
         </button>
       )}
 
-      <main className="flex-1 flex flex-col relative min-w-0 bg-white">
+      <main className="flex-1 flex flex-col relative min-w-0 bg-white dark:bg-zinc-950">
         {!hasStartedChat ? (
           <div className="flex-1 flex items-center justify-center p-4">
             <div className="w-full max-w-xl scale-90 origin-center">
-              <div className="bg-white rounded-[3rem] p-6 md:p-8 shadow-2xl shadow-purple-500/5 border border-gray-100">
+              <div className="bg-white dark:bg-zinc-900 rounded-[3rem] p-6 md:p-8 shadow-2xl shadow-purple-500/5 border border-gray-100 dark:border-zinc-800">
                 <div className="text-center mb-6">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-50 border border-purple-100 text-purple-600 text-xs font-bold uppercase tracking-wider mb-3">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-50 dark:bg-purple-950 border border-purple-100 dark:border-purple-900 text-purple-600 dark:text-purple-400 text-xs font-bold uppercase tracking-wider mb-3">
                     <Video size={14} />
                     Chat con Video
                   </div>
-                  <h2 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">
+                  <h2 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-zinc-100 tracking-tight">
                     Analizza un <span className="text-purple-600 italic">Video</span>
                   </h2>
-                  <p className="text-gray-500 font-medium mt-2 text-sm">
+                  <p className="text-gray-500 dark:text-zinc-400 font-medium mt-2 text-sm">
                     Incolla il link di un video YouTube per iniziare a chattare
                   </p>
                 </div>
 
                 <div className="flex justify-center mb-4">
-                  <div className="bg-gray-100 p-1 rounded-2xl flex gap-1">
+                  <div className="bg-gray-100 dark:bg-zinc-800 p-1 rounded-2xl flex gap-1">
                     <button
                       type="button"
                       onClick={() => {
                         setVideoInputMode("video");
                         setVideoInputError("");
                       }}
-                      className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${videoInputMode === "video" ? "bg-white text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
+                      className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${videoInputMode === "video" ? "bg-white dark:bg-zinc-900 dark:text-zinc-100 shadow-sm" : "text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300"}`}
                     >
                       Singolo Video
                     </button>
@@ -1449,7 +1449,7 @@ export default function Chat() {
                         setVideoInputMode("channel");
                         setVideoInputError("");
                       }}
-                      className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${videoInputMode === "channel" ? "bg-white text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
+                      className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${videoInputMode === "channel" ? "bg-white dark:bg-zinc-900 dark:text-zinc-100 shadow-sm" : "text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300"}`}
                     >
                       Intero Canale
                     </button>
@@ -1458,7 +1458,7 @@ export default function Chat() {
 
                 <form onSubmit={handleVideoInputSubmit} className="flex flex-col gap-3">
                   <div className="relative group">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 group-focus-within:text-purple-600 dark:group-focus-within:text-purple-400 transition-colors">
                       <Youtube size={18} />
                     </div>
                     <input
@@ -1480,12 +1480,12 @@ export default function Chat() {
                           ? "https://youtube.com/watch?v=..."
                           : "https://youtube.com/@nomecanale"
                       }
-                      className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium focus:outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-200 transition-all"
+                      className="w-full pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-xl text-sm font-medium focus:outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-200 dark:focus:border-purple-700 transition-all"
                     />
                   </div>
 
                   {videoInputError && (
-                    <div className="px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-red-600 text-xs font-medium text-center">
+                    <div className="px-3 py-2 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-900 rounded-lg text-red-600 dark:text-red-400 text-xs font-medium text-center">
                       {videoInputError}
                     </div>
                   )}
@@ -1493,14 +1493,14 @@ export default function Chat() {
                   {videoInputLoading && (
                     <div className="flex items-center justify-center gap-2 py-3">
                       <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                      <span className="text-xs font-medium text-gray-500">Caricamento...</span>
+                      <span className="text-xs font-medium text-gray-500 dark:text-zinc-400">Caricamento...</span>
                     </div>
                   )}
 
                   {videoInputInfo && !videoInputLoading && (
-                    <div className="mt-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                    <div className="mt-3 p-3 bg-gray-50 dark:bg-zinc-900 rounded-xl border border-gray-100 dark:border-zinc-800">
                       <div className="flex gap-3">
-                        <div className="w-56 shrink-0 aspect-video rounded-lg overflow-hidden bg-gray-200 relative group">
+                        <div className="w-56 shrink-0 aspect-video rounded-lg overflow-hidden bg-gray-200 dark:bg-zinc-800 relative group">
                           <img
                             src={videoInputInfo.thumbnail}
                             alt={videoInputInfo.title}
@@ -1538,17 +1538,17 @@ export default function Chat() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1 mb-1">
-                            <h4 className="text-xs font-bold text-gray-900 line-clamp-2">
+                            <h4 className="text-xs font-bold text-gray-900 dark:text-zinc-100 line-clamp-2">
                               {videoInputInfo.title}
                             </h4>
                             {videoInputInfo.detected && (
-                              <span className="text-[9px] text-green-600 font-medium">Identificato</span>
+                              <span className="text-[9px] text-green-600 dark:text-green-400 font-medium">Identificato</span>
                             )}
                           </div>
-                          <p className="text-[10px] text-gray-500 mb-1">
+                          <p className="text-[10px] text-gray-500 dark:text-zinc-400 mb-1">
                             {videoInputInfo.channelTitle}
                           </p>
-                          <div className="flex items-center gap-2 text-[9px] text-gray-400">
+                          <div className="flex items-center gap-2 text-[9px] text-gray-400 dark:text-zinc-500">
                             <span>{formatNumber(videoInputInfo.viewCount)} visualizzazioni</span>
                             <span>•</span>
                             <span>{formatNumber(videoInputInfo.likeCount)} mi piace</span>
@@ -1565,7 +1565,7 @@ export default function Chat() {
                         <button
                           type="button"
                           onClick={cancelAnalysis}
-                          className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg font-bold text-xs hover:bg-red-100 transition-colors"
+                          className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 rounded-lg font-bold text-xs hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors"
                         >
                           <X size={14} />
                           Annulla
@@ -1577,7 +1577,7 @@ export default function Chat() {
                   {!videoInputInfo && !videoInputLoading && (
                     <button
                       type="submit"
-                      className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-gray-900 text-white rounded-xl font-bold text-sm hover:bg-black transition-all transform hover:-translate-y-0.5 shadow-lg shadow-gray-200 active:scale-95"
+                      className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-gray-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl font-bold text-sm hover:bg-black dark:hover:bg-zinc-300 transition-all transform hover:-translate-y-0.5 shadow-lg shadow-gray-200 dark:shadow-none active:scale-95"
                     >
                       <Search size={16} />
                       {videoInputMode === "video" ? "Carica Video" : "Carica Canale"}
@@ -1586,11 +1586,11 @@ export default function Chat() {
                 </form>
 
                 <div className="mt-6 flex items-center justify-center gap-4 opacity-40">
-                  <div className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-gray-900">
+                  <div className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-gray-900 dark:text-zinc-200">
                     <Sparkles size={10} /> IA Unlimited
                   </div>
-                  <div className="w-1 h-1 rounded-full bg-gray-300" />
-                  <div className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-gray-900">
+                  <div className="w-1 h-1 rounded-full bg-gray-300 dark:bg-zinc-700" />
+                  <div className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-gray-900 dark:text-zinc-200">
                     <MessageSquare size={10} /> Chat Intelligente
                   </div>
                 </div>
@@ -1599,15 +1599,15 @@ export default function Chat() {
           </div>
         ) : (
           <>
-            <div className="px-8 py-4 border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+            <div className="px-8 py-4 border-b border-gray-100 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-10">
               <div className="max-w-4xl mx-auto flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600">
+                  <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-950 flex items-center justify-center text-purple-600 dark:text-purple-400">
                     <MessageSquare size={20} />
                   </div>
                   <div>
-                    <h2 className="font-bold text-gray-900">Chat AI</h2>
-                    <p className="text-xs text-gray-500">
+                    <h2 className="font-bold text-gray-900 dark:text-zinc-100">Chat AI</h2>
+                    <p className="text-xs text-gray-500 dark:text-zinc-400">
                       {(activeChatId &&
                         chats.find((c: any) => c.id === activeChatId)?.title) ||
                         "Nuova conversazione"}
@@ -1616,10 +1616,10 @@ export default function Chat() {
                 </div>
                 <button
                   onClick={handleExportConversation}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-transparent border border-gray-200 text-gray-700 hover:bg-gray-50 transition-all text-xs font-bold shadow-sm group"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-transparent border border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all text-xs font-bold shadow-sm group"
                   title="Esporta conversazione"
                 >
-                  <Download size={14} className="text-gray-900 group-hover:scale-110 transition-transform" />
+                  <Download size={14} className="text-gray-900 dark:text-zinc-100 group-hover:scale-110 transition-transform" />
                   Esporta
                 </button>
               </div>
@@ -1633,7 +1633,7 @@ export default function Chat() {
               <AnimatePresence>
                 {messages.length === 0 ? (
                   <div className="h-full flex items-center justify-center">
-                    <p className="text-gray-400 font-medium">Inizia una conversazione</p>
+                    <p className="text-gray-400 dark:text-zinc-500 font-medium">Inizia una conversazione</p>
                   </div>
                 ) : (
                   <div className="space-y-6">
@@ -1647,11 +1647,11 @@ export default function Chat() {
                           <div key={msg.id || `msg-${idx}`}>
                             {showDateSep && (
                               <div className="flex items-center gap-3 my-6 max-w-3xl mx-auto">
-                                <div className="flex-1 h-px bg-gray-200" />
-                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest shrink-0">
+                                <div className="flex-1 h-px bg-gray-200 dark:bg-zinc-800" />
+                                <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest shrink-0">
                                   {formatSeparatorDate(new Date())}
                                 </span>
-                                <div className="flex-1 h-px bg-gray-200" />
+                                <div className="flex-1 h-px bg-gray-200 dark:bg-zinc-800" />
                               </div>
                             )}
                             <motion.div
@@ -1671,7 +1671,7 @@ export default function Chat() {
                               >
                                 {msg.videoId && (
                                   <div className="mb-3 space-y-2 w-full max-w-md">
-                                    <div className="aspect-video w-full rounded-xl overflow-hidden shadow-lg border border-gray-100">
+                                    <div className="aspect-video w-full rounded-xl overflow-hidden shadow-lg border border-gray-100 dark:border-zinc-800">
                                       <iframe
                                         width="100%"
                                         height="100%"
@@ -1683,10 +1683,10 @@ export default function Chat() {
                                       ></iframe>
                                     </div>
                                     {msg.videoTitle && (
-                                      <p className="text-xs font-bold text-gray-500">
+                                      <p className="text-xs font-bold text-gray-500 dark:text-zinc-400">
                                         {msg.videoTitle}
                                         {msg.videoChannel && (
-                                          <span className="text-gray-400">
+                                          <span className="text-gray-400 dark:text-zinc-500">
                                             {" "}
                                             • {msg.videoChannel}
                                           </span>
@@ -1695,8 +1695,8 @@ export default function Chat() {
                                     )}
 
                                     {msg.transcript && msg.transcript.length > 0 && (
-                                      <div className="w-full mt-2 rounded-xl bg-gray-50 text-gray-800 border border-gray-100 shadow-sm overflow-hidden">
-                                        <div className="px-3 py-2 border-b border-gray-100 bg-white/50 flex items-center justify-between">
+                                      <div className="w-full mt-2 rounded-xl bg-gray-50 dark:bg-zinc-900 text-gray-800 dark:text-zinc-200 border border-gray-100 dark:border-zinc-800 shadow-sm overflow-hidden">
+                                        <div className="px-3 py-2 border-b border-gray-100 dark:border-zinc-800 bg-white/50 dark:bg-zinc-800/60 flex items-center justify-between">
                                           <p className="text-[9px] font-black text-purple-600 uppercase tracking-widest">
                                             Trascrizione Video
                                           </p>
@@ -1711,7 +1711,7 @@ export default function Chat() {
                                           {msg.transcript.slice(0, 100).map((line: any, i: number) => (
                                             <div
                                               key={i}
-                                              className="flex gap-2 hover:bg-gray-100/50 rounded transition-colors cursor-pointer"
+                                              className="flex gap-2 hover:bg-gray-100/50 dark:hover:bg-zinc-800/60 rounded transition-colors cursor-pointer"
                                               onClick={() =>
                                                 line.time &&
                                                 setCurrentVideoStartTime(line.time)
@@ -1720,13 +1720,13 @@ export default function Chat() {
                                               <span className="shrink-0 text-purple-600 font-mono font-bold">
                                                 {formatTimestamp(line.time)}
                                               </span>
-                                              <span className="text-gray-700 leading-relaxed">
+                                              <span className="text-gray-700 dark:text-zinc-300 leading-relaxed">
                                                 {line.text}
                                               </span>
                                             </div>
                                           ))}
                                           {msg.transcript.length > 100 && (
-                                            <p className="text-[10px] text-gray-400 italic text-center pt-2">
+                                            <p className="text-[10px] text-gray-400 dark:text-zinc-500 italic text-center pt-2">
                                               ... trascrizione troncata per brevità
                                             </p>
                                           )}
@@ -1738,9 +1738,9 @@ export default function Chat() {
 
                                 {msg.text ? (
                                   msg.sender === "user" && msg.cancelled ? (
-                                    <div className="px-5 py-3.5 rounded-2xl text-sm leading-relaxed bg-red-50 text-red-600 rounded-br-sm border border-red-100">
+                                    <div className="px-5 py-3.5 rounded-2xl text-sm leading-relaxed bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 rounded-br-sm border border-red-100 dark:border-red-900">
                                       <div>{msg.text}</div>
-                                      <div className="text-[10px] text-red-400 font-medium mt-1.5 pt-1.5 border-t border-red-200/50 flex items-center gap-1">
+                                      <div className="text-[10px] text-red-400 dark:text-red-300 font-medium mt-1.5 pt-1.5 border-t border-red-200/50 dark:border-red-800/50 flex items-center gap-1">
                                         <Square size={8} className="fill-current shrink-0" />
                                         Messaggio annullato
                                       </div>
@@ -1749,8 +1749,8 @@ export default function Chat() {
                                     <div
                                       className={`px-5 py-3.5 rounded-2xl text-sm leading-relaxed ${
                                         msg.sender === "user"
-                                          ? "bg-gray-900 text-white rounded-br-sm"
-                                          : "bg-purple-50 text-gray-800 rounded-bl-sm border border-purple-100"
+                                          ? "bg-gray-900 dark:bg-zinc-800 dark:text-white rounded-br-sm"
+                                          : "bg-purple-50 dark:bg-purple-950 dark:text-zinc-200 rounded-bl-sm border border-purple-100 dark:border-purple-900"
                                       }`}
                                     >
                                       {msg.sender === "system" && msg.videoId ? (
@@ -1770,35 +1770,35 @@ export default function Chat() {
                                   <div className="flex items-center gap-0.5">
                                     <button
                                       onClick={() => handleCopy(msg.text)}
-                                      className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+                                      className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300 transition-all"
                                       title="Copia"
                                     >
                                       <Copy size={13} />
                                     </button>
                                     <button
                                       onClick={() => handleLike(msg.id)}
-                                      className={`p-1 rounded-md transition-all ${likedMessages.has(msg.id) ? "text-blue-500 bg-blue-50" : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"}`}
+                                      className={`p-1 rounded-md transition-all ${likedMessages.has(msg.id) ? "text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-950" : "text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800"}`}
                                       title="Mi piace"
                                     >
                                       <ThumbsUp size={13} />
                                     </button>
                                     <button
                                       onClick={() => handleDislike(msg.id)}
-                                      className={`p-1 rounded-md transition-all ${dislikedMessages.has(msg.id) ? "text-red-500 bg-red-50" : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"}`}
+                                      className={`p-1 rounded-md transition-all ${dislikedMessages.has(msg.id) ? "text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950" : "text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800"}`}
                                       title="Non mi piace"
                                     >
                                       <ThumbsDown size={13} />
                                     </button>
                                     <button
                                       onClick={() => handleRetry(msg)}
-                                      className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+                                      className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300 transition-all"
                                       title="Riprova"
                                     >
                                       <RefreshCw size={13} />
                                     </button>
                                     <button
                                       onClick={() => handleRegenerate(msg)}
-                                      className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+                                      className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300 transition-all"
                                       title="Rigenera"
                                     >
                                       <RotateCw size={13} />
@@ -1809,7 +1809,7 @@ export default function Chat() {
                                   <div className="flex items-center gap-0.5 mt-0.5">
                                     <button
                                       onClick={() => handleEdit(msg)}
-                                      className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+                                      className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300 transition-all"
                                       title="Modifica messaggio"
                                     >
                                       <Pencil size={12} />
@@ -1833,7 +1833,7 @@ export default function Chat() {
                       <Sparkles size={14} className="text-white" />
                     </div>
                   </div>
-                  <div className="bg-purple-50 px-5 py-3.5 rounded-2xl rounded-bl-sm border border-purple-100 flex items-center gap-1.5">
+                  <div className="bg-purple-50 dark:bg-purple-950 px-5 py-3.5 rounded-2xl rounded-bl-sm border border-purple-100 dark:border-purple-900 flex items-center gap-1.5">
                     <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
                     <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
                     <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" />
@@ -1848,12 +1848,12 @@ export default function Chat() {
               <div className="flex justify-between items-center gap-2 mb-3 relative">
                 <button
                   onClick={createNewChat}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-transparent border border-gray-200 text-gray-700 hover:bg-gray-50 transition-all text-xs font-bold shadow-sm group"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-transparent border border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all text-xs font-bold shadow-sm group"
                   title="Inizia una nuova conversazione"
                 >
                   <Plus
                     size={14}
-                    className="text-gray-900 group-hover:scale-110 transition-transform"
+                    className="text-gray-900 dark:text-zinc-100 group-hover:scale-110 transition-transform"
                   />
                   Nuova Chat
                 </button>
@@ -1861,7 +1861,7 @@ export default function Chat() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setInput("Trascrivi questo video")}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-transparent border border-gray-200 text-purple-600 hover:bg-purple-50 transition-all text-xs font-bold shadow-sm"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-transparent border border-gray-200 dark:border-zinc-700 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950 transition-all text-xs font-bold shadow-sm"
                     title="Trascrivi"
                   >
                     <FileAudio size={14} />
@@ -1869,7 +1869,7 @@ export default function Chat() {
                   </button>
                   <button
                     onClick={() => setInput("Crea un riassunto")}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-transparent border border-gray-200 text-purple-600 hover:bg-purple-50 transition-all text-xs font-bold shadow-sm"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-transparent border border-gray-200 dark:border-zinc-700 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950 transition-all text-xs font-bold shadow-sm"
                     title="Crea riassunto"
                   >
                     <Wand2 size={14} />
@@ -1882,7 +1882,7 @@ export default function Chat() {
                       className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-xs font-bold shadow-sm border ${
                         isAskMenuOpen
                           ? "bg-purple-600 text-white border-purple-600"
-                          : "bg-transparent border-gray-200 text-purple-600 hover:bg-purple-50"
+                          : "bg-transparent border-gray-200 dark:border-zinc-700 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950"
                       }`}
                     >
                       <Sparkles size={14} />
@@ -1899,9 +1899,9 @@ export default function Chat() {
                           initial={{ opacity: 0, y: 10, scale: 0.95 }}
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                          className="absolute bottom-full right-0 mb-2 w-64 bg-white rounded-xl border border-gray-100 shadow-xl z-20 py-2 overflow-hidden"
+                          className="absolute bottom-full right-0 mb-2 w-64 bg-white dark:bg-zinc-900 rounded-xl border border-gray-100 dark:border-zinc-800 shadow-xl z-20 py-2 overflow-hidden"
                         >
-                          <div className="px-3 py-1.5 border-b border-gray-50 mb-1">
+                          <div className="px-3 py-1.5 border-b border-gray-50 dark:border-zinc-800 mb-1">
                             <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
                               Suggerimenti rapidi
                             </p>
@@ -1911,13 +1911,13 @@ export default function Chat() {
                               <button
                                 key={idx}
                                 onClick={() => handleSuggestedQuestion(q)}
-                                className="w-full text-left px-4 py-2 text-xs text-gray-600 hover:bg-purple-50 hover:text-purple-700 transition-colors"
+                                className="w-full text-left px-4 py-2 text-xs text-gray-600 dark:text-zinc-300 hover:bg-purple-50 dark:hover:bg-purple-950 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
                               >
                                 {q}
                               </button>
                             ))
                           ) : (
-                            <div className="px-4 py-3 text-xs text-gray-400 italic text-center">
+                            <div className="px-4 py-3 text-xs text-gray-400 dark:text-zinc-500 italic text-center">
                               Nessun suggerimento disponibile
                             </div>
                           )}
@@ -1949,12 +1949,12 @@ export default function Chat() {
                 }}
               >
                 {editingMessageId && (
-                  <div className="flex items-center gap-2 px-3 py-1.5 mb-1.5 bg-purple-50 border border-purple-200 rounded-lg text-xs">
+                  <div className="flex items-center gap-2 px-3 py-1.5 mb-1.5 bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-900 rounded-lg text-xs">
                     <Pencil size={12} className="text-purple-600 shrink-0" />
-                    <span className="text-purple-700 font-medium flex-1">Modifica messaggio</span>
+                    <span className="text-purple-700 dark:text-purple-300 font-medium flex-1">Modifica messaggio</span>
                     <button
                       onClick={() => { setEditingMessageId(null); setInput(""); textareaRef.current && (textareaRef.current.style.height = "auto"); }}
-                      className="text-purple-500 hover:text-purple-700 hover:bg-purple-100 p-1 rounded-md transition-colors"
+                      className="text-purple-500 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900 p-1 rounded-md transition-colors"
                     >
                       <X size={14} />
                     </button>
@@ -1992,7 +1992,7 @@ export default function Chat() {
                     }
                   }}
                   placeholder="Chiedi a Resumari di analizzare qualcosa... (Shift+Invio per andare a capo)"
-                  className="w-full bg-gray-50 border border-gray-100 rounded-xl pl-4 pr-12 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/10 focus:border-purple-200 transition-all resize-none overflow-hidden shadow-xl shadow-purple-500/5"
+                  className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-xl pl-4 pr-12 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/10 focus:border-purple-200 dark:focus:border-purple-700 transition-all resize-none overflow-hidden shadow-xl shadow-purple-500/5"
                 />
                 <button
                   onClick={isTyping ? handleCancel : handleSend}
@@ -2001,13 +2001,13 @@ export default function Chat() {
                     input.trim()
                       ? isTyping
                         ? "bg-red-500 text-white shadow-lg animate-pulse"
-                        : "bg-gray-900 text-white hover:scale-105 active:scale-95 shadow-lg"
-                      : "bg-gray-200 text-gray-400"
+                        : "bg-gray-900 dark:bg-zinc-100 dark:text-zinc-900 hover:scale-105 active:scale-95 shadow-lg"
+                      : "bg-gray-200 dark:bg-zinc-800 dark:text-zinc-500"
                   }`}
                 >
                   {isTyping ? <Square size={14} className="fill-current" /> : <Send size={16} />}
                 </button>
-                <div className="absolute left-3 -top-6 text-[9px] text-gray-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                <div className="absolute left-3 -top-6 text-[9px] text-gray-400 dark:text-zinc-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                   Trascina immagini qui o incollale con Ctrl+V
                 </div>
               </div>
@@ -2054,12 +2054,12 @@ export default function Chat() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ type: "spring", damping: 25 }}
-              className="w-full max-w-lg max-h-[80vh] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col"
+              className="w-full max-w-lg max-h-[80vh] bg-white dark:bg-zinc-900 rounded-xl shadow-2xl overflow-hidden flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="p-6 border-b border-gray-100">
+              <div className="p-6 border-b border-gray-100 dark:border-zinc-800">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-black text-gray-900 text-lg flex items-center gap-2">
+                  <h3 className="font-black text-gray-900 dark:text-zinc-100 text-lg flex items-center gap-2">
                     <History size={22} className="text-purple-600" />
                     Cronologia completa
                   </h3>
@@ -2068,7 +2068,7 @@ export default function Chat() {
                       setIsHistoryPanelOpen(false);
                       setHistorySearch("");
                     }}
-                    className="p-2 rounded-md hover:bg-gray-100 text-gray-500 transition-all"
+                    className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-500 dark:text-zinc-400 transition-all"
                   >
                     <X size={20} />
                   </button>
@@ -2076,14 +2076,14 @@ export default function Chat() {
                 <div className="relative">
                   <Search
                     size={16}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500"
                   />
                   <input
                     type="text"
                     value={historySearch}
                     onChange={(e) => setHistorySearch(e.target.value)}
                     placeholder="Cerca conversazioni..."
-                    className="w-full bg-gray-50 border border-gray-100 rounded-lg pl-9 pr-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/10 focus:border-purple-200 transition-all"
+                    className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-lg pl-9 pr-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/10 focus:border-purple-200 dark:focus:border-purple-700 transition-all"
                   />
                 </div>
               </div>
@@ -2096,7 +2096,7 @@ export default function Chat() {
 
                   if (filteredChats.length === 0) {
                     return (
-                      <p className="text-center py-12 text-gray-400 font-medium">
+                      <p className="text-center py-12 text-gray-400 dark:text-zinc-500 font-medium">
                         {q ? "Nessun risultato" : "Nessuna conversazione"}
                       </p>
                     );
@@ -2109,8 +2109,8 @@ export default function Chat() {
                           onClick={() => handleChatSelect(chat.id)}
                           className={`w-full flex items-center gap-3 px-4 py-3 rounded-md text-left transition-all cursor-pointer group ${
                             activeChatId === chat.id
-                              ? "bg-purple-50 border border-purple-200 text-purple-700"
-                              : "hover:bg-gray-50 border border-transparent"
+                              ? "bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-900 text-purple-700 dark:text-purple-300"
+                              : "hover:bg-gray-50 dark:hover:bg-zinc-800 border border-transparent"
                           }`}
                         >
                           <MessageSquare
@@ -2118,14 +2118,14 @@ export default function Chat() {
                             className={
                               activeChatId === chat.id
                                 ? "text-purple-600"
-                                : "text-gray-400 shrink-0"
+                                : "text-gray-400 dark:text-zinc-500 shrink-0"
                             }
                           />
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-gray-900 truncate">
+                            <p className="text-sm font-bold text-gray-900 dark:text-zinc-100 truncate">
                               {chat.title}
                             </p>
-                            <p className="text-xs text-gray-400">
+                            <p className="text-xs text-gray-400 dark:text-zinc-500">
                               {formatChatDate(chat.createdAt)}
                             </p>
                           </div>
