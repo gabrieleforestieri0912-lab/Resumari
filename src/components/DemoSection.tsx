@@ -523,7 +523,7 @@ export default function DemoSection() {
                                       className="w-10 h-10 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
                                     />
                                   ) : (
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm ring-2 ring-purple-200/50">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-red-500 flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm ring-2 ring-purple-200/50">
                                       {ch.name[0]}
                                     </div>
                                   )}
@@ -575,8 +575,8 @@ export default function DemoSection() {
 
                   {messages.length === 0 && !selectedChannel ? (
                     <div className="flex-1 flex flex-col items-center justify-center p-6 text-center overflow-y-auto">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-100 to-red-100 flex items-center justify-center mb-3">
-                        <Sparkles size={24} className="text-purple-600" />
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600 to-red-500 flex items-center justify-center mb-3 shadow-lg shadow-purple-500/20">
+                        <Sparkles size={24} className="text-white" />
                       </div>
                       <h3 className="text-base font-black text-gray-900 dark:text-gray-100 mb-1">
                         Scegli un canale

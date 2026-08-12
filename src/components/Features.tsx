@@ -82,12 +82,11 @@ function FeatureCard({ title, description, icon, index, highlighted }: FeatureCa
           : "border-gray-100 dark:border-zinc-800 shadow-xl shadow-gray-200/50 dark:shadow-none hover:border-purple-200 dark:hover:border-purple-700"
       }`}
     >
-      {/* Icon */}
+      {/* Badge with the brand gradient + white icon, coherent across every
+          card (same identity as the free-tools page and the rest of the site). */}
       <div
-        className={`mx-auto mb-8 flex items-center justify-center rounded-2xl transition-all duration-500 group-hover:bg-linear-to-br group-hover:from-purple-600 group-hover:to-red-600 group-hover:text-white group-hover:rotate-6 group-hover:shadow-lg group-hover:shadow-purple-200 ${
-          highlighted
-            ? "w-20 h-20 bg-linear-to-br from-purple-100 to-red-100 dark:from-purple-900/40 dark:to-red-900/40 text-purple-600 dark:text-purple-400 shadow-md shadow-purple-200 dark:shadow-none"
-            : "w-16 h-16 bg-gray-50 dark:bg-zinc-800 text-gray-400 dark:text-gray-500"
+        className={`mx-auto mb-8 flex items-center justify-center rounded-2xl bg-linear-to-br from-purple-600 to-red-600 text-white shadow-lg shadow-purple-500/20 transition-all duration-500 group-hover:rotate-6 group-hover:scale-105 group-hover:shadow-purple-500/40 ${
+          highlighted ? "w-20 h-20" : "w-16 h-16"
         }`}
       >
         {icon}
