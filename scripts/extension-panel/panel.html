@@ -126,6 +126,10 @@
           <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           <span>Trascrizioni</span>
         </button>
+        <button class="nav__item" data-tab="chat" title="Chat">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>Chat</span>
+        </button>
         <button class="nav__item" data-tab="account" title="Account">
           <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           <span>Account</span>
@@ -151,6 +155,35 @@
 
       <!-- detail -->
       <section id="tx-detail" class="tab__scroll" hidden></section>
+    </main>
+
+    <!-- Tab: Chat -->
+    <main id="tab-chat" class="tab">
+      <div class="chat__header">
+        <div class="chat__heading">
+          <p class="chat__title">Chat IA</p>
+          <p class="chat__subtitle">Chiedi qualsiasi cosa sui tuoi video e documenti</p>
+        </div>
+        <button id="chat-new" class="icon-btn" title="Nuova conversazione" aria-label="Nuova conversazione">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+      <div id="chat-ctx" class="chat__ctx" hidden>
+        <span class="chat__ctx-icon">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15l4-4m0 0-4-4m4 4H3"/><path d="M21 18v-6a2 2 0 0 0-2-2h-4"/></svg>
+        </span>
+        <span class="chat__ctx-text">—</span>
+        <button id="chat-ctx-clear" class="chat__ctx-clear" title="Rimuovi contesto" aria-label="Rimuovi contesto">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div id="chat-messages" class="chat__messages" aria-live="polite"></div>
+      <div class="chat__composer">
+        <textarea id="chat-input" class="chat__input" rows="1" placeholder="Chiedi a Resumari…" aria-label="Messaggio"></textarea>
+        <button id="chat-send" class="btn btn--primary chat__send" disabled aria-label="Invia messaggio">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
     </main>
 
     <!-- Tab: Account -->

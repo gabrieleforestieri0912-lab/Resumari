@@ -56,13 +56,15 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       expect(html).toContain('usage-content')
     })
 
-    it('has left sidebar navigation across the three app tabs', () => {
+    it('has left sidebar navigation across the four app tabs', () => {
       // The nav lives in a left sidebar (app__body row) next to the tabs.
       expect(html).toContain('class="app__body"')
       expect(html).toContain('data-tab="transcripts"')
+      expect(html).toContain('data-tab="chat"')
       expect(html).toContain('data-tab="account"')
       expect(html).toContain('data-tab="usage"')
       expect(html).toContain('Trascrizioni')
+      expect(html).toContain('Chat')
       expect(html).toContain('Account')
       expect(html).toContain('Usage')
       // The nav precedes the first tab inside the body wrapper.
@@ -72,6 +74,24 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       expect(bodyIdx).toBeGreaterThan(-1)
       expect(navIdx).toBeGreaterThan(bodyIdx)
       expect(firstTabIdx).toBeGreaterThan(navIdx)
+    })
+
+    it('has a chat tab with composer, messages area and context chip', () => {
+      expect(html).toContain('id="tab-chat"')
+      expect(html).toContain('Chat IA')
+      expect(html).toContain('chat-messages')
+      expect(html).toContain('chat-input')
+      expect(html).toContain('chat-send')
+      expect(html).toContain('chat-new')
+      expect(html).toContain('chat-ctx')
+      expect(html).toContain('chat-ctx-clear')
+      // The chat tab sits between transcripts and account.
+      const txIdx = html.indexOf('id="tab-transcripts"')
+      const chatIdx = html.indexOf('id="tab-chat"')
+      const accIdx = html.indexOf('id="tab-account"')
+      expect(txIdx).toBeGreaterThan(-1)
+      expect(chatIdx).toBeGreaterThan(txIdx)
+      expect(accIdx).toBeGreaterThan(chatIdx)
     })
 
     it('does not use emoji anywhere in the panel', () => {
@@ -119,6 +139,14 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       expect(css).toContain('.plan')
       expect(css).toContain('.usage-event')
       expect(css).toContain('.toast')
+      // Chat tab styling
+      expect(css).toContain('.chat__messages')
+      expect(css).toContain('.chat__bubble')
+      expect(css).toContain('.chat__bubble--markdown')
+      expect(css).toContain('.chat__composer')
+      expect(css).toContain('.chat__typing')
+      expect(css).toContain('.chat__ctx')
+      expect(css).toContain('.chat__col { min-width: 0; flex: 1; }')
     })
 
     it('forces [hidden] to hide even on elements with a display rule (e.g. .field)', () => {
@@ -183,6 +211,30 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       expect(js).toContain('/api/create-checkout-session')
       // usage history
       expect(js).toContain('/api/usage')
+    })
+
+    it('implements the chat flow (send, context from transcript, persistence)', () => {
+      expect(js).toContain('function chatSend')
+      expect(js).toContain('function renderChat')
+      expect(js).toContain('function newChat')
+      expect(js).toContain('function clearChatContext')
+      expect(js).toContain('function startChatWithTranscript')
+      expect(js).toContain('resumari_panel_chat')
+      expect(js).toContain('state.chatTyping')
+      // Send posts to the same AI chat endpoint the site uses.
+      expect(js).toContain('authFetch("/api/ai/chat"')
+      // The payload carries the pinned video context when one is set.
+      expect(js).toContain('payload.videoId')
+      // AI answers are rendered as markdown; user messages are escaped text.
+      expect(js).toContain('mdToHtml')
+      expect(js).toContain('escHtml')
+      // 401 is handled before any error bubble is pushed (status forwarded).
+      expect(js).toContain('{ ok: res.ok, status: res.status, d: d }')
+      expect(js).toContain('r.status === 401')
+      // The transcript detail exposes a shortcut into the chat.
+      expect(js).toContain('id: "detail-chat"')
+      // Enter sends, Shift+Enter keeps the line break.
+      expect(js).toContain('e.key === "Enter" && !e.shiftKey')
     })
 
     it('shares auth with the site through chrome.storage (resumariAuth)', () => {

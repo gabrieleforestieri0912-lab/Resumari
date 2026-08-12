@@ -25,12 +25,17 @@
     selected: null,
     query: "",
     usage: null,
+    chat: [], // [{ role: "user" | "ai", text, time }]
+    chatTyping: false,
+    chatContext: null, // { videoId, title } set from a transcript detail
     loginMode: "password", // password | code
     loginStep: "email", // code sub-step: email | code
     theme: "auto", // auto | light | dark
     youtubeTheme: null, // last known YouTube theme from content.js
     onYoutube: false, // is the active tab a YouTube page?
   };
+
+  var CHAT_KEY = "resumari_panel_chat";
 
   /* ---------- tiny DOM helpers ---------- */
   function $(id) { return document.getElementById(id); }
@@ -168,7 +173,7 @@
   }
 
   function switchTab(tab) {
-    var tabs = ["transcripts", "account", "usage"];
+    var tabs = ["transcripts", "chat", "account", "usage"];
     tabs.forEach(function (t) {
       var m = $("tab-" + t);
       if (m) m.classList.toggle("tab--active", t === tab);
@@ -178,6 +183,10 @@
     });
     if (tab === "account") renderAccount();
     if (tab === "usage") loadUsage();
+    if (tab === "chat") {
+      renderChat();
+      setTimeout(function () { var i = $("chat-input"); if (i) i.focus(); }, 60);
+    }
   }
 
   /* ---------- auth: bootstrap ---------- */
@@ -245,6 +254,7 @@
   function enterApp() {
     showView("app");
     renderHeader();
+    loadChat();
     switchTab("transcripts");
     loadTranscripts();
     processPendingVideo();
@@ -476,6 +486,10 @@
           '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/></svg>',
           el("span", { text: "Riassumi con IA" }),
         ]),
+        el("button", { class: "action action--ghost", id: "detail-chat", onclick: function () { startChatWithTranscript(item); } }, [
+          '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+          el("span", { text: "Chiedi in chat" }),
+        ]),
       ]),
     );
     detail.appendChild(
@@ -592,6 +606,261 @@
         renderTranscripts();
       })
       .catch(function (e) { toast(e.message); btn.disabled = false; });
+  }
+
+  /* ---------- chat ---------- */
+  function loadChat() {
+    try {
+      var raw = localStorage.getItem(CHAT_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (Array.isArray(parsed.messages)) state.chat = parsed.messages;
+        if (parsed.context) state.chatContext = parsed.context;
+      }
+    } catch (e) { /* ignore corrupt storage */ }
+  }
+
+  function saveChat() {
+    try {
+      localStorage.setItem(CHAT_KEY, JSON.stringify({ messages: state.chat, context: state.chatContext }));
+    } catch (e) { /* ignore */ }
+  }
+
+  // Tiny safe markdown renderer (escaping first). Supports the subset the AI
+  // actually emits: code fences, headings, lists, bold, italic, inline code,
+  // links, blockquotes and paragraphs.
+  function mdToHtml(text) {
+    var html = String(text || "")
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+
+    // Code fences first (their content stays escaped verbatim).
+    var fences = [];
+    html = html.replace(/```([^`]*?)```/gs, function (_, code) {
+      fences.push(code);
+      return "@@CODE" + (fences.length - 1) + "@@";
+    });
+
+    var lines = html.split("\n");
+    var out = [];
+    var listType = null; // "ul" | "ol"
+    var inQuote = false;
+    function closeList() {
+      if (listType) { out.push("</" + listType + ">"); listType = null; }
+    }
+    function closeQuote() {
+      if (inQuote) { out.push("</blockquote>"); inQuote = false; }
+    }
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      var m;
+      if (m = line.match(/^#{1,3}\s+(.*)$/)) {
+        closeList(); closeQuote();
+        var h = m[1].replace(/<\/?h[1-3]>/g, "");
+        out.push("<h" + m[0].split(" ")[0].length + ">" + h + "</h" + m[0].split(" ")[0].length + ">");
+      } else if (m = line.match(/^[-*]\s+(.*)$/)) {
+        closeQuote();
+        if (listType !== "ul") { closeList(); out.push("<ul>"); listType = "ul"; }
+        out.push("<li>" + m[1] + "</li>");
+      } else if (m = line.match(/^\d+\.\s+(.*)$/)) {
+        closeQuote();
+        if (listType !== "ol") { closeList(); out.push("<ol>"); listType = "ol"; }
+        out.push("<li>" + m[1] + "</li>");
+      } else if (line.indexOf("> ") === 0) {
+        closeList();
+        if (!inQuote) { out.push("<blockquote>"); inQuote = true; }
+        out.push(mdInline(line.slice(2)));
+      } else if (line.replace(/@@CODE\d+@@/g, "").trim() === "") {
+        // blank line (or a code placeholder alone)
+        var ph = line.match(/^@@CODE(\d+)@@$/);
+        if (ph) {
+          closeList(); closeQuote();
+          out.push("<pre><code>" + fences[Number(ph[1])] + "</code></pre>");
+        } else {
+          closeList(); closeQuote();
+        }
+      } else {
+        var codePh = line.match(/^@@CODE(\d+)@@$/);
+        if (codePh) {
+          closeList(); closeQuote();
+          out.push("<pre><code>" + fences[Number(codePh[1])] + "</code></pre>");
+        } else {
+          closeList(); closeQuote();
+          out.push("<p>" + mdInline(line) + "</p>");
+        }
+      }
+    }
+    closeList(); closeQuote();
+    return out.join("");
+  }
+
+  function mdInline(text) {
+    var codeSpans = [];
+    text = text.replace(/`([^`]+)`/g, function (_, c) {
+      codeSpans.push(c);
+      return "@@INL" + (codeSpans.length - 1) + "@@";
+    });
+    text = text
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    return text.replace(/@@INL(\d+)@@/g, function (_, n) {
+      return "<code>" + codeSpans[Number(n)] + "</code>";
+    });
+  }
+
+  function renderChat() {
+    var wrap = $("chat-messages");
+    if (!wrap) return;
+    var ctx = $("chat-ctx");
+    if (state.chatContext && state.chatContext.videoId) {
+      ctx.hidden = false;
+      var t = ctx.querySelector(".chat__ctx-text");
+      if (t) t.textContent = "Video: " + (state.chatContext.title || state.chatContext.videoId);
+    } else {
+      ctx.hidden = true;
+    }
+
+    wrap.innerHTML = "";
+    if (state.chat.length === 0 && !state.chatTyping) {
+      wrap.appendChild(
+        el("div", { class: "chat__empty" }, [
+          '<svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+          el("p", { class: "chat__empty-title", text: "Chat IA" }),
+          el("p", { class: "chat__empty-text", text: "Fai domande, riassunti e analisi sui tuoi video. Incolla un link YouTube oppure apri una trascrizione e premi \"Chiedi in chat\"." }),
+        ]),
+      );
+    }
+
+    state.chat.forEach(function (msg) {
+      wrap.appendChild(chatRow(msg));
+    });
+
+    if (state.chatTyping) {
+      wrap.appendChild(
+        el("div", { class: "chat__row chat__row--ai" }, [
+          el("div", { class: "chat__avatar chat__avatar--ai" }, [
+            '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/></svg>',
+          ]),
+          el("div", { class: "chat__typing" }, [
+            el("span"), el("span"), el("span"),
+          ]),
+        ]),
+      );
+    }
+    wrap.scrollTop = wrap.scrollHeight;
+  }
+
+  function chatRow(msg) {
+    var isUser = msg.role === "user";
+    return el("div", { class: "chat__row " + (isUser ? "chat__row--user" : "chat__row--ai") }, [
+      el("div", { class: "chat__avatar " + (isUser ? "chat__avatar--user" : "chat__avatar--ai") }, [
+        isUser
+          ? '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
+          : '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/></svg>',
+      ]),
+      el("div", { class: "chat__col" }, [
+        el("div", { class: "chat__bubble" + (isUser ? "" : " chat__bubble--markdown"), html: isUser ? escHtml(msg.text) : mdToHtml(msg.text) }),
+        el("div", { class: "chat__time", text: msg.time || "" }),
+      ]),
+    ]);
+  }
+
+  function escHtml(text) {
+    return String(text || "")
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/\n/g, "<br>");
+  }
+
+  function chatSend() {
+    var input = $("chat-input");
+    var text = (input.value || "").trim();
+    if (!text || state.chatTyping) return;
+
+    state.chat.push({ role: "user", text: text, time: nowTime() });
+    input.value = "";
+    autoResizeChatInput();
+    updateChatSendState();
+    state.chatTyping = true;
+    saveChat();
+    renderChat();
+
+    var payload = { message: text };
+    if (state.chatContext && state.chatContext.videoId) {
+      payload.videoId = state.chatContext.videoId;
+    }
+
+    authFetch("/api/ai/chat", { method: "POST", body: JSON.stringify(payload) })
+      .then(function (res) {
+        return res.json().then(function (d) { return { ok: res.ok, status: res.status, d: d }; });
+      })
+      .then(function (r) {
+        state.chatTyping = false;
+        if (!r.ok) {
+          if (r.status === 401) { handleLogout(); return; }
+          var msg = r.d.message || "Errore durante la richiesta";
+          if (r.d && r.d.credits === 0) {
+            state.chat.push({ role: "ai", text: "Crediti esauriti. Passa a un piano Pro o Business per continuare a usare la chat.", time: nowTime() });
+          } else {
+            state.chat.push({ role: "ai", text: msg, time: nowTime() });
+          }
+        } else {
+          if (typeof r.d.credits === "number") {
+            state.credits = r.d.credits;
+            renderHeader();
+          }
+          state.chat.push({ role: "ai", text: r.d.response || "", time: nowTime() });
+        }
+        saveChat();
+        renderChat();
+      })
+      .catch(function () {
+        state.chatTyping = false;
+        state.chat.push({ role: "ai", text: "Errore di rete. Controlla la connessione e riprova.", time: nowTime() });
+        saveChat();
+        renderChat();
+      });
+  }
+
+  function nowTime() {
+    return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function newChat() {
+    state.chat = [];
+    state.chatContext = null;
+    saveChat();
+    renderChat();
+    var input = $("chat-input");
+    if (input) input.focus();
+  }
+
+  function clearChatContext() {
+    state.chatContext = null;
+    saveChat();
+    renderChat();
+  }
+
+  // Called from the transcript detail: opens the chat tab pinned to that video.
+  function startChatWithTranscript(item) {
+    if (!item) return;
+    state.chatContext = { videoId: item.video_id, title: item.title };
+    saveChat();
+    switchTab("chat");
+  }
+
+  function autoResizeChatInput() {
+    var input = $("chat-input");
+    if (!input) return;
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 96) + "px";
+  }
+
+  function updateChatSendState() {
+    var send = $("chat-send");
+    var input = $("chat-input");
+    if (send && input) send.disabled = !input.value.trim() || state.chatTyping;
   }
 
   /* ---------- account ---------- */
@@ -1088,6 +1357,21 @@
       if (e.key === "Escape" && !$("logout-modal").hidden) closeLogoutConfirm(true);
     });
     $("credits-badge").addEventListener("click", function () { switchTab("account"); });
+
+    // Chat tab
+    $("chat-send").addEventListener("click", chatSend);
+    $("chat-input").addEventListener("input", function () {
+      autoResizeChatInput();
+      updateChatSendState();
+    });
+    $("chat-input").addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        chatSend();
+      }
+    });
+    $("chat-new").addEventListener("click", newChat);
+    $("chat-ctx-clear").addEventListener("click", clearChatContext);
     $("tx-search").addEventListener("input", function (e) {
       state.query = e.target.value;
       renderTranscripts();
