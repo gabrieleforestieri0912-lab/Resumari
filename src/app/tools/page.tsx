@@ -23,7 +23,6 @@ const tools = [
     title: "YouTube Thumbnail Downloader",
     description:
       "Scarica thumbnail YouTube in tutte le risoluzioni disponibili — da 120x90 a Full HD 1280x720.",
-    color: "from-rose-500 to-pink-600",
   },
   {
     href: "/tools/subtitle-converter",
@@ -31,7 +30,6 @@ const tools = [
     title: "Subtitle Format Converter",
     description:
       "Converti tra formati SRT, VTT e testo semplice all'istante. Incolla, converti, copia.",
-    color: "from-blue-500 to-cyan-600",
   },
   {
     href: "/tools/script-timer",
@@ -39,7 +37,6 @@ const tools = [
     title: "Video Script Timer",
     description:
       "Incolla il tuo copione e ottieni la durata stimata del video a velocità di lettura lenta, media e veloce.",
-    color: "from-amber-500 to-orange-600",
   },
   {
     href: "/tools/transcript-cleaner",
@@ -47,7 +44,6 @@ const tools = [
     title: "Transcript Cleaner",
     description:
       "Rimuovi timestamp, parole di riempimento, etichette relatori e correggi la formattazione in qualsiasi trascrizione.",
-    color: "from-emerald-500 to-teal-600",
   },
   {
     href: "/tools/title-counter",
@@ -55,7 +51,6 @@ const tools = [
     title: "YouTube Title & Description Counter",
     description:
       "Conteggio caratteri e parole in tempo reale con limiti colorati e anteprima SERP live.",
-    color: "from-violet-500 to-purple-600",
   },
   {
     href: "/tools/subtitle-validator",
@@ -63,7 +58,6 @@ const tools = [
     title: "Subtitle Validator",
     description:
       "Controlla i sottotitoli per timecode sovrapposti, problemi di velocità di lettura, didascalie vuote e altro.",
-    color: "from-indigo-500 to-blue-600",
   },
   {
     href: "/tools/timestamp-generator",
@@ -71,7 +65,6 @@ const tools = [
     title: "YouTube Timestamp & Chapter Generator",
     description:
       "Crea capitoli compatibili YouTube dalla trascrizione o da timestamp manuali. Convalida il formato automaticamente.",
-    color: "from-red-500 to-rose-600",
   },
   {
     href: "/tools/earnings-calculator",
@@ -79,7 +72,6 @@ const tools = [
     title: "YouTube Earnings Calculator",
     description:
       "Stima i guadagni pubblicitari YouTube da visualizzazioni e CPM. Include preset per nicchia e traguardi YPP.",
-    color: "from-green-500 to-emerald-600",
   },
   {
     href: "/tools/tag-generator",
@@ -87,7 +79,6 @@ const tools = [
     title: "YouTube Tag Generator",
     description:
       "Genera tag YouTube ottimizzati dal tuo argomento video. Mostra il contatore del limite di 500 caratteri.",
-    color: "from-sky-500 to-blue-600",
   },
   {
     href: "/tools/show-notes",
@@ -95,7 +86,6 @@ const tools = [
     title: "Podcast Show Notes Generator",
     description:
       "Crea note show professionali per podcast dalla tua trascrizione. Scegli tra template Minimal, Dettagliato o SEO.",
-    color: "from-fuchsia-500 to-pink-600",
   },
 ];
 
@@ -128,9 +118,9 @@ export default function ToolsPage() {
                 href={tool.href}
                 className="group relative bg-white rounded-2xl border border-gray-200 p-6 transition-all duration-300 hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 hover:border-gray-300"
               >
-                <div
-                  className={`w-12 h-12 rounded-xl bg-linear-to-br ${tool.color} flex items-center justify-center mb-4 shadow-lg`}
-                >
+                {/* Badge with the brand gradient + white icon, coherent across
+                    every card (same identity as the landing/extension). */}
+                <div className="w-12 h-12 rounded-2xl bg-linear-to-r from-purple-600 to-red-600 flex items-center justify-center mb-4 shadow-lg shadow-purple-500/25">
                   <tool.icon className="w-5 h-5 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">
