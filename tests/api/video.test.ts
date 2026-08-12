@@ -112,9 +112,25 @@ describe('POST /api/video', () => {
     expect(stored.credits).toBe(4)
   })
 
-  it('does not deduct credits for business users', async () => {
+  it('blocks business users with zero credits (pool model)', async () => {
     getAuthenticatedUserMock.mockResolvedValue({ ...user, plan: 'business', credits: 0 })
     client.setData('users', [{ ...user, plan: 'business', credits: 0 }])
+
+    const res = await post({ videoUrl: 'abc123def45' })
+    expect(res.status).toBe(403)
+  })
+
+  it('blocks pro users with zero credits (pool model)', async () => {
+    getAuthenticatedUserMock.mockResolvedValue({ ...user, plan: 'pro', credits: 0 })
+    client.setData('users', [{ ...user, plan: 'pro', credits: 0 }])
+
+    const res = await post({ videoUrl: 'abc123def45' })
+    expect(res.status).toBe(403)
+  })
+
+  it('deducts credits for business users (pool model)', async () => {
+    getAuthenticatedUserMock.mockResolvedValue({ ...user, plan: 'business', credits: 5 })
+    client.setData('users', [{ ...user, plan: 'business', credits: 5 }])
     fetchMock.mockImplementation((url: string) => {
       if (url.startsWith('https://youtube.com/api/timedtext')) {
         return Promise.resolve(jsonResponse({ events: [{ tStartMs: 0, segs: [{ utf8: 'Hi' }] }] }))
@@ -124,7 +140,9 @@ describe('POST /api/video', () => {
 
     const res = await post({ videoUrl: 'abc123def45' })
     expect(res.status).toBe(200)
-    expect(client.getData('users')[0].credits).toBe(0)
+    const body = await res.json()
+    expect(body.credits).toBe(4)
+    expect(client.getData('users')[0].credits).toBe(4)
   })
 
   it('falls back to a third-party transcript source when timedtext is empty', async () => {

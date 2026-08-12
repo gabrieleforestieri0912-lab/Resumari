@@ -91,6 +91,14 @@ export async function POST(request: Request) {
         userId: decoded.userId,
         plan,
       },
+      // The subscription (and its invoices) inherit this metadata, so the
+      // webhook can attribute renewals and reset the monthly credit pool.
+      subscription_data: {
+        metadata: {
+          userId: decoded.userId,
+          plan,
+        },
+      },
     });
 
     return NextResponse.json({ url: session.url });

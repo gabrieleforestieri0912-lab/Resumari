@@ -154,14 +154,50 @@ describe('POST /api/v1/transcript', () => {
     expect(updated.credits).toBe(98)
   })
 
-  it('allows pro users to transcribe with zero credits', async () => {
+  it('blocks pro users with zero credits (pool model)', async () => {
     authenticateApiKeyMock.mockResolvedValue({
       authenticated: true,
       user: { ...authUser, credits: 0, plan: 'pro' },
       creditsRemaining: 0,
       rateLimitRemaining: 29,
     })
-    client.setData('users', [{ ...authUser, credits: 0, plan: 'pro' }])
+    const res = await POST(
+      new Request('http://localhost/api/v1/transcript', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ video_id: 'abc123def45' }),
+      }),
+    )
+    expect(res.status).toBe(403)
+    const body = await res.json()
+    expect(body.error).toBe('insufficient_credits')
+  })
+
+  it('blocks business users with zero credits (pool model)', async () => {
+    authenticateApiKeyMock.mockResolvedValue({
+      authenticated: true,
+      user: { ...authUser, credits: 0, plan: 'business' },
+      creditsRemaining: 0,
+      rateLimitRemaining: 29,
+    })
+    const res = await POST(
+      new Request('http://localhost/api/v1/transcript', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ video_id: 'abc123def45' }),
+      }),
+    )
+    expect(res.status).toBe(403)
+  })
+
+  it('deducts credits for business users (pool model)', async () => {
+    authenticateApiKeyMock.mockResolvedValue({
+      authenticated: true,
+      user: { ...authUser, credits: 100, plan: 'business' },
+      creditsRemaining: 100,
+      rateLimitRemaining: 29,
+    })
+    client.setData('users', [{ ...authUser, credits: 100, plan: 'business' }])
     fetchMock.mockImplementation((url: string) => {
       if (url.startsWith('https://youtube.com/api/timedtext')) {
         return Promise.resolve(jsonResponse({ events: [{ tStartMs: 0, segs: [{ utf8: 'Hi' }] }] }))
@@ -179,6 +215,8 @@ describe('POST /api/v1/transcript', () => {
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.text).toBe('Hi')
-    expect(body.credits_remaining).toBe(0)
+    expect(body.credits_used).toBe(2)
+    expect(body.credits_remaining).toBe(98)
+    expect(client.getData('users')[0].credits).toBe(98)
   })
 })

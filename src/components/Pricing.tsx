@@ -52,11 +52,12 @@ export default function Pricing() {
       description:
         "Ideale per creatori e studenti che analizzano video quotidianamente.",
       features: [
-        "1000 Crediti inclusi",
+        "1000 Crediti / mese",
+        "Crediti per trascrizioni e chat AI",
+        "Reset automatico ogni mese",
         "Formati avanzati (JSON, CSV, SRT)",
         "Accesso API Beta",
         "Supporto prioritario 24/7",
-        "Senza Pubblicità",
       ],
       buttonText: "Scegli Pro",
       popular: true,
@@ -73,7 +74,9 @@ export default function Pricing() {
       description:
         "Per team e aziende che necessitano di analisi massiva e supporto.",
       features: [
-        "3000 Crediti inclusi",
+        "3000 Crediti / mese",
+        "Crediti per trascrizioni e chat AI",
+        "Reset automatico ogni mese",
         "Team Management",
         "Fatturazione aziendale",
         "Custom Workflow",

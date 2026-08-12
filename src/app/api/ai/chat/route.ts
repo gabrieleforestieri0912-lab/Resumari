@@ -3,6 +3,7 @@ import { getServiceClient, TABLES } from '@/lib/supabase';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
 import { generateChatCompletion } from '@/lib/ai';
 import { getAuthenticatedUser } from '@/lib/auth';
+import { hasEnoughCredits, deductCredits, CREDIT_COSTS } from '@/lib/credits';
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || '';
 
@@ -90,8 +91,11 @@ export async function POST(request: Request) {
   const user = await getAuthenticatedUser(request);
   if (!user) return NextResponse.json({ message: 'Non autorizzato' }, { status: 401 });
 
-  if (user.credits <= 0 && user.plan === 'free') {
-    return NextResponse.json({ message: 'Crediti insufficienti. Passa a un piano Pro!' }, { status: 403 });
+  if (!hasEnoughCredits(user, CREDIT_COSTS.chat)) {
+    return NextResponse.json(
+      { message: 'Crediti insufficienti. I crediti si ricaricano ogni mese con un piano Pro o Business.' },
+      { status: 403 }
+    );
   }
 
   try {
@@ -152,24 +156,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Errore nel salvataggio della chat' }, { status: 500 });
     }
 
-    // Decrement credits only after successful save
-    if (user.plan !== 'business') {
-      const { data: currentUser } = await client
-        .from(TABLES.USERS)
-        .select('credits')
-        .eq('id', user.id)
-        .single();
-
-      if (currentUser) {
-        const newCredits = Math.max(0, (currentUser.credits || 0) - 1);
-        await client
-          .from(TABLES.USERS)
-          .update({ credits: newCredits, updated_at: new Date().toISOString() })
-          .eq('id', user.id);
-      }
+    // Atomic deduction — blocks every plan (pool model) and prevents overspending.
+    // Deducted AFTER the chat is saved so failed AI calls don't consume credits;
+    // in the rare race where the deduction fails here, the chat stays as history
+    // and the client can simply retry the message.
+    const remaining = await deductCredits(user.id, CREDIT_COSTS.chat);
+    if (remaining === null) {
+      return NextResponse.json({ message: 'Crediti insufficienti' }, { status: 403 });
     }
 
-    return NextResponse.json({ response: aiResponse, credits: (user.credits || 0) - 1 });
+    return NextResponse.json({ response: aiResponse, credits: remaining });
   } catch (error: any) {
     console.error('Chat API Error:', error);
     const message = error.message?.includes('429') || error.message?.includes('quota')

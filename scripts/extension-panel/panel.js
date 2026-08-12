@@ -139,6 +139,8 @@
     return existing || ("https://img.youtube.com/vi/" + videoId + "/hqdefault.jpg");
   }
 
+  // MUST stay in sync with src/lib/credits.ts (PLAN_LIMITS) — the standalone
+  // panel can't import the server module, so it duplicates the values.
   var PLAN_LIMITS = { free: 10, pro: 1000, business: 3000 };
   var PLAN_NAMES = { free: "Starter", pro: "Pro Pack", business: "Business" };
 
@@ -573,14 +575,14 @@
       id: "pro", name: "Pro Pack", price: "€7.99", period: "/mese",
       icon: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
       desc: "Ideale per chi analizza video ogni giorno.",
-      features: ["1000 Crediti inclusi", "Formati avanzati (JSON, CSV, SRT)", "Accesso API Beta", "Supporto prioritario"],
+      features: ["1000 Crediti / mese", "Reset automatico ogni mese", "Formati avanzati (JSON, CSV, SRT)", "Accesso API Beta"],
       popular: true,
     },
     {
       id: "business", name: "Business", price: "€19.99", period: "/mese",
       icon: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="2"/><line x1="15" y1="22" x2="15" y2="2"/></svg>',
       desc: "Per team e analisi massive.",
-      features: ["3000 Crediti inclusi", "Crediti illimitati sulle trascrizioni", "Team Management", "Account Manager"],
+      features: ["3000 Crediti / mese", "Reset automatico ogni mese", "Team Management", "Account Manager"],
     },
   ];
 
@@ -603,17 +605,11 @@
     var credits = state.credits;
     $("acc-credits").textContent = credits != null ? credits : "…";
     $("acc-credits-sub").textContent =
-      plan === "business"
-        ? "Crediti illimitati sulle trascrizioni"
-        : "di " + limit + " nel piano " + (PLAN_NAMES[plan] || plan);
+      "di " + limit + " al mese nel piano " + (PLAN_NAMES[plan] || plan);
     var progress = $("acc-progress");
-    if (plan === "business") {
-      progress.hidden = true;
-    } else {
-      progress.hidden = false;
-      var pct = Math.min(100, ((credits != null ? credits : 0) / limit) * 100);
-      $("acc-progress-bar").style.width = pct + "%";
-    }
+    progress.hidden = false;
+    var pct = Math.min(100, ((credits != null ? credits : 0) / limit) * 100);
+    $("acc-progress-bar").style.width = pct + "%";
   }
 
   function renderPlans(currentPlan) {

@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { getServiceClient, TABLES } from '@/lib/supabase';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
+import { getPlanLimit } from '@/lib/credits';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
         email: email.toLowerCase(),
         password: hashedPassword,
         name: name || email.split('@')[0],
-        credits: 10,
+        credits: getPlanLimit('free'),
         plan: 'free',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { getServiceClient, TABLES } from '@/lib/supabase';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
+import { getPlanLimit } from '@/lib/credits';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
         .insert({
           email: email.toLowerCase(),
           name,
-          credits: 10,
+          credits: getPlanLimit('free'),
           plan: 'free',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),

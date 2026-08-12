@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getServiceClient, TABLES } from '@/lib/supabase';
 import { getAuthenticatedUser } from '@/lib/auth';
+import { hasEnoughCredits, deductCredits, CREDIT_COSTS } from '@/lib/credits';
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || '';
 
@@ -127,8 +127,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Non autorizzato. Effettua il login.' }, { status: 401 });
     }
 
-    if (user.credits <= 0 && user.plan === 'free') {
-      return NextResponse.json({ message: 'Crediti insufficienti. Passa a un piano Pro!' }, { status: 403 });
+    if (!hasEnoughCredits(user, CREDIT_COSTS.transcription)) {
+      return NextResponse.json(
+        { message: 'Crediti insufficienti. I crediti si ricaricano ogni mese con un piano Pro o Business.' },
+        { status: 403 }
+      );
     }
 
     const { videoUrl } = await request.json();
@@ -154,17 +157,10 @@ export async function POST(request: Request) {
       }
     }
 
-    try {
-      const client = getServiceClient();
-      if (client && user.plan !== 'business') {
-        const newCredits = Math.max(0, (user.credits || 0) - 1);
-        await client
-          .from(TABLES.USERS)
-          .update({ credits: newCredits, updated_at: new Date().toISOString() })
-          .eq('id', user.id);
-      }
-    } catch (dbError) {
-      console.error('Failed to update credits:', dbError);
+    // Atomic deduction — blocks every plan (pool model) and prevents overspending.
+    const remaining = await deductCredits(user.id, CREDIT_COSTS.transcription);
+    if (remaining === null) {
+      return NextResponse.json({ message: 'Crediti insufficienti' }, { status: 403 });
     }
 
     return NextResponse.json({
@@ -178,6 +174,7 @@ export async function POST(request: Request) {
       description: details?.description || '',
       transcript,
       transcriptLanguage,
+      credits: remaining,
     });
   } catch (error) {
     console.error('Video API error:', error);

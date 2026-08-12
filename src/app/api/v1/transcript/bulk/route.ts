@@ -1,5 +1,6 @@
 import { authenticateApiKey } from '@/lib/api-auth'
 import { getServiceClient } from '@/lib/supabase'
+import { hasEnoughCredits, deductCredits, CREDIT_COSTS } from '@/lib/credits'
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || ''
 
@@ -140,7 +141,7 @@ export async function POST(request: Request) {
     })
   }
 
-  if (auth.user.credits < 2 && auth.user.plan === 'free') {
+  if (!hasEnoughCredits(auth.user, CREDIT_COSTS.transcriptionApi)) {
     return new Response(JSON.stringify({ error: 'insufficient_credits' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json' },
@@ -239,22 +240,28 @@ export async function POST(request: Request) {
           }
         }
 
-        // Deduct credits: 2 per successful extraction, refund failed
-        const chargeable = succeeded * 2
-        const creditsToDeduct = Math.min(chargeable, auth.user.credits)
+        // Deduct credits: 2 per successful extraction, refund failed.
+        // Atomic by default; falls back to a capped charge only if credits ran
+        // out mid-batch due to a concurrent request.
+        const chargeable = succeeded * CREDIT_COSTS.transcriptionApi
+        let remaining = await deductCredits(auth.user.id, chargeable)
+        let creditsUsed = chargeable
+        if (remaining === null) {
+          const client = getServiceClient()
+          const { data: currentUser } = await client
+            .from('users')
+            .select('credits')
+            .eq('id', auth.user.id)
+            .single()
 
-        const client = getServiceClient()
-        const { data: currentUser } = await client
-          .from('users')
-          .select('credits')
-          .eq('id', auth.user.id)
-          .single()
-
-        const remaining = Math.max(0, (currentUser?.credits || 0) - creditsToDeduct)
-        await client
-          .from('users')
-          .update({ credits: remaining, updated_at: new Date().toISOString() })
-          .eq('id', auth.user.id)
+          const available = currentUser?.credits || 0
+          creditsUsed = Math.min(chargeable, available)
+          remaining = Math.max(0, available - creditsUsed)
+          await client
+            .from('users')
+            .update({ credits: remaining, updated_at: new Date().toISOString() })
+            .eq('id', auth.user.id)
+        }
 
         send('batch', {
           batchIndex: 0,
@@ -263,7 +270,7 @@ export async function POST(request: Request) {
         })
 
         send('done', {
-          stats: { total: videos.length, succeeded, failed, credits_used: creditsToDeduct, credits_remaining: remaining },
+          stats: { total: videos.length, succeeded, failed, credits_used: creditsUsed, credits_remaining: remaining },
         })
       } catch (err: any) {
         send('error', { error: 'resolution_failed', message: err.message || 'Errore' })

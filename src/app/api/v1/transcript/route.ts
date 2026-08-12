@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { authenticateApiKey } from '@/lib/api-auth'
-import { getServiceClient } from '@/lib/supabase'
+import { hasEnoughCredits, deductCredits, CREDIT_COSTS } from '@/lib/credits'
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || ''
 
@@ -88,7 +88,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'invalid_input', message: 'video_id non valido' }, { status: 400 })
   }
 
-  if (auth.user.credits < 2 && auth.user.plan === 'free') {
+  if (!hasEnoughCredits(auth.user, CREDIT_COSTS.transcriptionApi)) {
     return NextResponse.json({ error: 'insufficient_credits', message: 'Crediti insufficienti' }, { status: 403 })
   }
 
@@ -103,20 +103,11 @@ export async function POST(request: Request) {
 
   const text = transcriptData.transcript.map((s: any) => s.text).join(' ')
 
-  const client = getServiceClient()
-  const { data: currentUser } = await client
-    .from('users')
-    .select('credits')
-    .eq('id', auth.user.id)
-    .single()
-
-  const creditsUsed = 2
-  const creditsRemaining = Math.max(0, (currentUser?.credits || 0) - creditsUsed)
-
-  await client
-    .from('users')
-    .update({ credits: creditsRemaining, updated_at: new Date().toISOString() })
-    .eq('id', auth.user.id)
+  // Atomic deduction — blocks every plan (pool model) and prevents overspending.
+  const creditsRemaining = await deductCredits(auth.user.id, CREDIT_COSTS.transcriptionApi)
+  if (creditsRemaining === null) {
+    return NextResponse.json({ error: 'insufficient_credits', message: 'Crediti insufficienti' }, { status: 403 })
+  }
 
   return NextResponse.json({
     video_id: videoId,
@@ -126,7 +117,7 @@ export async function POST(request: Request) {
     transcript: transcriptData.transcript,
     text,
     language: transcriptData.language,
-    credits_used: creditsUsed,
+    credits_used: CREDIT_COSTS.transcriptionApi,
     credits_remaining: creditsRemaining,
   })
 }
