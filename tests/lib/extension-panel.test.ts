@@ -209,5 +209,16 @@ describe('standalone side panel (scripts/extension-panel)', () => {
     it('exposes the panel marker for tests', () => {
       expect(js).toContain('window.__RESUMARI_PANEL__')
     })
+
+    it('parses inline SVG children as elements, not visible code', () => {
+      // Regression: el() used to append string children with createTextNode,
+      // so icon markup ('<svg …>…</svg>') rendered as raw code in the panel.
+      // Strings starting with '<' must be parsed as HTML via a <template>.
+      expect(js).toContain('document.createElement("template")')
+      expect(js).toContain('tpl.innerHTML = c')
+      expect(js).toContain('tpl.content')
+      // Plain text children must still become text nodes.
+      expect(js).toContain('document.createTextNode(c)')
+    })
   })
 })

@@ -46,7 +46,21 @@
       });
     }
     (children || []).forEach(function (c) {
-      if (c) node.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+      if (!c) return;
+      if (typeof c === "string") {
+        // Strings that look like markup (inline SVG icons) are parsed as HTML
+        // so they render as icons; a plain createTextNode would show the raw
+        // '<svg …>' code as visible text in the panel.
+        if (/^\s*</.test(c)) {
+          var tpl = document.createElement("template");
+          tpl.innerHTML = c;
+          node.appendChild(tpl.content);
+        } else {
+          node.appendChild(document.createTextNode(c));
+        }
+      } else {
+        node.appendChild(c);
+      }
     });
     return node;
   }
