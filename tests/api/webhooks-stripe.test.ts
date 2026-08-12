@@ -100,6 +100,41 @@ describe('POST /api/webhooks/stripe', () => {
     expect(stored.credits).toBe(3000)
   })
 
+  it('supports the standard plan (metadata and product-name fallback)', async () => {
+    // Metadata path: invoice.paid resets the standard pool to 750.
+    client.setData('users', [{ ...user, plan: 'standard', credits: 0, stripe_subscription_id: 'sub_std' }])
+    retrieveSubscriptionMock.mockResolvedValue({
+      id: 'sub_std',
+      metadata: { userId: 'user-1', plan: 'standard' },
+    })
+    const res = await POST(
+      webhookRequest({
+        type: 'invoice.paid',
+        data: { object: { subscription: 'sub_std' } },
+      }),
+    )
+    expect(res.status).toBe(200)
+    expect(client.getData('users')[0].credits).toBe(750)
+
+    // Fallback path: product name only (no plan in metadata; userId always
+    // comes from the subscription metadata).
+    client.setData('users', [{ ...user, plan: 'standard', credits: 0, stripe_subscription_id: 'sub_std2' }])
+    retrieveSubscriptionMock.mockResolvedValue({
+      id: 'sub_std2',
+      metadata: { userId: 'user-1' },
+      items: { data: [{ price: { product: { name: 'Standard' } } }] },
+    })
+    const res2 = await POST(
+      webhookRequest({
+        type: 'invoice.paid',
+        data: { object: { subscription: 'sub_std2' } },
+      }),
+    )
+    expect(res2.status).toBe(200)
+    expect(client.getData('users')[0].plan).toBe('standard')
+    expect(client.getData('users')[0].credits).toBe(750)
+  })
+
   it('does not reset credits when invoice.paid has no subscription', async () => {
     client.setData('users', [{ ...user, plan: 'pro', credits: 42 }])
     const res = await POST(

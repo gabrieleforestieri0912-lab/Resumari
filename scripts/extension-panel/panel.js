@@ -162,8 +162,8 @@
 
   // MUST stay in sync with src/lib/credits.ts (PLAN_LIMITS) — the standalone
   // panel can't import the server module, so it duplicates the values.
-  var PLAN_LIMITS = { free: 10, pro: 1000, business: 3000 };
-  var PLAN_NAMES = { free: "Starter", pro: "Pro Pack", business: "Business" };
+  var PLAN_LIMITS = { free: 10, standard: 750, pro: 1000, business: 3000 };
+  var PLAN_NAMES = { free: "Starter", standard: "Standard", pro: "Pro Pack", business: "Business" };
 
   /* ---------- view switching ---------- */
   function showView(name) {
@@ -874,14 +874,20 @@
       features: ["10 Crediti omaggio", "Trascrizioni base", "Esporta in TXT"],
     },
     {
-      id: "pro", name: "Pro Pack", price: "€7.99", period: "/mese",
+      id: "standard", name: "Standard", price: "€5.99", period: "/mese", cta: "Passa a Standard",
+      icon: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>',
+      desc: "Per chi usa Resumari con costanza e vuole più spazio.",
+      features: ["750 Crediti / mese", "Reset automatico ogni mese", "Esporta in TXT e JSON", "Supporto via email"],
+    },
+    {
+      id: "pro", name: "Pro Pack", price: "€7.99", period: "/mese", cta: "Passa a Pro",
       icon: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
       desc: "Ideale per chi analizza video ogni giorno.",
       features: ["1000 Crediti / mese", "Reset automatico ogni mese", "Formati avanzati (JSON, CSV, SRT)", "Accesso API Beta"],
       popular: true,
     },
     {
-      id: "business", name: "Business", price: "€19.99", period: "/mese",
+      id: "business", name: "Business", price: "€19.99", period: "/mese", cta: "Passa a Business",
       icon: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="2"/><line x1="15" y1="22" x2="15" y2="2"/></svg>',
       desc: "Per team e analisi massive.",
       features: ["3000 Crediti / mese", "Reset automatico ogni mese", "Team Management", "Account Manager"],
@@ -941,7 +947,7 @@
             ? el("button", { class: "btn btn--block", disabled: true, text: "Piano gratuito", style: "background:#f1f0f6;color:#9a9aa6" })
             : el("button", {
                 class: "btn btn--primary btn--block plan__cta",
-                text: p.id === "pro" ? "Passa a Pro" : "Passa a Business",
+                text: p.cta || "Passa al piano",
                 onclick: function () { startCheckout(p.id, this); },
               }),
       ]);

@@ -5,6 +5,7 @@ import { getServiceClient, TABLES } from '@/lib/supabase'
 // `invoice.paid` handler in /api/webhooks/stripe).
 export const PLAN_LIMITS: Record<string, number> = {
   free: 10,
+  standard: 750,
   pro: 1000,
   business: 3000,
 }

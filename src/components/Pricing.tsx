@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/immutability */
 import { motion } from "framer-motion";
-import { Check, Star, Zap, Sparkles, Building2, Crown, LucideIcon } from "lucide-react";
+import { Check, Star, Zap, Sparkles, Building2, Gem, LucideIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
 
@@ -42,6 +42,26 @@ export default function Pricing() {
       buttonText: "Inizia Gratis",
       popular: false,
       isFree: true,
+    },
+    {
+      name: "Standard",
+      price: "5.99",
+      period: "/mese",
+      icon: Gem,
+      color: "purple",
+      description:
+        "Per chi usa Resumari con costanza e vuole più spazio per trascrizioni e chat.",
+      features: [
+        "750 Crediti / mese",
+        "Crediti per trascrizioni e chat AI",
+        "Reset automatico ogni mese",
+        "Esporta in TXT e JSON",
+        "Supporto via email",
+      ],
+      buttonText: "Scegli Standard",
+      popular: false,
+      isFree: false,
+      planType: "standard",
     },
     {
       name: "Pro Pack",
@@ -163,7 +183,7 @@ export default function Pricing() {
         </motion.p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3 max-w-6xl mx-auto items-center">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4 max-w-7xl mx-auto items-center">
         {plans.map((plan, index) => {
           const Icon = plan.icon;
           return (

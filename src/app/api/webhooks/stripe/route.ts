@@ -12,12 +12,17 @@ if (process.env.STRIPE_SECRET_KEY) {
 
 // Plan is passed through the checkout `subscription_data.metadata`; fall back to
 // the product name for subscriptions created before that was added.
+const PAID_PLANS = ['standard', 'pro', 'business']
+
 function planFromSubscription(subscription: any): string {
   const metaPlan = subscription?.metadata?.plan;
-  if (metaPlan === 'pro' || metaPlan === 'business') return metaPlan;
+  if (typeof metaPlan === 'string' && PAID_PLANS.includes(metaPlan)) return metaPlan;
   const productName = subscription?.items?.data?.[0]?.price?.product?.name;
   if (typeof productName === 'string' && productName.toLowerCase().includes('business')) {
     return 'business';
+  }
+  if (typeof productName === 'string' && productName.toLowerCase().includes('standard')) {
+    return 'standard';
   }
   return 'pro';
 }

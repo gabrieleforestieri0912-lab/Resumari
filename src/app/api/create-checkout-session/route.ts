@@ -11,6 +11,7 @@ if (process.env.STRIPE_SECRET_KEY) {
 }
 
 const PLAN_DATA: Record<string, { name: string; price: number; description: string }> = {
+  standard: { name: 'Standard', price: 5.99, description: 'Piano Standard mensile' },
   pro: { name: 'Pro Pack', price: 7.99, description: 'Piano Pro mensile' },
   business: { name: 'Business', price: 19.99, description: 'Piano Business mensile' },
 };

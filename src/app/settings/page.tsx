@@ -441,15 +441,21 @@ export default function Settings() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-gray-900 text-sm capitalize">
-                  {user?.plan === "pro" ? "Piano Pro" : user?.plan === "premium" ? "Piano Premium" : "Piano Free"}
+                  {user?.plan === "pro"
+                    ? "Piano Pro"
+                    : user?.plan === "premium"
+                      ? "Piano Premium"
+                      : user?.plan === "standard"
+                        ? "Piano Standard"
+                        : "Piano Free"}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {user?.plan === "pro" || user?.plan === "premium"
-                    ? (locale === 'it' ? 'Riassunti illimitati' : 'Unlimited summaries')
+                  {user?.plan === "pro" || user?.plan === "premium" || user?.plan === "standard"
+                    ? (locale === 'it' ? 'Crediti mensili inclusi' : 'Monthly credits included')
                     : (locale === 'it' ? `${user?.credits ?? 10} riassunti disponibili` : `${user?.credits ?? 10} summaries available`)}
                 </p>
               </div>
-              {user?.plan !== "pro" && user?.plan !== "premium" && (
+              {user?.plan !== "pro" && user?.plan !== "premium" && user?.plan !== "standard" && (
                 <Link
                   href="/#pricing"
                   className="px-4 py-2 bg-purple-600 text-white text-xs font-black rounded-xl hover:bg-purple-700 transition-all flex items-center gap-1.5"

@@ -260,6 +260,16 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       expect(js).toContain('/api/usage')
     })
 
+    it('exposes the four subscription plans (Starter, Standard, Pro Pack, Business)', () => {
+      // The account tab renders the plans from the duplicated PLAN_* maps.
+      expect(js).toContain('var PLAN_LIMITS = { free: 10, standard: 750, pro: 1000, business: 3000 }')
+      expect(js).toContain('standard: "Standard"')
+      expect(js).toContain('id: "standard", name: "Standard", price: "€5.99"')
+      expect(js).toContain('750 Crediti / mese')
+      // The checkout button label for the new plan.
+      expect(js).toContain('cta: "Passa a Standard"')
+    })
+
     it('implements the replayable guide tour', () => {
       expect(js).toContain('GUIDE_STEPS')
       expect(js).toContain('function renderGuide')
