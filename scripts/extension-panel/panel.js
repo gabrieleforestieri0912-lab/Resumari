@@ -13,6 +13,8 @@
 
   var AUTH_KEY = "resumariAuth";
   var PENDING_KEY = "pendingTranscript";
+  var THEME_KEY = "resumariTheme";
+  var YT_THEME_KEY = "resumariYoutubeTheme";
 
   var state = {
     user: null,
@@ -24,6 +26,9 @@
     usage: null,
     loginMode: "password", // password | code
     loginStep: "email", // code sub-step: email | code
+    theme: "auto", // auto | light | dark
+    youtubeTheme: null, // last known YouTube theme from content.js
+    onYoutube: false, // is the active tab a YouTube page?
   };
 
   /* ---------- tiny DOM helpers ---------- */
@@ -769,6 +774,73 @@
     });
   }
 
+  /* ---------- theme ---------- */
+  var THEME_ICONS = {
+    auto: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+    light: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>',
+    dark: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+  };
+
+  function isYoutubeActive() {
+    return new Promise(function (resolve) {
+      try {
+        chrome.tabs.query({ active: true, lastFocusedWindow: true }, function (tabs) {
+          var t = tabs && tabs[0];
+          resolve(!!(t && t.url && t.url.indexOf("youtube.com") !== -1));
+        });
+      } catch (e) { resolve(false); }
+    });
+  }
+
+  function refreshYoutubeContext() {
+    isYoutubeActive().then(function (active) {
+      state.onYoutube = active;
+      applyTheme();
+    });
+  }
+
+  function applyTheme() {
+    var resolved;
+    if (state.theme === "light") {
+      resolved = "light";
+    } else if (state.theme === "dark") {
+      resolved = "dark";
+    } else if (state.onYoutube && state.youtubeTheme) {
+      // Auto: follow the YouTube theme so there is no contrast.
+      resolved = state.youtubeTheme;
+    } else {
+      // Auto elsewhere: follow the operating system.
+      try {
+        resolved = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      } catch (e) { resolved = "light"; }
+    }
+    document.documentElement.setAttribute("data-theme", resolved);
+    document.querySelectorAll(".theme-icon").forEach(function (ic) {
+      ic.innerHTML = THEME_ICONS[state.theme] || THEME_ICONS.auto;
+    });
+    document.querySelectorAll(".theme-menu__item").forEach(function (b) {
+      b.classList.toggle("theme-menu__item--active", b.getAttribute("data-theme-choice") === state.theme);
+    });
+  }
+
+  function setThemeChoice(choice) {
+    state.theme = choice === "light" || choice === "dark" ? choice : "auto";
+    storageSet({ [THEME_KEY]: state.theme });
+    applyTheme();
+    document.querySelectorAll(".theme-menu").forEach(function (m) { m.hidden = true; });
+  }
+
+  function loadTheme() {
+    storageGet(THEME_KEY).then(function (t) {
+      state.theme = t === "light" || t === "dark" ? t : "auto";
+      return storageGet(YT_THEME_KEY);
+    }).then(function (yt) {
+      state.youtubeTheme = yt === "light" || yt === "dark" ? yt : null;
+      applyTheme();
+      refreshYoutubeContext();
+    });
+  }
+
   /* ---------- login flow ---------- */
   function showAlert(id, text, type) {
     var a = $(id);
@@ -925,6 +997,33 @@
     document.querySelectorAll(".seg__item").forEach(function (btn) {
       btn.addEventListener("click", function () { setLoginMode(btn.getAttribute("data-mode")); });
     });
+    // Theme picker (works both on the login view and in the app header).
+    document.querySelectorAll(".theme-btn").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var menu = btn.parentElement.querySelector(".theme-menu");
+        if (menu) menu.hidden = !menu.hidden;
+      });
+    });
+    document.querySelectorAll(".theme-menu__item").forEach(function (btn) {
+      btn.addEventListener("click", function () { setThemeChoice(btn.getAttribute("data-theme-choice")); });
+    });
+    document.addEventListener("click", function (e) {
+      document.querySelectorAll(".theme-menu").forEach(function (menu) {
+        if (!menu.hidden && !menu.contains(e.target)) menu.hidden = true;
+      });
+    });
+    try {
+      chrome.tabs.onActivated.addListener(function () { refreshYoutubeContext(); });
+    } catch (e) { /* non-extension context */ }
+    try {
+      var mqTheme = window.matchMedia("(prefers-color-scheme: dark)");
+      if (mqTheme.addEventListener) {
+        mqTheme.addEventListener("change", function () {
+          if (state.theme === "auto") applyTheme();
+        });
+      }
+    } catch (e) { /* unsupported */ }
     $("logout-btn").addEventListener("click", handleLogout);
     $("credits-badge").addEventListener("click", function () { switchTab("account"); });
     $("tx-search").addEventListener("input", function (e) {
@@ -978,11 +1077,24 @@
         }
       });
     } catch (e) { /* non-extension context */ }
+
+    // Follow YouTube theme changes while the panel is open (auto mode).
+    try {
+      chrome.storage.onChanged.addListener(function (changes, area) {
+        if (area !== "local" || !changes[YT_THEME_KEY]) return;
+        var next = changes[YT_THEME_KEY].newValue;
+        if (next === "light" || next === "dark") {
+          state.youtubeTheme = next;
+          if (state.theme === "auto") applyTheme();
+        }
+      });
+    } catch (e) { /* non-extension context */ }
   }
 
   /* ---------- boot ---------- */
   document.addEventListener("DOMContentLoaded", function () {
     wire();
+    loadTheme();
     bootstrap();
   });
 

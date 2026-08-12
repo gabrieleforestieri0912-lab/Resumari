@@ -171,6 +171,20 @@ describe('extension build (scripts/build-extension.js)', () => {
       expect(content).toContain('resumari-toast')
       expect(content).toContain('Apertura Resumari')
     })
+
+    it('syncs the YouTube theme so the side panel can follow it (no contrast)', () => {
+      expect(content).toContain('function getYoutubeTheme')
+      expect(content).toContain('function syncYoutubeTheme')
+      expect(content).toContain('resumariYoutubeTheme')
+      expect(content).toContain('hasAttribute("dark")')
+      expect(content).toContain('attributeFilter: ["dark"]')
+    })
+
+    it('syncs the YouTube theme only on real YouTube pages', () => {
+      // On the Resumari site there is no dark attribute; writing 'light'
+      // there would clobber the YouTube value the panel needs.
+      expect(content).toContain('if (getPlatform() !== "youtube") return;')
+    })
   })
 
   describe('panelJsWithBase()', () => {

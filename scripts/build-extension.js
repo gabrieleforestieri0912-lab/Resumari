@@ -302,10 +302,24 @@ function injectVideoPageButton() {
   if (shareBtn) c.insertBefore(b, shareBtn);
   else c.appendChild(b);
 }
+// Keep the side panel's theme in sync with YouTube's own light/dark theme
+// (YouTube sets html[dark]): the panel reads resumariYoutubeTheme from
+// chrome.storage and switches automatically in Auto mode.
+function getYoutubeTheme() {
+  return document.documentElement && document.documentElement.hasAttribute("dark") ? "dark" : "light";
+}
+function syncYoutubeTheme() {
+  // Only sync from real YouTube pages: on the Resumari site html has no
+  // "dark" attribute, and writing "light" there would clobber the value the
+  // panel needs while the user is on YouTube.
+  if (getPlatform() !== "youtube") return;
+  try { chrome.storage.local.set({ resumariYoutubeTheme: getYoutubeTheme() }); } catch (e) {}
+}
 function init() {
   injectStyles();
   injectVideoPageButton();
   injectThumbnailButtons();
+  syncYoutubeTheme();
   let lastUrl = location.href;
   new MutationObserver(function() {
     if (location.href !== lastUrl) {
@@ -313,6 +327,11 @@ function init() {
     }
     scheduleInjection();
   }).observe(document.body, { childList: true, subtree: true });
+  // Watch YouTube's own theme attribute so theme switches propagate live.
+  if (document.documentElement) {
+    new MutationObserver(function() { syncYoutubeTheme(); })
+      .observe(document.documentElement, { attributes: true, attributeFilter: ["dark"] });
+  }
   setTimeout(injectThumbnailButtons, 1500);
   setTimeout(injectThumbnailButtons, 3000);
 }

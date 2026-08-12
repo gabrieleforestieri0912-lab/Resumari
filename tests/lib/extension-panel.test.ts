@@ -61,6 +61,26 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       expect(html).toContain('Account')
       expect(html).toContain('Usage')
     })
+
+    it('exposes a theme picker with Auto / Chiaro / Scuro', () => {
+      expect(html).toContain('data-theme="auto"')
+      expect(html).toContain('id="theme-btn"')
+      expect(html).toContain('id="theme-menu"')
+      expect(html).toContain('data-theme-choice="auto"')
+      expect(html).toContain('data-theme-choice="light"')
+      expect(html).toContain('data-theme-choice="dark"')
+      expect(html).toContain('Auto')
+      expect(html).toContain('Chiaro')
+      expect(html).toContain('Scuro')
+    })
+
+    it('also shows the theme picker on the login view (pre-auth users)', () => {
+      // The login view has its own floating theme button so new users can
+      // switch theme before logging in.
+      expect(html).toContain('login__theme')
+      // Both instances (login + header) share the same class-based wiring.
+      expect(html.match(/class="icon-btn theme-btn"/g)).toHaveLength(2)
+    })
   })
 
   describe('panel.css', () => {
@@ -79,6 +99,25 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       // UA [hidden] rule and show the code field in password mode (and vice
       // versa). The global [hidden] rule must exist and win.
       expect(css).toMatch(/\[hidden\]\s*\{\s*display:\s*none\s*!important\s*;?\s*\}/i)
+    })
+
+    it('defines a dark palette and a system (prefers-color-scheme) fallback', () => {
+      // Explicit dark theme applied by panel.js.
+      expect(css).toContain('html[data-theme="dark"]')
+      // System fallback for dark users before panel.js runs.
+      expect(css).toContain('@media (prefers-color-scheme: dark)')
+      expect(css).toContain('html:not([data-theme="light"])')
+      // Colors are variable-driven so both themes share the same rules.
+      expect(css).toMatch(/:root\s*\{[^}]*--bg:/)
+      expect(css).toContain('var(--bg)')
+      expect(css).toContain('var(--card)')
+      expect(css).toContain('var(--text)')
+    })
+
+    it('styles the theme picker menu', () => {
+      expect(css).toContain('.theme-menu')
+      expect(css).toContain('.theme-menu__item')
+      expect(css).toContain('.theme-wrap')
     })
   })
 
@@ -119,6 +158,17 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       expect(js).toContain('pendingTranscript')
       expect(js).toContain('autoProcess')
       expect(js).toContain('transcribeVideo')
+    })
+
+    it('implements the theme system (auto/light/dark + YouTube sync)', () => {
+      expect(js).toContain('resumariTheme')
+      expect(js).toContain('resumariYoutubeTheme')
+      expect(js).toContain('function applyTheme')
+      expect(js).toContain('function setThemeChoice')
+      expect(js).toContain('function isYoutubeActive')
+      expect(js).toContain('data-theme')
+      // Auto follows YouTube when opened from it, else the OS.
+      expect(js).toContain('prefers-color-scheme: dark')
     })
 
     it('exposes the panel marker for tests', () => {
