@@ -58,7 +58,7 @@ export default function Hero() {
         >
           Smettila di rincorrere il tempo.{" "}
           <span className="relative inline-block">
-            <span className="bg-clip-text text-transparent bg-linear-to-r from-purple-600 via-red-500 to-red-600">
+            <span className="text-glow-pulse">
               Trascrivi ore di video
             </span>
 
@@ -66,7 +66,7 @@ export default function Hero() {
           <br />
           <span className="text-gray-900 dark:text-gray-100">
             in pochi{" "}
-            <span className="inline-block px-4 -mx-2 italic bg-clip-text text-transparent bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 py-1">
+            <span className="inline-block px-4 -mx-2 italic text-glow-pulse py-1">
               semplici secondi
             </span>
           </span>
