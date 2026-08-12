@@ -1095,7 +1095,7 @@
     {
       icon: "<path d=\"M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/>",
       title: "Account, crediti e piani",
-      text: "Qui trovi i crediti disponibili e i piani di abbonamento. Trascrizioni, riassunti e messaggi della chat consumano crediti: scegli il piano adatto e gestisci l'abbonamento.",
+      text: "Qui trovi i crediti disponibili e i piani di abbonamento: Starter gratuito, Standard, Pro e Business. Trascrizioni, riassunti e messaggi della chat consumano crediti: scegli il piano adatto e gestisci l'abbonamento.",
       tip: "Il badge in alto a destra mostra sempre i crediti rimasti."
     },
     {
