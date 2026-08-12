@@ -45,14 +45,14 @@ export default function Pricing() {
     },
     {
       name: "Standard",
-      price: "5.99",
+      price: "7.99",
       period: "/mese",
       icon: Gem,
       color: "purple",
       description:
         "Per chi usa Resumari con costanza e vuole più spazio per trascrizioni e chat.",
       features: [
-        "750 Crediti / mese",
+        "1000 Crediti / mese",
         "Crediti per trascrizioni e chat AI",
         "Reset automatico ogni mese",
         "Esporta in TXT e JSON",
@@ -65,14 +65,14 @@ export default function Pricing() {
     },
     {
       name: "Pro Pack",
-      price: "7.99",
+      price: "19.99",
       period: "/mese",
       icon: Zap,
       color: "purple",
       description:
         "Ideale per creatori e studenti che analizzano video quotidianamente.",
       features: [
-        "1000 Crediti / mese",
+        "2500 Crediti / mese",
         "Crediti per trascrizioni e chat AI",
         "Reset automatico ogni mese",
         "Formati avanzati (JSON, CSV, SRT)",
@@ -87,14 +87,14 @@ export default function Pricing() {
     },
     {
       name: "Business",
-      price: "19.99",
+      price: "39.99",
       period: "/mese",
       icon: Building2,
       color: "purple",
       description:
         "Per team e aziende che necessitano di analisi massiva e supporto.",
       features: [
-        "3000 Crediti / mese",
+        "6000 Crediti / mese",
         "Crediti per trascrizioni e chat AI",
         "Reset automatico ogni mese",
         "Team Management",

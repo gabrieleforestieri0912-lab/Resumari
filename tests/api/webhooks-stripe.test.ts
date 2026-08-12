@@ -77,7 +77,7 @@ describe('POST /api/webhooks/stripe', () => {
     const stored = client.getData('users')[0]
     expect(stored.plan).toBe('pro')
     expect(stored.stripe_subscription_id).toBe('sub_123')
-    expect(stored.credits).toBe(1000)
+    expect(stored.credits).toBe(2500)
   })
 
   it('resets credits to the plan limit on monthly invoice.paid', async () => {
@@ -97,11 +97,11 @@ describe('POST /api/webhooks/stripe', () => {
     expect(retrieveSubscriptionMock).toHaveBeenCalledWith('sub_123')
     const stored = client.getData('users')[0]
     expect(stored.plan).toBe('business')
-    expect(stored.credits).toBe(3000)
+    expect(stored.credits).toBe(6000)
   })
 
   it('supports the standard plan (metadata and product-name fallback)', async () => {
-    // Metadata path: invoice.paid resets the standard pool to 750.
+    // Metadata path: invoice.paid resets the standard pool to 1000.
     client.setData('users', [{ ...user, plan: 'standard', credits: 0, stripe_subscription_id: 'sub_std' }])
     retrieveSubscriptionMock.mockResolvedValue({
       id: 'sub_std',
@@ -114,7 +114,7 @@ describe('POST /api/webhooks/stripe', () => {
       }),
     )
     expect(res.status).toBe(200)
-    expect(client.getData('users')[0].credits).toBe(750)
+    expect(client.getData('users')[0].credits).toBe(1000)
 
     // Fallback path: product name only (no plan in metadata; userId always
     // comes from the subscription metadata).
@@ -132,7 +132,7 @@ describe('POST /api/webhooks/stripe', () => {
     )
     expect(res2.status).toBe(200)
     expect(client.getData('users')[0].plan).toBe('standard')
-    expect(client.getData('users')[0].credits).toBe(750)
+    expect(client.getData('users')[0].credits).toBe(1000)
   })
 
   it('does not reset credits when invoice.paid has no subscription', async () => {

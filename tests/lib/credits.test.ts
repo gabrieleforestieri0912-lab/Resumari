@@ -40,7 +40,7 @@ describe('credits module', () => {
   })
 
   it('defines the monthly credit pools per plan', () => {
-    expect(PLAN_LIMITS).toEqual({ free: 10, standard: 750, pro: 1000, business: 3000 })
+    expect(PLAN_LIMITS).toEqual({ free: 10, standard: 1000, pro: 2500, business: 6000 })
     expect(CREDIT_COSTS.transcription).toBe(1)
     expect(CREDIT_COSTS.transcriptionApi).toBe(2)
     expect(CREDIT_COSTS.chat).toBe(1)
@@ -48,9 +48,9 @@ describe('credits module', () => {
 
   it('resolves the plan limit (unknown plans fall back to free)', () => {
     expect(getPlanLimit('free')).toBe(10)
-    expect(getPlanLimit('standard')).toBe(750)
-    expect(getPlanLimit('pro')).toBe(1000)
-    expect(getPlanLimit('business')).toBe(3000)
+    expect(getPlanLimit('standard')).toBe(1000)
+    expect(getPlanLimit('pro')).toBe(2500)
+    expect(getPlanLimit('business')).toBe(6000)
     expect(getPlanLimit('nonexistent')).toBe(10)
     expect(getPlanLimit(null)).toBe(10)
     expect(getPlanLimit(undefined)).toBe(10)
@@ -98,11 +98,11 @@ describe('credits module', () => {
 
   it('grants the full monthly pool for a plan', async () => {
     await setPlanCredits('user-1', 'business')
-    expect(client.getData('users')[0].credits).toBe(3000)
+    expect(client.getData('users')[0].credits).toBe(6000)
     await setPlanCredits('user-1', 'pro')
-    expect(client.getData('users')[0].credits).toBe(1000)
+    expect(client.getData('users')[0].credits).toBe(2500)
     await setPlanCredits('user-1', 'standard')
-    expect(client.getData('users')[0].credits).toBe(750)
+    expect(client.getData('users')[0].credits).toBe(1000)
     await setPlanCredits('user-1', 'free')
     expect(client.getData('users')[0].credits).toBe(10)
   })
