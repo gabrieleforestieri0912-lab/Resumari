@@ -812,7 +812,7 @@ export default function DemoSection() {
             href="/signup"
             className="group relative px-1 py-1 rounded-4xl bg-linear-to-r from-purple-600 to-red-600 transition-all hover:scale-[1.02] shadow-lg shadow-purple-500/25 cursor-pointer"
           >
-            <span className="block px-8 py-3 bg-white text-gray-900 text-sm font-bold rounded-[1.8rem] transition-colors group-hover:bg-gray-50">
+            <span className="block px-8 py-3 bg-white dark:bg-zinc-950 text-gray-900 dark:text-white text-sm font-bold rounded-[1.8rem] transition-colors group-hover:bg-gray-50 dark:group-hover:bg-zinc-900">
               Inizia a Usare Resumari
             </span>
           </Link>

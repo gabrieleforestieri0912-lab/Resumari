@@ -245,7 +245,7 @@ export default function Pricing() {
                   onClick={() => handleCheckout(plan.planType)}
                   className="group relative px-1 py-1 rounded-4xl bg-linear-to-r from-purple-600 to-red-600 hover:scale-[1.02] transition-all shadow-lg shadow-purple-500/25 cursor-pointer w-full"
                 >
-                  <span className="block px-7 py-2 bg-white text-gray-900 text-sm font-bold rounded-[1.8rem] transition-colors group-hover:bg-gray-50">
+                  <span className="block px-7 py-2 bg-white dark:bg-zinc-950 text-gray-900 dark:text-white text-sm font-bold rounded-[1.8rem] transition-colors group-hover:bg-gray-50 dark:group-hover:bg-zinc-900">
                     {plan.buttonText}
                   </span>
                 </button>

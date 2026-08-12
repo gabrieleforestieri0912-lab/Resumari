@@ -140,7 +140,7 @@ export default function Navbar() {
               href="/chat"
               className="hidden md:flex items-center gap-2 px-1 py-1 rounded-4xl bg-linear-to-r from-purple-600 to-red-600 hover:scale-[1.02] transition-all shadow-lg shadow-purple-500/25"
             >
-              <span className="block px-7 py-2 bg-white text-gray-900 text-sm font-bold rounded-[1.8rem] hover:bg-gray-50 transition-colors">
+              <span className="block px-7 py-2 bg-white dark:bg-zinc-950 text-gray-900 dark:text-white text-sm font-bold rounded-[1.8rem] hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors">
                 Chat AI
               </span>
             </Link>
@@ -224,7 +224,7 @@ export default function Navbar() {
               href="/signup"
               className="hidden md:flex items-center px-1 py-1 bg-linear-to-r from-purple-600 to-red-600 rounded-4xl hover:scale-[1.02] transition-all shadow-lg shadow-purple-500/25"
             >
-              <span className="block px-6 py-2 bg-white text-gray-900 text-sm font-bold rounded-[1.8rem] hover:bg-gray-50 transition-colors">Inizia</span>
+              <span className="block px-6 py-2 bg-white dark:bg-zinc-950 text-gray-900 dark:text-white text-sm font-bold rounded-[1.8rem] hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors">Inizia</span>
             </Link>
           </div>
         )}
