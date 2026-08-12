@@ -140,6 +140,7 @@ function createHarness(opts: { hostname?: string; pathname?: string; href?: stri
 
   const chromeMock = {
     runtime: {
+      id: 'fake-ext',
       getURL: (p: string) => `chrome-extension://fake/${p}`,
       onMessage: {
         addListener: (cb: Listener) => captured.messageListeners.push(cb),
@@ -152,7 +153,14 @@ function createHarness(opts: { hostname?: string; pathname?: string; href?: stri
           for (const k of Object.keys(obj)) captured.storage.set(k, obj[k])
         },
         remove: (k: string) => captured.storage.delete(k),
-        get: () => {},
+        get: (key: string, cb?: (res: Record<string, unknown>) => void) => {
+          const out: Record<string, unknown> = {}
+          const keys = Array.isArray(key) ? key : [key]
+          for (const k of keys) {
+            if (captured.storage.has(k)) out[k] = captured.storage.get(k)
+          }
+          if (cb) cb(out)
+        },
       },
       onChanged: {
         addListener: (cb: Function) => captured.storageChangeListeners.push(cb),
@@ -241,7 +249,7 @@ function createHarness(opts: { hostname?: string; pathname?: string; href?: stri
     fireStorageChange(changes: Record<string, any>, area = 'local') {
       for (const l of captured.storageChangeListeners) l(changes, area)
     },
-    invokeMessage(msg: any, sender: any = {}) {
+    invokeMessage(msg: any, sender: any = { id: 'fake-ext' }) {
       const sendResponse = (res: unknown) => captured.responses.push(res)
       for (const l of captured.messageListeners) l(msg, sender, sendResponse)
       return captured.responses
@@ -318,15 +326,15 @@ describe('extension content script (content.js)', () => {
   })
 
   describe('auth sync messages', () => {
-    it('stores the token and user on AUTH_SYNC', () => {
-      const h = createHarness()
+    it('stores the token and user on AUTH_SYNC (on the Resumari site)', () => {
+      const h = createHarness({ hostname: 'resumari.it' })
       const responses = h.invokeMessage({
         type: 'AUTH_SYNC',
-        token: 'jwt-token',
+        token: 'aaa.bbb.ccc',
         user: { id: 'u1', name: 'Test' },
       })
 
-      expect(h.captured.localStorage['token']).toBe('jwt-token')
+      expect(h.captured.localStorage['token']).toBe('aaa.bbb.ccc')
       expect(JSON.parse(h.captured.localStorage['user'])).toEqual({ id: 'u1', name: 'Test' })
       expect(h.captured.dispatchedEvents).toContainEqual(
         expect.objectContaining({ type: 'resumari-auth-changed' }),
@@ -334,9 +342,38 @@ describe('extension content script (content.js)', () => {
       expect(responses).toEqual([{ success: true }])
     })
 
+    it('never writes the token into page localStorage off the Resumari site (e.g. YouTube)', () => {
+      const h = createHarness({ hostname: 'www.youtube.com' })
+      h.invokeMessage({
+        type: 'AUTH_SYNC',
+        token: 'aaa.bbb.ccc',
+        user: { id: 'u1' },
+      })
+
+      // chrome.storage is fine (extension-private), but the page must never
+      // see the token on a third-party origin.
+      expect(h.captured.storage.get('resumariAuth')).toEqual({ token: 'aaa.bbb.ccc', user: { id: 'u1' } })
+      expect(h.captured.localStorage['token']).toBeUndefined()
+      expect(h.captured.dispatchedEvents).toHaveLength(0)
+    })
+
+    it('rejects AUTH_SYNC payloads whose token is not a JWT', () => {
+      const h = createHarness({ hostname: 'resumari.it' })
+      h.invokeMessage({ type: 'AUTH_SYNC', token: 'not-a-jwt', user: { id: 'u1' } })
+      expect(h.captured.storage.has('resumariAuth')).toBe(false)
+      expect(h.captured.localStorage['token']).toBeUndefined()
+    })
+
+    it('ignores runtime messages from unknown senders', () => {
+      const h = createHarness({ hostname: 'resumari.it' })
+      h.invokeMessage({ type: 'AUTH_SYNC', token: 'aaa.bbb.ccc', user: { id: 'u1' } }, { id: 'evil-ext' })
+      expect(h.captured.storage.has('resumariAuth')).toBe(false)
+      expect(h.captured.localStorage['token']).toBeUndefined()
+    })
+
     it('clears the session on AUTH_LOGOUT', () => {
-      const h = createHarness()
-      h.invokeMessage({ type: 'AUTH_SYNC', token: 't', user: { id: 'u1' } })
+      const h = createHarness({ hostname: 'resumari.it' })
+      h.invokeMessage({ type: 'AUTH_SYNC', token: 'aaa.bbb.ccc', user: { id: 'u1' } })
       const responses = h.invokeMessage({ type: 'AUTH_LOGOUT' })
 
       expect(h.captured.localStorage['token']).toBeUndefined()
@@ -351,34 +388,54 @@ describe('extension content script (content.js)', () => {
   describe('shared auth bridge (chrome.storage)', () => {
     it('mirrors AUTH_SYNC into chrome.storage', () => {
       const h = createHarness()
-      h.invokeMessage({ type: 'AUTH_SYNC', token: 't1', user: { id: 'u1' } })
-      expect(h.captured.storage.get('resumariAuth')).toEqual({ token: 't1', user: { id: 'u1' } })
+      h.invokeMessage({ type: 'AUTH_SYNC', token: 'aaa.bbb.ccc', user: { id: 'u1' } })
+      expect(h.captured.storage.get('resumariAuth')).toEqual({ token: 'aaa.bbb.ccc', user: { id: 'u1' } })
     })
 
     it('clears chrome.storage on AUTH_LOGOUT', () => {
       const h = createHarness()
-      h.invokeMessage({ type: 'AUTH_SYNC', token: 't1', user: { id: 'u1' } })
+      h.invokeMessage({ type: 'AUTH_SYNC', token: 'aaa.bbb.ccc', user: { id: 'u1' } })
       h.invokeMessage({ type: 'AUTH_LOGOUT' })
       expect(h.captured.storage.has('resumariAuth')).toBe(false)
     })
 
     it('writes chrome.storage when the site dispatches resumari-auth-change', () => {
-      const h = createHarness()
-      h.fireWindowEvent('resumari-auth-change', { token: 't2', user: { id: 'u2' } })
-      expect(h.captured.storage.get('resumariAuth')).toEqual({ token: 't2', user: { id: 'u2' } })
+      const h = createHarness({ hostname: 'resumari.it' })
+      h.fireWindowEvent('resumari-auth-change', { token: 'aaa.bbb.ccc', user: { id: 'u2' } })
+      expect(h.captured.storage.get('resumariAuth')).toEqual({ token: 'aaa.bbb.ccc', user: { id: 'u2' } })
+    })
+
+    it('ignores resumari-auth-change events off the Resumari site', () => {
+      // A hostile page (e.g. YouTube) must not be able to inject shared auth.
+      const h = createHarness({ hostname: 'www.youtube.com' })
+      h.fireWindowEvent('resumari-auth-change', { token: 'aaa.bbb.ccc', user: { id: 'u2' } })
+      expect(h.captured.storage.has('resumariAuth')).toBe(false)
+    })
+
+    it('ignores resumari-auth-change events with a non-JWT token', () => {
+      const h = createHarness({ hostname: 'resumari.it' })
+      h.fireWindowEvent('resumari-auth-change', { token: 'not-a-jwt', user: { id: 'u2' } })
+      expect(h.captured.storage.has('resumariAuth')).toBe(false)
     })
 
     it('removes chrome.storage on a logout event from the site', () => {
-      const h = createHarness()
-      h.fireWindowEvent('resumari-auth-change', { token: 't2', user: { id: 'u2' } })
+      const h = createHarness({ hostname: 'resumari.it' })
+      h.fireWindowEvent('resumari-auth-change', { token: 'aaa.bbb.ccc', user: { id: 'u2' } })
       h.fireWindowEvent('resumari-auth-change', null)
+      expect(h.captured.storage.has('resumariAuth')).toBe(false)
+    })
+
+    it('honours a sticky panel logout: site login cannot re-inject auth', () => {
+      const h = createHarness({ hostname: 'resumari.it' })
+      h.captured.storage.set('resumariLoggedOut', true)
+      h.fireWindowEvent('resumari-auth-change', { token: 'aaa.bbb.ccc', user: { id: 'u2' } })
       expect(h.captured.storage.has('resumariAuth')).toBe(false)
     })
 
     it('mirrors panel logins into the site session on resumari.it', () => {
       const h = createHarness({ hostname: 'resumari.it' })
-      h.fireStorageChange({ resumariAuth: { newValue: { token: 't3', user: { id: 'u3' } } } })
-      expect(h.captured.localStorage['token']).toBe('t3')
+      h.fireStorageChange({ resumariAuth: { newValue: { token: 'aaa.bbb.ccc', user: { id: 'u3' } } } })
+      expect(h.captured.localStorage['token']).toBe('aaa.bbb.ccc')
       expect(JSON.parse(h.captured.localStorage['user'])).toEqual({ id: 'u3' })
       expect(h.captured.dispatchedEvents.at(-1)).toEqual(
         expect.objectContaining({ type: 'resumari-auth-changed' }),
@@ -387,7 +444,7 @@ describe('extension content script (content.js)', () => {
 
     it('does not touch the page session on non-Resumari origins', () => {
       const h = createHarness({ hostname: 'www.youtube.com' })
-      h.fireStorageChange({ resumariAuth: { newValue: { token: 't3', user: { id: 'u3' } } } })
+      h.fireStorageChange({ resumariAuth: { newValue: { token: 'aaa.bbb.ccc', user: { id: 'u3' } } } })
       expect(h.captured.localStorage['token']).toBeUndefined()
       expect(h.captured.dispatchedEvents).toHaveLength(0)
     })

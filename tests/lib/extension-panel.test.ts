@@ -210,6 +210,22 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       expect(js).toContain('window.__RESUMARI_PANEL__')
     })
 
+    it('shows the login page on logout and keeps the session sticky', () => {
+      // Logout must return to the login view.
+      expect(js).toContain('function handleLogout')
+      expect(js).toContain('showView("login")')
+      // A sticky flag prevents the site (still-open NextAuth session) from
+      // silently logging the panel back in after an explicit logout.
+      expect(js).toContain('resumariLoggedOut')
+      expect(js).toContain('storageSet({ [LOGGED_OUT_KEY]: true })')
+      // Bootstrap ignores stored tokens while the flag is set.
+      expect(js).toContain('storageGet(LOGGED_OUT_KEY)')
+      // A real login clears the flag again.
+      expect(js).toContain('storageRemove(LOGGED_OUT_KEY)')
+      // Incoming tokens from the site are re-checked against the flag.
+      expect(js).toContain('loggedOut')
+    })
+
     it('parses inline SVG children as elements, not visible code', () => {
       // Regression: el() used to append string children with createTextNode,
       // so icon markup ('<svg …>…</svg>') rendered as raw code in the panel.

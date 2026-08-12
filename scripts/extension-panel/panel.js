@@ -12,6 +12,7 @@
   if (API_BASE.indexOf("__RESUMARI") === 0) API_BASE = "http://localhost:3000";
 
   var AUTH_KEY = "resumariAuth";
+  var LOGGED_OUT_KEY = "resumariLoggedOut";
   var PENDING_KEY = "pendingTranscript";
   var THEME_KEY = "resumariTheme";
   var YT_THEME_KEY = "resumariYoutubeTheme";
@@ -181,6 +182,22 @@
 
   /* ---------- auth: bootstrap ---------- */
   function bootstrap() {
+    // A logout from the panel is sticky: while resumariLoggedOut is set, any
+    // token the site mirrors back into chrome.storage (e.g. a still-open
+    // NextAuth session re-synced by the content script) is ignored, so the
+    // panel stays on the login page until the user logs in again explicitly.
+    storageGet(LOGGED_OUT_KEY).then(function (loggedOut) {
+      if (loggedOut) {
+        clearLocal();
+        storageRemove(AUTH_KEY);
+        showView("login");
+        return;
+      }
+      adoptStoredAuth();
+    });
+  }
+
+  function adoptStoredAuth() {
     var shared = null;
     storageGet(AUTH_KEY).then(function (auth) {
       shared = auth;
@@ -924,6 +941,9 @@
           state.user = r.d.user;
           state.credits = typeof r.d.user.credits === "number" ? r.d.user.credits : null;
           saveLocal();
+          // Clear the sticky logout flag BEFORE publishing the new token, so
+          // the adoption listener can never read a stale flag.
+          storageRemove(LOGGED_OUT_KEY);
           storageSet({ [AUTH_KEY]: { token: r.d.token, user: r.d.user } });
           enterApp();
         })
@@ -970,6 +990,9 @@
           state.user = r.d.user;
           state.credits = typeof r.d.user.credits === "number" ? r.d.user.credits : null;
           saveLocal();
+          // Clear the sticky logout flag BEFORE publishing the new token, so
+          // the adoption listener can never read a stale flag.
+          storageRemove(LOGGED_OUT_KEY);
           storageSet({ [AUTH_KEY]: { token: r.d.token, user: r.d.user } });
           enterApp();
         })
@@ -980,6 +1003,9 @@
 
   function handleLogout() {
     clearLocal();
+    // Sticky logout: keep resumariLoggedOut so the site's session cannot
+    // silently log the panel back in until an explicit login happens here.
+    storageSet({ [LOGGED_OUT_KEY]: true });
     storageRemove(AUTH_KEY);
     state.user = null;
     state.token = null;
@@ -1067,21 +1093,30 @@
         if (next && next.token) {
           // Already adopted locally.
           if (state.token === next.token) return;
-          state.token = next.token;
-          fetch(API_BASE + "/api/profile", { headers: { Authorization: "Bearer " + next.token } })
-            .then(function (res) {
-              if (!res.ok) {
-                storageRemove(AUTH_KEY);
-                return;
-              }
-              return res.json().then(function (data) {
-                state.user = data;
-                state.credits = typeof data.credits === "number" ? data.credits : null;
-                saveLocal();
-                enterApp();
-              });
-            })
-            .catch(function () {});
+          // After an explicit panel logout the session is sticky: a token the
+          // site mirrors back (e.g. a still-open NextAuth session) must not
+          // silently log the panel in again.
+          storageGet(LOGGED_OUT_KEY).then(function (loggedOut) {
+            if (loggedOut) {
+              storageRemove(AUTH_KEY);
+              return;
+            }
+            state.token = next.token;
+            fetch(API_BASE + "/api/profile", { headers: { Authorization: "Bearer " + next.token } })
+              .then(function (res) {
+                if (!res.ok) {
+                  storageRemove(AUTH_KEY);
+                  return;
+                }
+                return res.json().then(function (data) {
+                  state.user = data;
+                  state.credits = typeof data.credits === "number" ? data.credits : null;
+                  saveLocal();
+                  enterApp();
+                });
+              })
+              .catch(function () {});
+          });
         } else {
           handleLogout();
         }

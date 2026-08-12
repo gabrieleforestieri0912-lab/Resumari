@@ -103,23 +103,44 @@ chrome.commands.onCommand.addListener((command) => {
   });
 });`;
 
-const content = `chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
+const content = `// --- Security helpers (shared by every auth bridge below) ---
+// A real session token is a signed JWT (header.payload.signature). Only such
+// values are ever mirrored into chrome.storage or page localStorage, so junk
+// dispatched by a page (forged events, XSS output) is rejected on sight.
+function isValidToken(t) {
+  return typeof t === "string" && t.split(".").length === 3;
+}
+function isResumariSite() {
+  var host = location.hostname;
+  return host.indexOf("resumari") !== -1 || host === "localhost" || host === "127.0.0.1";
+}
+
+chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
+  // Only the extension itself may drive the content script. A page cannot
+  // send runtime messages, but this check keeps any stray caller out.
+  if (!sender || sender.id !== chrome.runtime.id) return;
   if (msg.type === "GET_VIDEO_ID") {
     sendResponse({ videoId: getVideoId() });
     return;
   }
-  if (msg.type === "AUTH_SYNC" && msg.token && msg.user) {
-    localStorage.setItem("token", msg.token);
-    localStorage.setItem("user", JSON.stringify(msg.user));
-    window.dispatchEvent(new CustomEvent("resumari-auth-changed", { detail: { token: msg.token, user: msg.user } }));
+  if (msg.type === "AUTH_SYNC" && isValidToken(msg.token) && msg.user) {
+    // Token is only ever written to the page localStorage on the Resumari
+    // site itself — never on YouTube or any third-party origin.
+    if (isResumariSite()) {
+      localStorage.setItem("token", msg.token);
+      localStorage.setItem("user", JSON.stringify(msg.user));
+      window.dispatchEvent(new CustomEvent("resumari-auth-changed", { detail: { token: msg.token, user: msg.user } }));
+    }
     try { chrome.storage.local.set({ resumariAuth: { token: msg.token, user: msg.user } }); } catch (e) {}
     sendResponse({ success: true });
     return;
   }
   if (msg.type === "AUTH_LOGOUT") {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    window.dispatchEvent(new CustomEvent("resumari-auth-changed", { detail: null }));
+    if (isResumariSite()) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.dispatchEvent(new CustomEvent("resumari-auth-changed", { detail: null }));
+    }
     try { chrome.storage.local.remove("resumariAuth"); } catch (e) {}
     sendResponse({ success: true });
     return;
@@ -128,18 +149,19 @@ const content = `chrome.runtime.onMessage.addListener(function(msg, sender, send
 
 // --- Shared auth bridge (site <-> side panel) via chrome.storage.local ---
 // One login anywhere (site or panel) is reflected everywhere.
-function isResumariSite() {
-  var host = location.hostname;
-  return host.indexOf("resumari") !== -1 || host === "localhost" || host === "127.0.0.1";
-}
 // Site -> extension: the site dispatches this event on login/logout.
-// NOTE: this trusts page-dispatched events; the side panel re-validates any
-// token against /api/profile before adopting it, so forged values never grant
-// access — they are only ever cleared again.
+// Hardened: (1) only trusted on the Resumari site itself — a hostile page on
+// YouTube must not be able to inject or clear the shared auth; (2) only JWT
+// tokens are accepted; (3) a sticky panel logout (resumariLoggedOut) is
+// honoured, so a still-open site session cannot log the panel back in.
 window.addEventListener("resumari-auth-change", function (e) {
+  if (!isResumariSite()) return;
   var d = e && e.detail;
-  if (d && d.token && d.user) {
-    try { chrome.storage.local.set({ resumariAuth: { token: d.token, user: d.user } }); } catch (ex) {}
+  if (d && isValidToken(d.token) && d.user) {
+    chrome.storage.local.get("resumariLoggedOut", function (res) {
+      if (res && res.resumariLoggedOut) return; // user explicitly logged out
+      try { chrome.storage.local.set({ resumariAuth: { token: d.token, user: d.user } }); } catch (ex) {}
+    });
   } else {
     try { chrome.storage.local.remove("resumariAuth"); } catch (ex) {}
   }
@@ -149,7 +171,7 @@ window.addEventListener("resumari-auth-change", function (e) {
 chrome.storage.onChanged.addListener(function (changes, area) {
   if (area !== "local" || !changes.resumariAuth || !isResumariSite()) return;
   var next = changes.resumariAuth.newValue;
-  if (next && next.token && next.user) {
+  if (next && isValidToken(next.token) && next.user) {
     localStorage.setItem("token", next.token);
     localStorage.setItem("user", JSON.stringify(next.user));
     window.dispatchEvent(new CustomEvent("resumari-auth-changed", { detail: { token: next.token, user: next.user } }));
