@@ -56,13 +56,32 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       expect(html).toContain('usage-content')
     })
 
-    it('has bottom navigation across the three app tabs', () => {
+    it('has left sidebar navigation across the three app tabs', () => {
+      // The nav lives in a left sidebar (app__body row) next to the tabs.
+      expect(html).toContain('class="app__body"')
       expect(html).toContain('data-tab="transcripts"')
       expect(html).toContain('data-tab="account"')
       expect(html).toContain('data-tab="usage"')
       expect(html).toContain('Trascrizioni')
       expect(html).toContain('Account')
       expect(html).toContain('Usage')
+      // The nav precedes the first tab inside the body wrapper.
+      const bodyIdx = html.indexOf('class="app__body"')
+      const navIdx = html.indexOf('<nav class="app__nav"')
+      const firstTabIdx = html.indexOf('id="tab-transcripts"')
+      expect(bodyIdx).toBeGreaterThan(-1)
+      expect(navIdx).toBeGreaterThan(bodyIdx)
+      expect(firstTabIdx).toBeGreaterThan(navIdx)
+    })
+
+    it('does not use emoji anywhere in the panel', () => {
+      const emoji = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}]/u
+      expect(html).not.toMatch(emoji)
+      expect(css).not.toMatch(emoji)
+      expect(js).not.toMatch(emoji)
+      // The credits badge icon is an SVG, not the old ⚡ glyph.
+      expect(html).not.toContain('⚡')
+      expect(html).toContain('credits-badge__icon')
     })
 
     it('exposes a theme picker with Auto / Chiaro / Scuro', () => {
@@ -90,7 +109,9 @@ describe('standalone side panel (scripts/extension-panel)', () => {
     it('styles the shell, login, cards, plans and timeline', () => {
       expect(css).toContain('.view')
       expect(css).toContain('.login__wrap')
+      expect(css).toContain('.app__body')
       expect(css).toContain('.app__nav')
+      expect(css).toContain('.nav__item')
       expect(css).toContain('.tx-card')
       expect(css).toContain('.plan')
       expect(css).toContain('.usage-event')

@@ -375,7 +375,7 @@ function buildExtension(outputDir = distDir) {
   fs.copyFileSync(path.join(panelDir, 'panel.css'), path.join(outputDir, 'panel.css'));
   fs.writeFileSync(path.join(outputDir, 'panel.js'), panelJsWithBase());
 
-  console.log(`✅ Extension version ${VERSION} created (standalone panel)`);
+  console.log(`Extension version ${VERSION} created (standalone panel)`);
 }
 
 if (require.main === module) {
