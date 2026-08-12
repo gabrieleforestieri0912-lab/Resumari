@@ -1001,6 +1001,19 @@
     }
   }
 
+  /* ---------- logout confirmation ---------- */
+  function openLogoutConfirm() {
+    $("logout-modal").hidden = false;
+    $("logout-confirm").focus();
+  }
+  function closeLogoutConfirm(restoreFocus) {
+    $("logout-modal").hidden = true;
+    // Return focus to the logout button (cancel/overlay/Escape paths) so
+    // keyboard users are not left stranded. On confirm the app view is
+    // destroyed, so focus is intentionally not restored there.
+    if (restoreFocus && $("logout-btn")) $("logout-btn").focus();
+  }
+
   function handleLogout() {
     clearLocal();
     // Sticky logout: keep resumariLoggedOut so the site's session cannot
@@ -1060,7 +1073,20 @@
         });
       }
     } catch (e) { /* unsupported */ }
-    $("logout-btn").addEventListener("click", handleLogout);
+    $("logout-btn").addEventListener("click", openLogoutConfirm);
+    $("logout-confirm").addEventListener("click", function () {
+      closeLogoutConfirm();
+      handleLogout();
+    });
+    $("logout-cancel").addEventListener("click", function () { closeLogoutConfirm(true); });
+    document.querySelectorAll("[data-logout-cancel]").forEach(function (el) {
+      el.addEventListener("click", function () { closeLogoutConfirm(true); });
+    });
+    document.addEventListener("keydown", function (e) {
+      // Only react to Escape while the confirmation dialog is open, so the
+      // handler never interferes with other Escape-based UI (e.g. menus).
+      if (e.key === "Escape" && !$("logout-modal").hidden) closeLogoutConfirm(true);
+    });
     $("credits-badge").addEventListener("click", function () { switchTab("account"); });
     $("tx-search").addEventListener("input", function (e) {
       state.query = e.target.value;

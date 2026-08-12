@@ -112,6 +112,9 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       expect(css).toContain('.app__body')
       expect(css).toContain('.app__nav')
       expect(css).toContain('.nav__item')
+      expect(css).toContain('.modal')
+      expect(css).toContain('.modal__card')
+      expect(css).toContain('.btn--danger')
       expect(css).toContain('.tx-card')
       expect(css).toContain('.plan')
       expect(css).toContain('.usage-event')
@@ -224,6 +227,24 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       expect(js).toContain('storageRemove(LOGGED_OUT_KEY)')
       // Incoming tokens from the site are re-checked against the flag.
       expect(js).toContain('loggedOut')
+    })
+
+    it('asks for confirmation before logging out', () => {
+      // A modal asks for confirmation; the actual logout only runs on confirm.
+      expect(html).toContain('id="logout-modal"')
+      expect(html).toContain('id="logout-confirm"')
+      expect(html).toContain('id="logout-cancel"')
+      expect(html).toContain('data-logout-cancel')
+      expect(html).toContain('Vuoi uscire?')
+      expect(js).toContain('function openLogoutConfirm')
+      expect(js).toContain('function closeLogoutConfirm')
+      // The logout button opens the dialog; handleLogout runs only on confirm.
+      expect(js).toContain('"logout-btn").addEventListener("click", openLogoutConfirm)')
+      expect(js).toContain('"logout-confirm").addEventListener("click"')
+      expect(js).toContain('closeLogoutConfirm();')
+      expect(js).toContain('handleLogout();')
+      // Escape closes the dialog without logging out.
+      expect(js).toContain('e.key === "Escape"')
     })
 
     it('parses inline SVG children as elements, not visible code', () => {
