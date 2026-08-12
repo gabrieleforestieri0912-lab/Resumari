@@ -56,17 +56,19 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       expect(html).toContain('usage-content')
     })
 
-    it('has left sidebar navigation across the four app tabs', () => {
+    it('has left sidebar navigation across the five app tabs', () => {
       // The nav lives in a left sidebar (app__body row) next to the tabs.
       expect(html).toContain('class="app__body"')
       expect(html).toContain('data-tab="transcripts"')
       expect(html).toContain('data-tab="chat"')
       expect(html).toContain('data-tab="account"')
       expect(html).toContain('data-tab="usage"')
+      expect(html).toContain('data-tab="guide"')
       expect(html).toContain('Trascrizioni')
       expect(html).toContain('Chat')
       expect(html).toContain('Account')
       expect(html).toContain('Usage')
+      expect(html).toContain('Guida')
       // The nav precedes the first tab inside the body wrapper.
       const bodyIdx = html.indexOf('class="app__body"')
       const navIdx = html.indexOf('<nav class="app__nav"')
@@ -74,6 +76,30 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       expect(bodyIdx).toBeGreaterThan(-1)
       expect(navIdx).toBeGreaterThan(bodyIdx)
       expect(firstTabIdx).toBeGreaterThan(navIdx)
+    })
+
+    it('has a guide tab with a replayable tour', () => {
+      expect(html).toContain('id="tab-guide"')
+      expect(html).toContain('Come funziona il pannello')
+      // Replay button restarts the tour from the first step.
+      expect(html).toContain('id="guide-replay"')
+      expect(html).toContain('Riproduci')
+      // Step card + navigation (previous/next + clickable dots).
+      expect(html).toContain('guide-icon')
+      expect(html).toContain('guide-counter')
+      expect(html).toContain('guide-title')
+      expect(html).toContain('guide-text')
+      expect(html).toContain('guide-tip')
+      expect(html).toContain('guide-dots')
+      expect(html).toContain('id="guide-prev"')
+      expect(html).toContain('id="guide-next"')
+      expect(html).toContain('Indietro')
+      expect(html).toContain('Avanti')
+      // The guide tab sits after usage inside the app body.
+      const usageIdx = html.indexOf('id="tab-usage"')
+      const guideIdx = html.indexOf('id="tab-guide"')
+      expect(usageIdx).toBeGreaterThan(-1)
+      expect(guideIdx).toBeGreaterThan(usageIdx)
     })
 
     it('has a chat tab with composer, messages area and context chip', () => {
@@ -120,8 +146,22 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       // The login view has its own floating theme button so new users can
       // switch theme before logging in.
       expect(html).toContain('login__theme')
-      // Both instances (login + header) share the same class-based wiring.
+      // Both instances (login + sidebar) share the same class-based wiring.
       expect(html.match(/class="icon-btn theme-btn"/g)).toHaveLength(2)
+    })
+
+    it('docks the theme picker at the bottom of the sidebar nav', () => {
+      // The theme button lives inside the nav column, not the header.
+      expect(html).toContain('theme-wrap--nav')
+      const navIdx = html.indexOf('<nav class="app__nav"')
+      const navEndIdx = html.indexOf('</nav>')
+      const themeIdx = html.indexOf('theme-wrap--nav')
+      const logoutIdx = html.indexOf('id="logout-btn"')
+      expect(themeIdx).toBeGreaterThan(navIdx)
+      expect(themeIdx).toBeLessThan(navEndIdx)
+      // The logout button stays in the header, outside the nav.
+      expect(logoutIdx).toBeGreaterThan(-1)
+      expect(logoutIdx).toBeLessThan(navIdx)
     })
   })
 
@@ -147,6 +187,13 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       expect(css).toContain('.chat__typing')
       expect(css).toContain('.chat__ctx')
       expect(css).toContain('.chat__col { min-width: 0; flex: 1; }')
+      // Guide (replay tour) styling
+      expect(css).toContain('.guide__card')
+      expect(css).toContain('.guide__icon')
+      expect(css).toContain('.guide__dots')
+      expect(css).toContain('.guide__dot--active')
+      // Theme picker docked at the bottom of the sidebar.
+      expect(css).toContain('.theme-wrap--nav')
     })
 
     it('forces [hidden] to hide even on elements with a display rule (e.g. .field)', () => {
@@ -211,6 +258,23 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       expect(js).toContain('/api/create-checkout-session')
       // usage history
       expect(js).toContain('/api/usage')
+    })
+
+    it('implements the replayable guide tour', () => {
+      expect(js).toContain('GUIDE_STEPS')
+      expect(js).toContain('function renderGuide')
+      expect(js).toContain('function guideNext')
+      expect(js).toContain('function guidePrev')
+      expect(js).toContain('function guideReplay')
+      expect(js).toContain('state.guideStep')
+      // The tour is wired to the prev/next/replay buttons.
+      expect(js).toContain('"guide-next").addEventListener("click", guideNext)')
+      expect(js).toContain('"guide-prev").addEventListener("click", guidePrev)')
+      expect(js).toContain('"guide-replay").addEventListener("click", guideReplay)')
+      // The last step rewinds the tour (replay behaviour).
+      expect(js).toContain('"Ricomincia"')
+      // Switching to the guide tab renders the current step.
+      expect(js).toContain('if (tab === "guide") renderGuide();')
     })
 
     it('implements the chat flow (send, context from transcript, persistence)', () => {

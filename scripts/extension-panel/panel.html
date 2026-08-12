@@ -95,25 +95,6 @@
         </span>
         <span id="credits-value">…</span>
       </button>
-      <div class="theme-wrap">
-        <button id="theme-btn" class="icon-btn theme-btn" title="Tema" aria-label="Tema" aria-haspopup="menu">
-          <svg id="theme-icon" class="theme-icon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        </button>
-        <div id="theme-menu" class="theme-menu" hidden role="menu" aria-label="Tema del pannello">
-          <button class="theme-menu__item" data-theme-choice="auto" role="menuitemradio">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            Auto
-          </button>
-          <button class="theme-menu__item" data-theme-choice="light" role="menuitemradio">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-            Chiaro
-          </button>
-          <button class="theme-menu__item" data-theme-choice="dark" role="menuitemradio">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            Scuro
-          </button>
-        </div>
-      </div>
       <button id="logout-btn" class="icon-btn" title="Esci" aria-label="Esci">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
@@ -138,6 +119,29 @@
           <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
           <span>Usage</span>
         </button>
+        <button class="nav__item" data-tab="guide" title="Guida">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span>Guida</span>
+        </button>
+        <div class="theme-wrap theme-wrap--nav">
+          <button id="theme-btn" class="icon-btn theme-btn" title="Tema" aria-label="Tema" aria-haspopup="menu">
+            <svg id="theme-icon" class="theme-icon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </button>
+          <div id="theme-menu" class="theme-menu" hidden role="menu" aria-label="Tema del pannello">
+            <button class="theme-menu__item" data-theme-choice="auto" role="menuitemradio">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              Auto
+            </button>
+            <button class="theme-menu__item" data-theme-choice="light" role="menuitemradio">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+              Chiaro
+            </button>
+            <button class="theme-menu__item" data-theme-choice="dark" role="menuitemradio">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              Scuro
+            </button>
+          </div>
+        </div>
       </nav>
 
     <!-- Tab: Trascrizioni -->
@@ -253,6 +257,40 @@
         </div>
         <div id="usage-stats" class="usage__stats"></div>
         <div id="usage-content" class="usage__content"></div>
+      </section>
+    </main>
+
+    <!-- Tab: Guida -->
+    <main id="tab-guide" class="tab">
+      <section class="tab__scroll">
+        <div class="guide">
+          <div class="guide__head">
+            <div class="guide__head-text">
+              <p class="section-label">Guida</p>
+              <h2 class="guide__title">Come funziona il pannello</h2>
+              <p class="muted guide__sub">Un tour rapido di tutte le funzioni, riproducibile quando vuoi.</p>
+            </div>
+            <button id="guide-replay" class="btn btn--ghost guide__btn" title="Riproduci il tour dall'inizio">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Riproduci
+            </button>
+          </div>
+
+          <div class="guide__card">
+            <div class="guide__icon" id="guide-icon"></div>
+            <p class="guide__counter" id="guide-counter">Passo 1 di 5</p>
+            <h3 class="guide__step-title" id="guide-title">—</h3>
+            <p class="guide__text" id="guide-text"></p>
+            <p class="guide__tip" id="guide-tip" hidden></p>
+          </div>
+
+          <div class="guide__dots" id="guide-dots" aria-label="Passi della guida"></div>
+
+          <div class="guide__nav">
+            <button id="guide-prev" class="btn btn--ghost guide__btn">Indietro</button>
+            <button id="guide-next" class="btn btn--primary guide__btn">Avanti</button>
+          </div>
+        </div>
       </section>
     </main>
 

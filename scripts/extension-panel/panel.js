@@ -32,6 +32,7 @@
     loginStep: "email", // code sub-step: email | code
     theme: "auto", // auto | light | dark
     youtubeTheme: null, // last known YouTube theme from content.js
+    guideStep: 0, // current step of the replay tour (Guida)
     onYoutube: false, // is the active tab a YouTube page?
   };
 
@@ -173,7 +174,7 @@
   }
 
   function switchTab(tab) {
-    var tabs = ["transcripts", "chat", "account", "usage"];
+    var tabs = ["transcripts", "chat", "account", "usage", "guide"];
     tabs.forEach(function (t) {
       var m = $("tab-" + t);
       if (m) m.classList.toggle("tab--active", t === tab);
@@ -187,6 +188,7 @@
       renderChat();
       setTimeout(function () { var i = $("chat-input"); if (i) i.focus(); }, 60);
     }
+    if (tab === "guide") renderGuide();
   }
 
   /* ---------- auth: bootstrap ---------- */
@@ -1070,6 +1072,94 @@
     });
   }
 
+  /* ---------- guide (replay tour) ---------- */
+  var GUIDE_STEPS = [
+    {
+      icon: "<path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"/><polyline points=\"14 2 14 8 20 8\"/><line x1=\"16\" y1=\"13\" x2=\"8\" y2=\"13\"/><line x1=\"16\" y1=\"17\" x2=\"8\" y2=\"17\"/>",
+      title: "Trascrizioni istantanee",
+      text: "Incolla un link YouTube nel campo in alto e ottieni la trascrizione in pochi secondi. Tutte le trascrizioni restano salvate: ritrovale con la barra di ricerca oppure apri il dettaglio per copiare, riassumere o chiedere all'AI.",
+      tip: "Dal pulsante dell'estensione su YouTube puoi trascrivere direttamente il video che stai guardando."
+    },
+    {
+      icon: "<path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"/>",
+      title: "Chat IA con i tuoi video",
+      text: "Fai domande sul contenuto di una trascrizione: apri il dettaglio e premi Chiedi in chat, oppure incolla un link direttamente nella chat. Ogni risposta usa il contesto del video per essere precisa.",
+      tip: "Premi Invio per inviare il messaggio, Shift+Invio per andare a capo."
+    },
+    {
+      icon: "<path d=\"M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/>",
+      title: "Account, crediti e piani",
+      text: "Qui trovi i crediti disponibili e i piani di abbonamento. Trascrizioni, riassunti e messaggi della chat consumano crediti: scegli il piano adatto e gestisci l'abbonamento.",
+      tip: "Il badge in alto a destra mostra sempre i crediti rimasti."
+    },
+    {
+      icon: "<line x1=\"12\" y1=\"20\" x2=\"12\" y2=\"10\"/><line x1=\"18\" y1=\"20\" x2=\"18\" y2=\"4\"/><line x1=\"6\" y1=\"20\" x2=\"6\" y2=\"16\"/>",
+      title: "Cronologia di utilizzo",
+      text: "La pagina Usage riepiloga ogni operazione: trascrizioni, riassunti e chat con data e crediti consumati. Tieni d'occhio il consumo per gestire al meglio i tuoi crediti.",
+      tip: "Usa il pulsante di aggiornamento per ricaricare la cronologia."
+    },
+    {
+      icon: "<rect x=\"2\" y=\"3\" width=\"20\" height=\"14\" rx=\"2\"/><line x1=\"8\" y1=\"21\" x2=\"16\" y2=\"21\"/><line x1=\"12\" y1=\"17\" x2=\"12\" y2=\"21\"/>",
+      title: "Tema del pannello",
+      text: "Scegli il tema del pannello dal fondo della barra laterale: Auto segue il tema di YouTube per non avere contrasto, oppure forza Chiaro o Scuro a tuo piacimento.",
+      tip: "In modalita Auto il pannello si adatta da solo quando cambi tema su YouTube."
+    }
+  ];
+
+  function renderGuide() {
+    var step = GUIDE_STEPS[state.guideStep];
+    if (!step) return;
+    var wrap = "<svg viewBox=\"0 0 24 24\" width=\"26\" height=\"26\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">";
+    $("guide-icon").innerHTML = wrap + step.icon + "</svg>";
+    $("guide-counter").textContent = "Passo " + (state.guideStep + 1) + " di " + GUIDE_STEPS.length;
+    $("guide-title").textContent = step.title;
+    $("guide-text").textContent = step.text;
+    var tip = $("guide-tip");
+    if (step.tip) {
+      tip.textContent = step.tip;
+      tip.hidden = false;
+    } else {
+      tip.hidden = true;
+    }
+    var dots = $("guide-dots");
+    dots.innerHTML = "";
+    GUIDE_STEPS.forEach(function (s, i) {
+      var d = document.createElement("button");
+      d.type = "button";
+      d.className = "guide__dot" + (i === state.guideStep ? " guide__dot--active" : "");
+      d.setAttribute("aria-label", "Vai al passo " + (i + 1));
+      if (i === state.guideStep) d.setAttribute("aria-current", "step");
+      d.addEventListener("click", function () { guideGoTo(i); });
+      dots.appendChild(d);
+    });
+    var isLast = state.guideStep === GUIDE_STEPS.length - 1;
+    $("guide-prev").disabled = state.guideStep === 0;
+    $("guide-next").textContent = isLast ? "Ricomincia" : "Avanti";
+  }
+
+  function guideGoTo(i) {
+    state.guideStep = Math.max(0, Math.min(GUIDE_STEPS.length - 1, i));
+    renderGuide();
+  }
+
+  function guideNext() {
+    if (state.guideStep >= GUIDE_STEPS.length - 1) {
+      state.guideStep = 0; // replay from the start
+    } else {
+      state.guideStep++;
+    }
+    renderGuide();
+  }
+
+  function guidePrev() {
+    guideGoTo(state.guideStep - 1);
+  }
+
+  function guideReplay() {
+    state.guideStep = 0;
+    renderGuide();
+  }
+
   /* ---------- theme ---------- */
   var THEME_ICONS = {
     auto: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
@@ -1391,6 +1481,9 @@
     document.querySelectorAll(".nav__item").forEach(function (btn) {
       btn.addEventListener("click", function () { switchTab(btn.getAttribute("data-tab")); });
     });
+    $("guide-next").addEventListener("click", guideNext);
+    $("guide-prev").addEventListener("click", guidePrev);
+    $("guide-replay").addEventListener("click", guideReplay);
     document.querySelectorAll(".link-card").forEach(function (card) {
       card.addEventListener("click", function () { openSite(card.getAttribute("data-site")); });
     });

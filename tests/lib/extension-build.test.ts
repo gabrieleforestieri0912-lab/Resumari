@@ -244,6 +244,7 @@ describe('extension build (scripts/build-extension.js)', () => {
       expect(html).toContain('tab-transcripts')
       expect(html).toContain('tab-account')
       expect(html).toContain('tab-usage')
+      expect(html).toContain('tab-guide')
     })
 
     it('writes files whose content matches the exported constants', () => {
