@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSupabaseClient } from "@/lib/supabase";
+import { saveSession } from "@/lib/session";
 
 function CallbackContent() {
   const router = useRouter();
@@ -53,8 +54,7 @@ function CallbackContent() {
         }
 
         const data = await res.json();
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
+        saveSession(data.token, data.user);
 
         window.location.href = "/";
       } catch (err: any) {

@@ -128,7 +128,7 @@ export default function Pricing() {
 
   return (
     <section
-      className="py-16 px-6 relative overflow-hidden bg-white"
+      className="py-16 px-6 relative overflow-hidden bg-white dark:bg-zinc-950"
       id="pricing"
     >
       {/* Background Decorative Elements */}
@@ -141,7 +141,7 @@ export default function Pricing() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-3xl md:text-5xl font-black text-gray-900 mb-6 tracking-tight"
+          className="text-3xl md:text-5xl font-black text-gray-900 dark:text-gray-100 mb-6 tracking-tight"
         >
           Scegli il tuo{" "}
           <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-600 to-red-600">
@@ -153,7 +153,7 @@ export default function Pricing() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
-          className="text-lg text-gray-600 max-w-2xl mx-auto font-medium"
+          className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto font-medium"
         >
           Investi nel tuo tempo. Piani flessibili progettati per adattarsi alla
           tua crescita.
@@ -172,8 +172,8 @@ export default function Pricing() {
               transition={{ delay: index * 0.1 }}
               className={`relative flex flex-col p-6 rounded-2xl transition-all duration-500 h-full ${
                 plan.popular
-                  ? "bg-white border-2 border-purple-600 shadow-[0_32px_64px_-16px_rgba(123,47,247,0.15)] scale-105 z-10 py-8"
-                  : "bg-gray-50/50 border border-gray-200 hover:border-gray-300 hover:bg-white shadow-sm hover:shadow-xl"
+                  ? "bg-white dark:bg-zinc-900 border-2 border-purple-600 shadow-[0_32px_64px_-16px_rgba(123,47,247,0.15)] scale-105 z-10 py-8"
+                  : "bg-gray-50/50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-600 hover:bg-white dark:hover:bg-zinc-800 shadow-sm hover:shadow-xl"
               }`}
             >
               {plan.popular && (
@@ -198,11 +198,11 @@ export default function Pricing() {
                   <Icon size={20} strokeWidth={2.5} />
                 </div>
 
-                <h3 className="text-lg font-black text-gray-900 mb-1">
+                <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 mb-1">
                   {plan.name}
                 </h3>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-4xl font-black text-gray-900 tracking-tighter">
+                  <span className="text-4xl font-black text-gray-900 dark:text-gray-100 tracking-tighter">
                     {plan.price === "0" ? "Gratis" : `€${plan.price}`}
                   </span>
                   {plan.period && (
@@ -213,16 +213,16 @@ export default function Pricing() {
                 </div>
               </div>
 
-              <div className="h-px w-full bg-gray-100 mb-6" />
+              <div className="h-px w-full bg-gray-100 dark:bg-zinc-800 mb-6" />
 
               <ul className="space-y-3 mb-8 grow">
                 {plan.features.map((feature) => (
                   <li
                     key={feature}
-                    className="flex items-start gap-3 text-gray-700 text-[13px] font-semibold leading-tight"
+                    className="flex items-start gap-3 text-gray-700 dark:text-gray-300 text-[13px] font-semibold leading-tight"
                   >
                     <div
-                      className={`mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center ${plan.popular ? "bg-purple-600 text-white" : "bg-gray-200 text-gray-500"}`}
+                      className={`mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center ${plan.popular ? "bg-purple-600 text-white" : "bg-gray-200 dark:bg-zinc-700 text-gray-500 dark:text-gray-400"}`}
                     >
                       <Check size={10} strokeWidth={4} />
                     </div>
@@ -232,8 +232,8 @@ export default function Pricing() {
               </ul>
 
               {plan.isFree ? (
-                <button className="group relative px-1 py-1 rounded-4xl bg-gray-100 hover:bg-gray-200 transition-all cursor-pointer w-full">
-                  <span className="block px-7 py-2 bg-white text-gray-500 text-sm font-bold rounded-[1.8rem] transition-colors group-hover:bg-gray-50">
+                <button className="group relative px-1 py-1 rounded-4xl bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 transition-all cursor-pointer w-full">
+                  <span className="block px-7 py-2 bg-white dark:bg-zinc-900 text-gray-500 dark:text-gray-300 text-sm font-bold rounded-[1.8rem] transition-colors group-hover:bg-gray-50 dark:group-hover:bg-zinc-800">
                     {plan.buttonText}
                   </span>
                 </button>
@@ -253,7 +253,7 @@ export default function Pricing() {
       </div>
 
       <div className="mt-20 text-center">
-        <p className="text-gray-500 text-sm font-medium">
+        <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
           Hai bisogno di un piano personalizzato?{" "}
           <button className="text-purple-600 font-bold hover:underline">
             Parla con noi

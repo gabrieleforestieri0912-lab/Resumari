@@ -38,7 +38,7 @@ export default function Contattaci() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-gray-900 dark:text-gray-100">
       <Navbar />
       <main className="max-w-4xl mx-auto px-6 pt-28 pb-20">
         <div className="text-center mb-16">
@@ -48,7 +48,7 @@ export default function Contattaci() {
           <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
             Contattaci
           </h1>
-          <p className="text-lg text-gray-500 max-w-xl mx-auto">
+          <p className="text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
             Hai una domanda o vuoi lavorare con noi? Scrivici, rispondiamo entro
             24 ore.
           </p>
@@ -56,7 +56,7 @@ export default function Contattaci() {
 
         <div className="grid md:grid-cols-2 gap-12">
           <div>
-            <div className="bg-gray-50 rounded-3xl p-8 md:p-10">
+            <div className="bg-gray-50 dark:bg-zinc-900 rounded-3xl p-8 md:p-10">
               <h2 className="text-xl font-black mb-6">Inviaci un messaggio</h2>
 
               {stato === "success" ? (
@@ -80,7 +80,7 @@ export default function Contattaci() {
               ) : (
                 <form onSubmit={invia} className="space-y-5">
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                       Nome
                     </label>
                     <input
@@ -90,13 +90,13 @@ export default function Contattaci() {
                       onChange={(e) =>
                         setForm({ ...form, nome: e.target.value })
                       }
-                      className="w-full px-5 py-3 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 outline-none transition-all"
+                      className="w-full px-5 py-3 rounded-xl border border-gray-200 dark:border-zinc-700 dark:bg-zinc-950 dark:text-gray-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 outline-none transition-all"
                       placeholder="Il tuo nome"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                       Email
                     </label>
                     <input
@@ -106,13 +106,13 @@ export default function Contattaci() {
                       onChange={(e) =>
                         setForm({ ...form, email: e.target.value })
                       }
-                      className="w-full px-5 py-3 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 outline-none transition-all"
+                      className="w-full px-5 py-3 rounded-xl border border-gray-200 dark:border-zinc-700 dark:bg-zinc-950 dark:text-gray-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 outline-none transition-all"
                       placeholder="tua@email.it"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                       Messaggio
                     </label>
                     <textarea
@@ -122,7 +122,7 @@ export default function Contattaci() {
                       onChange={(e) =>
                         setForm({ ...form, messaggio: e.target.value })
                       }
-                      className="w-full px-5 py-3 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 outline-none transition-all resize-none"
+                      className="w-full px-5 py-3 rounded-xl border border-gray-200 dark:border-zinc-700 dark:bg-zinc-950 dark:text-gray-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 outline-none transition-all resize-none"
                       placeholder="Come possiamo aiutarti?"
                     />
                   </div>
@@ -164,14 +164,14 @@ export default function Contattaci() {
               <div className="space-y-6">
                 <a
                   href="mailto:support@resumari.it"
-                  className="flex items-start gap-4 p-4 bg-white rounded-2xl border border-gray-100 hover:border-purple-200 transition-all group"
+                  className="flex items-start gap-4 p-4 bg-white dark:bg-zinc-950 rounded-2xl border border-gray-100 dark:border-zinc-800 hover:border-purple-200 dark:hover:border-purple-700 transition-all group"
                 >
                   <div className="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Mail size={24} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900">Email</h3>
-                    <p className="text-sm text-gray-500">support@resumari.it</p>
+                    <h3 className="font-bold text-gray-900 dark:text-gray-100">Email</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">support@resumari.it</p>
                   </div>
                 </a>
 
@@ -179,25 +179,25 @@ export default function Contattaci() {
                   href="https://discord.gg/resumari"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-start gap-4 p-4 bg-white rounded-2xl border border-gray-100 hover:border-purple-200 transition-all group"
+                  className="flex items-start gap-4 p-4 bg-white dark:bg-zinc-950 rounded-2xl border border-gray-100 dark:border-zinc-800 hover:border-purple-200 dark:hover:border-purple-700 transition-all group"
                 >
                   <div className="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <MessageSquare size={24} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900">Discord</h3>
-                    <p className="text-sm text-gray-500">
+                    <h3 className="font-bold text-gray-900 dark:text-gray-100">Discord</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       Entra nella community
                     </p>
                   </div>
                 </a>
               </div>
 
-              <div className="mt-8 p-5 bg-white rounded-2xl border border-gray-100">
-                <h3 className="font-bold text-gray-900 mb-2">
+              <div className="mt-8 p-5 bg-white dark:bg-zinc-950 rounded-2xl border border-gray-100 dark:border-zinc-800">
+                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-2">
                   Orari di risposta
                 </h3>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   Rispondiamo Lun-Ven dalle 9:00 alle 18:00. Per questioni
                   urgenti, scrivici su Discord.
                 </p>

@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { clearSession } from "@/lib/session";
 import {
   MessageSquare,
   Sparkles,
@@ -207,8 +208,7 @@ export default function Videos() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    clearSession();
     router.push("/");
   };
 

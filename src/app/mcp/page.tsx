@@ -105,28 +105,28 @@ export default function McpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-zinc-950">
       {/* ── Hero ── */}
       <section className="pt-32 pb-20 px-4">
         <div className="max-w-5xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-purple-50 rounded-full text-purple-700 text-sm font-bold mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-purple-50 dark:bg-purple-950/40 rounded-full text-purple-700 dark:text-purple-300 text-sm font-bold mb-6">
             <Server size={14} />
             Remote MCP Server
           </div>
-          <h1 className="text-5xl md:text-6xl font-black text-gray-900 mb-4 tracking-tight">
+          <h1 className="text-5xl md:text-6xl font-black text-gray-900 dark:text-gray-100 mb-4 tracking-tight">
             YouTube Transcript MCP
           </h1>
-          <p className="text-xl text-gray-500 font-semibold mb-3 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-500 dark:text-gray-400 font-semibold mb-3 max-w-3xl mx-auto">
             Trasforma video YouTube in contesto AI pulito e pronto per ChatGPT, Claude, Cursor e altri agenti compatibili con MCP.
           </p>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <p className="text-gray-400 dark:text-gray-500 max-w-2xl mx-auto">
             Resumari usa i sottotitoli YouTube esistenti e non crea trascrizioni ASR per video senza didascalie.
           </p>
 
           {/* Client badges */}
           <div className="flex flex-wrap justify-center gap-3 mt-10">
             {["ChatGPT", "Claude", "Claude Code", "Cursor", "VS Code agents", "Registries"].map((name, i) => (
-              <span key={i} className="px-5 py-2 bg-gray-100 text-gray-700 text-sm font-bold rounded-xl">
+              <span key={i} className="px-5 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 text-sm font-bold rounded-xl">
                 {name}
               </span>
             ))}
@@ -135,14 +135,14 @@ export default function McpPage() {
       </section>
 
       {/* ── MCP Server URL ── */}
-      <section className="py-12 px-4 bg-gray-50">
+      <section className="py-12 px-4 bg-gray-50 dark:bg-zinc-900">
         <div className="max-w-2xl mx-auto text-center">
           <div className="flex items-center gap-2 justify-center mb-4">
             <Globe size={20} className="text-purple-600" />
-            <h2 className="text-lg font-black text-gray-900">Server URL</h2>
+            <h2 className="text-lg font-black text-gray-900 dark:text-gray-100">Server URL</h2>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-2 flex items-center gap-2">
-            <code className="flex-1 text-sm font-mono text-gray-800 px-4 py-3 truncate">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm p-2 flex items-center gap-2">
+            <code className="flex-1 text-sm font-mono text-gray-800 dark:text-gray-200 px-4 py-3 truncate">
               https://resumari.it/api/mcp
             </code>
             <button
@@ -158,38 +158,38 @@ export default function McpPage() {
       {/* ── Tools ── */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-black text-gray-900 text-center mb-3">Tools</h2>
-          <p className="text-gray-500 text-center mb-10 max-w-xl mx-auto">
+          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Tools</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-center mb-10 max-w-xl mx-auto">
             Due strumenti MCP per inviare video e ricevere trascrizioni pulite in formato markdown.
           </p>
           <div className="grid md:grid-cols-2 gap-6">
             {/* youtube.transcribe */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm p-6">
               <div className="flex items-center gap-2 mb-1">
                 <Play size={18} className="text-purple-600" />
-                <code className="text-sm font-mono font-bold text-gray-900">youtube.transcribe</code>
+                <code className="text-sm font-mono font-bold text-gray-900 dark:text-gray-100">youtube.transcribe</code>
               </div>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                 Invia un singolo URL o ID video YouTube e avvia un job di trascrizione asincrono.
-                Restituisce un job_id da usare con <code className="text-xs font-mono bg-gray-100 px-1 rounded">youtube.get_transcript_job</code>.
+                Restituisce un job_id da usare con <code className="text-xs font-mono bg-gray-100 dark:bg-zinc-800 px-1 rounded">youtube.get_transcript_job</code>.
               </p>
             </div>
 
             {/* youtube.get_transcript_job */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm p-6">
               <div className="flex items-center gap-2 mb-1">
                 <CheckCircle2 size={18} className="text-purple-600" />
-                <code className="text-sm font-mono font-bold text-gray-900">youtube.get_transcript_job</code>
+                <code className="text-sm font-mono font-bold text-gray-900 dark:text-gray-100">youtube.get_transcript_job</code>
               </div>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                 Interroga il job e ricevi la trascrizione in markdown pulito quando è pronta.
-                Usa questo strumento dopo aver chiamato <code className="text-xs font-mono bg-gray-100 px-1 rounded">youtube.transcribe</code>.
+                Usa questo strumento dopo aver chiamato <code className="text-xs font-mono bg-gray-100 dark:bg-zinc-800 px-1 rounded">youtube.transcribe</code>.
               </p>
             </div>
           </div>
 
           {/* Response example */}
-          <div className="mt-8 bg-gray-900 rounded-2xl p-6 overflow-x-auto">
+          <div className="mt-8 bg-gray-900 dark:bg-black rounded-2xl p-6 overflow-x-auto">
             <pre className="text-sm text-gray-300 font-mono whitespace-pre">{`{
   "job_id": "7e1f...",
   "status": "completed",
@@ -210,31 +210,31 @@ export default function McpPage() {
       </section>
 
       {/* ── Client Setup ── */}
-      <section className="py-16 px-4 bg-gray-50">
+      <section className="py-16 px-4 bg-gray-50 dark:bg-zinc-900">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-black text-gray-900 text-center mb-3">Set up your MCP client</h2>
-          <p className="text-gray-500 text-center mb-10 max-w-xl mx-auto">
+          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Set up your MCP client</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-center mb-10 max-w-xl mx-auto">
             Resumari usa OAuth. Il client apre una schermata di consenso nel browser, poi salva e aggiorna il token per richieste future.
           </p>
 
           <div className="space-y-4">
             {clients.map((client, i) => (
-              <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+              <div key={i} className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm overflow-hidden">
                 <button
                   onClick={() => setExpandedClient(expandedClient === i ? null : i)}
-                  className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-all text-left"
+                  className="w-full flex items-center justify-between p-5 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all text-left"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="font-bold text-gray-900">{client.name}</span>
+                    <span className="font-bold text-gray-900 dark:text-gray-100">{client.name}</span>
                   </div>
                   {expandedClient === i ? <ChevronUp size={18} className="text-gray-400 shrink-0" /> : <ChevronDown size={18} className="text-gray-400 shrink-0" />}
                 </button>
                 {expandedClient === i && (
-                  <div className="px-5 pb-6 border-t border-gray-100">
-                    <p className="text-sm text-gray-500 mt-4 mb-4">{client.desc}</p>
+                  <div className="px-5 pb-6 border-t border-gray-100 dark:border-zinc-800">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-4 mb-4">{client.desc}</p>
                     <ol className="space-y-3 mb-5">
                       {client.steps.map((step, j) => (
-                        <li key={j} className="flex items-start gap-3 text-sm text-gray-700">
+                        <li key={j} className="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300">
                           <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                             {j + 1}
                           </span>
@@ -242,9 +242,9 @@ export default function McpPage() {
                         </li>
                       ))}
                     </ol>
-                    <div className="bg-gray-50 rounded-xl p-1 flex items-center gap-2">
+                    <div className="bg-gray-50 dark:bg-zinc-800 rounded-xl p-1 flex items-center gap-2">
                       <span className="text-xs font-bold text-gray-400 uppercase px-3 shrink-0">{client.codeLabel}</span>
-                      <code className="flex-1 text-xs font-mono text-gray-700 px-3 py-2 truncate">{client.code}</code>
+                      <code className="flex-1 text-xs font-mono text-gray-700 dark:text-gray-300 px-3 py-2 truncate">{client.code}</code>
                       <button
                         onClick={() => copy(client.code, `client-${i}`)}
                         className="p-2 hover:bg-gray-200 rounded-lg transition-all shrink-0"
@@ -263,22 +263,22 @@ export default function McpPage() {
       {/* ── Docker & Registries ── */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-black text-gray-900 text-center mb-3">Docker and Registries</h2>
-          <p className="text-gray-500 text-center mb-10 max-w-xl mx-auto">
+          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Docker and Registries</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-center mb-10 max-w-xl mx-auto">
             Usa l'URL del server remoto in Docker Desktop, Smithery-style o altre voci di registro MCP.
           </p>
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm p-6">
             <ol className="space-y-3 mb-5">
-              <li className="flex items-start gap-3 text-sm text-gray-700">
-                <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">1</span>
+              <li className="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300">
+                <span className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">1</span>
                 <span>Crea o seleziona una voce di server MCP remoto.</span>
               </li>
-              <li className="flex items-start gap-3 text-sm text-gray-700">
-                <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">2</span>
+              <li className="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300">
+                <span className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">2</span>
                 <span>Imposta il trasporto su Streamable HTTP.</span>
               </li>
-              <li className="flex items-start gap-3 text-sm text-gray-700">
-                <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">3</span>
+              <li className="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300">
+                <span className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">3</span>
                 <span>Usa OAuth per l'autorizzazione dell'account.</span>
               </li>
             </ol>
@@ -295,14 +295,14 @@ export default function McpPage() {
       </section>
 
       {/* ── Auth Troubleshooting ── */}
-      <section className="py-16 px-4 bg-gray-50">
+      <section className="py-16 px-4 bg-gray-50 dark:bg-zinc-900">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-black text-gray-900 text-center mb-3">Seeing Auth: Unsupported?</h2>
-          <p className="text-gray-500 text-center mb-8">
+          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Seeing Auth: Unsupported?</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-center mb-8">
             Verifica che i metadati della risorsa protetta usino l'URL HTTPS canonico, che OAuth Server e Dynamic Client Registration siano abilitati,
             poi rimuovi e riaggiungi il server MCP dopo il deploy.
           </p>
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm p-6">
             <p className="text-xs font-bold text-gray-400 uppercase mb-3">Rimedi</p>
             <div className="space-y-2">
               {[
@@ -310,14 +310,14 @@ export default function McpPage() {
                 "Assicurati che .well-known/oauth-authorization-server sia accessibile.",
                 "Rimuovi e riaggiungi il server MCP dopo il deploy.",
               ].map((tip, i) => (
-                <p key={i} className="text-sm text-gray-600 flex items-start gap-2">
+                <p key={i} className="text-sm text-gray-600 dark:text-gray-300 flex items-start gap-2">
                   <span className="text-purple-600 mt-0.5">•</span>
                   {tip}
                 </p>
               ))}
             </div>
-            <div className="mt-4 bg-gray-50 rounded-xl p-4">
-              <pre className="text-sm text-gray-600 font-mono whitespace-pre">{`codex mcp remove transcribr
+            <div className="mt-4 bg-gray-50 dark:bg-zinc-800 rounded-xl p-4">
+              <pre className="text-sm text-gray-600 dark:text-gray-300 font-mono whitespace-pre">{`codex mcp remove transcribr
 codex mcp add transcribr --url https://resumari.it/api/mcp
 codex mcp list`}</pre>
             </div>
@@ -328,18 +328,18 @@ codex mcp list`}</pre>
       {/* ── Prompts ── */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-black text-gray-900 text-center mb-3">Prompts to Try</h2>
-          <p className="text-gray-500 text-center mb-10 max-w-xl mx-auto">
+          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Prompts to Try</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-center mb-10 max-w-xl mx-auto">
             Workflow MCP pratici da incollare nel tuo agente una volta connesso Resumari.
           </p>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {prompts.map((p, i) => (
-              <div key={i} className="bg-gray-50 rounded-2xl p-5 border border-gray-100 hover:border-purple-200 transition-all cursor-pointer group"
+              <div key={i} className="bg-gray-50 dark:bg-zinc-900 rounded-2xl p-5 border border-gray-100 dark:border-zinc-800 hover:border-purple-200 dark:hover:border-purple-700 transition-all cursor-pointer group"
                 onClick={() => copy(p.prompt + " <YOUTUBE_URL>", `prompt-${i}`)}
               >
                 <p className="text-xs font-bold text-gray-400 uppercase mb-1">{p.label}</p>
-                <h3 className="font-bold text-gray-900 text-sm mb-1">{p.title}</h3>
-                <p className="text-xs text-gray-500 line-clamp-2">{p.prompt}</p>
+                <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm mb-1">{p.title}</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{p.prompt}</p>
               </div>
             ))}
           </div>
@@ -347,10 +347,10 @@ codex mcp list`}</pre>
       </section>
 
       {/* ── What the agent receives ── */}
-      <section className="py-16 px-4 bg-gray-50">
+      <section className="py-16 px-4 bg-gray-50 dark:bg-zinc-900">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-black text-gray-900 text-center mb-3">What the agent receives</h2>
-          <p className="text-gray-500 text-center mb-10 max-w-xl mx-auto">
+          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">What the agent receives</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-center mb-10 max-w-xl mx-auto">
             Resumari estrae il transcript nativo, addebita crediti, esegue la pulizia in modo asincrono e restituisce markdown pronto per il contesto AI.
           </p>
           <div className="grid md:grid-cols-3 gap-4 text-center">
@@ -359,9 +359,9 @@ codex mcp list`}</pre>
               { label: "Clean markdown output", icon: CheckCircle2 },
               { label: "Existing YouTube captions only", icon: BookOpen },
             ].map((item, i) => (
-              <div key={i} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+              <div key={i} className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-gray-100 dark:border-zinc-800 shadow-sm">
                 <item.icon size={24} className="text-purple-600 mx-auto mb-3" />
-                <p className="font-bold text-gray-900 text-sm">{item.label}</p>
+                <p className="font-bold text-gray-900 dark:text-gray-100 text-sm">{item.label}</p>
               </div>
             ))}
           </div>

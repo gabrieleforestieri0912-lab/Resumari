@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Resumari</title>
+  <link rel="stylesheet" href="panel.css" />
+</head>
+<body>
+  <!-- ============ LOADING ============ -->
+  <div id="view-loading" class="view view--center">
+    <div class="spinner"></div>
+    <p class="muted">Caricamento…</p>
+  </div>
+
+  <!-- ============ LOGIN ============ -->
+  <div id="view-login" class="view" hidden>
+    <div class="login__wrap">
+      <div class="login__brand">
+        <img class="login__logo" src="resumari.png" alt="Resumari" />
+        <h1 class="login__title">Accedi a Resumari</h1>
+        <p id="login-subtitle" class="muted login__subtitle">
+          Accedi con email e password
+        </p>
+      </div>
+
+      <div id="login-message" class="alert" hidden></div>
+
+      <div class="seg" role="tablist" aria-label="Metodo di accesso">
+        <button type="button" class="seg__item seg__item--active" data-mode="password" role="tab" aria-selected="true">Password</button>
+        <button type="button" class="seg__item" data-mode="code" role="tab" aria-selected="false">Codice</button>
+      </div>
+
+      <form id="login-form" class="login__form">
+        <div class="field">
+          <label class="field__label" for="login-email">Email</label>
+          <input id="login-email" class="input" type="email" autocomplete="email" placeholder="nome@esempio.it" required />
+        </div>
+
+        <div class="field" id="login-password-field">
+          <label class="field__label" for="login-password">Password</label>
+          <input id="login-password" class="input" type="password" autocomplete="current-password" placeholder="••••••••" required />
+        </div>
+
+        <div class="field" id="login-code-field" hidden>
+          <label class="field__label" for="login-code">Codice a 6 cifre</label>
+          <input id="login-code" class="input input--center" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000" />
+        </div>
+
+        <button id="login-submit" class="btn btn--primary btn--block" type="submit">
+          <span class="btn__label" id="login-submit-label">Accedi</span>
+          <span class="btn__spinner" hidden></span>
+        </button>
+      </form>
+
+      <button id="login-back" class="link" hidden>Cambia email</button>
+
+      <p class="login__hint muted">
+        Accedi dal sito web e il pannello si sincronizzerà automaticamente.
+      </p>
+    </div>
+  </div>
+
+  <!-- ============ APP ============ -->
+  <div id="view-app" class="view" hidden>
+    <!-- Header -->
+    <header class="app__header">
+      <img class="app__logo" src="resumari.png" alt="Resumari" />
+      <div class="app__identity">
+        <span class="app__name">Resumari</span>
+        <span class="app__user" id="app-user">—</span>
+      </div>
+      <button id="credits-badge" class="credits-badge" title="Crediti">
+        <span class="credits-badge__icon">⚡</span>
+        <span id="credits-value">…</span>
+      </button>
+      <button id="logout-btn" class="icon-btn" title="Esci" aria-label="Esci">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </header>
+
+    <!-- Tab: Trascrizioni -->
+    <main id="tab-transcripts" class="tab tab--active">
+      <!-- list -->
+      <section id="tx-list" class="tab__scroll">
+        <div class="toolbar">
+          <div class="search">
+            <svg class="search__icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="tx-search" class="search__input" type="search" placeholder="Cerca tra le trascrizioni…" />
+          </div>
+        </div>
+        <div id="tx-content" class="tx__content"></div>
+      </section>
+
+      <!-- detail -->
+      <section id="tx-detail" class="tab__scroll" hidden></section>
+    </main>
+
+    <!-- Tab: Account -->
+    <main id="tab-account" class="tab">
+      <section class="tab__scroll">
+        <div class="account__profile card">
+          <div class="avatar" id="acc-avatar">—</div>
+          <div class="account__info">
+            <span class="account__name" id="acc-name">—</span>
+            <span class="muted account__email" id="acc-email">—</span>
+            <span class="pill pill--purple" id="acc-plan">—</span>
+          </div>
+        </div>
+
+        <div class="card card--gradient">
+          <div class="card--gradient__top">
+            <div>
+              <p class="card__label card__label--light">Crediti disponibili</p>
+              <p class="card__big" id="acc-credits">…</p>
+              <p class="card__sub" id="acc-credits-sub">—</p>
+            </div>
+            <button id="acc-refresh" class="icon-btn icon-btn--light" title="Aggiorna crediti" aria-label="Aggiorna crediti">
+              <svg id="acc-refresh-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            </button>
+          </div>
+          <div class="progress" id="acc-progress" hidden>
+            <div class="progress__bar" id="acc-progress-bar"></div>
+          </div>
+        </div>
+
+        <div id="acc-alert" class="alert" hidden></div>
+
+        <p class="section-label">Piani di abbonamento</p>
+        <div id="acc-plans" class="plans"></div>
+
+        <p class="section-label">Collegamenti</p>
+        <div class="links">
+          <button class="link-card" data-site="/api-keys">
+            <span class="link-card__icon link-card__icon--amber">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+            </span>
+            <span class="link-card__text"><b>API Keys</b><span class="muted">Gestisci le chiavi per l'API</span></span>
+            <svg class="link-card__arrow" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </button>
+          <button class="link-card" data-site="/settings">
+            <span class="link-card__icon link-card__icon--gray">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+            </span>
+            <span class="link-card__text"><b>Impostazioni</b><span class="muted">Profilo, password e preferenze</span></span>
+            <svg class="link-card__arrow" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Tab: Usage -->
+    <main id="tab-usage" class="tab">
+      <section class="tab__scroll">
+        <div class="usage__head">
+          <div>
+            <h2 class="usage__title">Usage History</h2>
+            <p class="muted usage__sub">Cronologia della tua attività</p>
+          </div>
+          <button id="usage-refresh" class="icon-btn" title="Aggiorna" aria-label="Aggiorna">
+            <svg id="usage-refresh-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </button>
+        </div>
+        <div id="usage-stats" class="usage__stats"></div>
+        <div id="usage-content" class="usage__content"></div>
+      </section>
+    </main>
+
+    <!-- Bottom nav -->
+    <nav class="app__nav">
+      <button class="nav__item nav__item--active" data-tab="transcripts">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>Trascrizioni</span>
+      </button>
+      <button class="nav__item" data-tab="account">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Account</span>
+      </button>
+      <button class="nav__item" data-tab="usage">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+        <span>Usage</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="panel.js"></script>
+</body>
+</html>

@@ -36,12 +36,12 @@ export default function Hero() {
   const blob3Y = useTransform(scrollYProgress, [0, 1], ["0%", "8%"]);
 
   return (
-    <section ref={sectionRef} className="min-h-screen flex flex-col items-center justify-center text-center px-6 pt-32 pb-24 overflow-hidden bg-white" style={{ position: 'relative' }}>
+    <section ref={sectionRef} className="min-h-screen flex flex-col items-center justify-center text-center px-6 py-20 md:py-24 overflow-hidden bg-white dark:bg-zinc-950" style={{ position: 'relative' }}>
       {/* Background Decorative Blobs with Parallax */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-        <motion.div style={{ y: blob1Y }} className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-100/50 rounded-full blur-[140px] animate-pulse" />
-        <motion.div style={{ y: blob2Y }} className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-red-50/60 rounded-full blur-[120px]" />
-        <motion.div style={{ y: blob3Y }} className="absolute top-[20%] right-[15%] w-[30%] h-[30%] bg-blue-50/40 rounded-full blur-[100px]" />
+        <motion.div style={{ y: blob1Y }} className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-100/50 dark:bg-purple-900/20 rounded-full blur-[140px] animate-pulse" />
+        <motion.div style={{ y: blob2Y }} className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-red-50/60 dark:bg-red-900/20 rounded-full blur-[120px]" />
+        <motion.div style={{ y: blob3Y }} className="absolute top-[20%] right-[15%] w-[30%] h-[30%] bg-blue-50/40 dark:bg-blue-900/20 rounded-full blur-[100px]" />
         <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] bg-size-[32px_32px] mask-[radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20" />
       </div>
 
@@ -54,7 +54,7 @@ export default function Hero() {
         {/* Title */}
         <motion.h1
           variants={itemVariants}
-          className="text-5xl md:text-7xl font-black leading-[1.1] text-gray-900 tracking-tight"
+          className="text-5xl md:text-7xl font-black leading-[1.1] text-gray-900 dark:text-gray-100 tracking-tight"
         >
           Smettila di rincorrere il tempo.{" "}
           <span className="relative inline-block">
@@ -64,7 +64,7 @@ export default function Hero() {
 
           </span>
           <br />
-          <span className="text-gray-900">
+          <span className="text-gray-900 dark:text-gray-100">
             in pochi{" "}
             <span className="inline-block px-4 -mx-2 italic bg-clip-text text-transparent bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 py-1">
               semplici secondi
@@ -75,7 +75,7 @@ export default function Hero() {
         {/* Subtitle */}
         <motion.p
           variants={itemVariants}
-          className="mt-8 text-lg md:text-xl text-gray-500 max-w-3xl leading-relaxed font-semibold tracking-tight"
+          className="mt-8 text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-3xl leading-relaxed font-semibold tracking-tight"
         >
           Basta subire il sovraccarico di informazioni. La nostra IA distilla i
           concetti chiave da video YouTube e documenti infiniti, consegnandoti
@@ -90,7 +90,7 @@ export default function Hero() {
           <Link
             href="/chat"
             aria-label="Inizia ora a riassumere i tuoi video gratuitamente"
-            className="group flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl text-white font-black text-base bg-gray-900 hover:bg-black transition-all transform hover:-translate-y-1 hover:shadow-2xl active:scale-95 shadow-xl shadow-gray-200"
+            className="group flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl text-white font-black text-base bg-gray-900 dark:bg-white dark:text-gray-900 hover:bg-black dark:hover:bg-gray-200 transition-all transform hover:-translate-y-1 hover:shadow-2xl active:scale-95 shadow-xl shadow-gray-200 dark:shadow-none"
           >
             Prova Gratis
             <ArrowRight
@@ -100,7 +100,7 @@ export default function Hero() {
           </Link>
           <a
             href="#demo"
-            className="group flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl text-gray-700 font-black text-base bg-white border-2 border-gray-200 hover:border-purple-300 hover:text-purple-700 transition-all transform hover:-translate-y-1 hover:shadow-xl active:scale-95"
+            className="group flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl text-gray-700 dark:text-gray-200 font-black text-base bg-white dark:bg-zinc-900 border-2 border-gray-200 dark:border-zinc-700 hover:border-purple-300 dark:hover:border-purple-500 hover:text-purple-700 dark:hover:text-purple-400 transition-all transform hover:-translate-y-1 hover:shadow-xl active:scale-95"
           >
             Scopri la demo
           </a>

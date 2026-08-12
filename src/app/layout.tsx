@@ -65,7 +65,7 @@ export default function RootLayout({
   const jsonLd = {};
 
   return (
-    <html lang="it" suppressHydrationWarning data-scroll-behavior="smooth">
+    <html lang="it" suppressHydrationWarning data-scroll-behavior="smooth" className="">
       <head>
         <script
           type="application/ld+json"

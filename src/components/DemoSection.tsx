@@ -415,7 +415,7 @@ export default function DemoSection() {
   };
 
   return (
-    <section className="w-full px-4 md:px-6 py-12 md:py-16 bg-gradient-to-b from-white via-purple-50/20 to-white relative overflow-hidden" id="demo">
+    <section className="w-full px-4 md:px-6 py-12 md:py-16 bg-gradient-to-b from-white via-purple-50/20 to-white dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-950 relative overflow-hidden" id="demo">
       <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-red-500/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="max-w-7xl mx-auto">
@@ -425,10 +425,10 @@ export default function DemoSection() {
             <Sparkles size={14} />
             Prova Gratuita
           </span>
-          <h2 className="text-3xl md:text-4xl font-black text-gray-900 mt-4 mb-2 tracking-tight">
+          <h2 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-gray-100 mt-4 mb-2 tracking-tight">
             Chat con un canale YouTube
           </h2>
-          <p className="text-gray-500 text-sm md:text-base max-w-xl mx-auto">
+          <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base max-w-xl mx-auto">
             Scegli un canale educativo e chatta con i suoi contenuti via AI.
             {userMsgCount > 0 && ` (${userMsgCount}/${DEMO_MESSAGE_LIMIT})`}
           </p>
@@ -436,7 +436,7 @@ export default function DemoSection() {
 
         <div className="flex gap-4 items-start">
           <div className="flex-1 min-w-0">
-            <div className={`bg-white rounded-2xl border shadow-xl overflow-hidden transition-all duration-500 ${selectedChannel ? "border-purple-200 shadow-purple-500/15 shadow-2xl" : "border-gray-200 shadow-purple-500/5"}`}>
+            <div className={`bg-white dark:bg-zinc-900 rounded-2xl border shadow-xl overflow-hidden transition-all duration-500 ${selectedChannel ? "border-purple-200 dark:border-purple-800 shadow-purple-500/15 shadow-2xl" : "border-gray-200 dark:border-zinc-800 shadow-purple-500/5"}`}>
               <div className="flex h-[520px] max-h-[75vh] relative">
                 <AnimatePresence>
                   {sidebarOpen && (
@@ -445,12 +445,12 @@ export default function DemoSection() {
                       animate={{ width: 230, opacity: 1 }}
                       exit={{ width: 0, opacity: 0 }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
-                      className="hidden md:flex flex-col shrink-0 border-r border-gray-100 bg-gray-50/50 overflow-hidden relative"
+                      className="hidden md:flex flex-col shrink-0 border-r border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-950/60 overflow-hidden relative"
                     >
                       <div className="absolute right-0 top-0 bottom-0 w-px bg-gradient-to-b from-purple-400/30 via-purple-600/40 to-red-400/30 pointer-events-none" />
-                      <div className="p-3 border-b border-gray-100">
+                      <div className="p-3 border-b border-gray-100 dark:border-zinc-800">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-black text-gray-900 uppercase tracking-wider">
+                          <span className="text-[10px] font-black text-gray-900 dark:text-gray-100 uppercase tracking-wider">
                             Canali
                           </span>
                           <button
@@ -470,8 +470,8 @@ export default function DemoSection() {
                               onClick={() => handleChannelClick(ch)}
                               className={`w-full flex items-center gap-2.5 p-2.5 rounded-xl text-left transition-all duration-200 ${
                                 selectedChannel?.id === ch.id
-                                  ? "bg-white shadow-sm border border-purple-200"
-                                  : "hover:bg-white hover:shadow-sm border border-transparent"
+                                  ? "bg-white dark:bg-zinc-800 shadow-sm border border-purple-200 dark:border-purple-700"
+                                  : "hover:bg-white dark:hover:bg-zinc-800 hover:shadow-sm border border-transparent"
                               }`}
                             >
                               {cd?.channelThumbnail ? (
@@ -486,7 +486,7 @@ export default function DemoSection() {
                                 </div>
                               )}
                               <div className="min-w-0">
-                                <p className="text-[13px] font-bold text-gray-900 truncate leading-tight">
+                                <p className="text-[13px] font-bold text-gray-900 dark:text-gray-100 truncate leading-tight">
                                   {ch.name}
                                 </p>
                                 <p className="text-[10px] text-gray-400 truncate leading-tight">
@@ -512,8 +512,8 @@ export default function DemoSection() {
                                   onClick={() => handleChannelClick(ch)}
                                   className={`w-full flex items-center gap-2.5 p-2.5 rounded-xl text-left transition-all duration-200 ${
                                     selectedChannel?.id === ch.id
-                                      ? "bg-white shadow-sm border border-purple-200"
-                                      : "hover:bg-white hover:shadow-sm border border-transparent"
+                                      ? "bg-white dark:bg-zinc-800 shadow-sm border border-purple-200 dark:border-purple-700"
+                                      : "hover:bg-white dark:hover:bg-zinc-800 hover:shadow-sm border border-transparent"
                                   }`}
                                 >
                                   {cd?.channelThumbnail ? (
@@ -528,7 +528,7 @@ export default function DemoSection() {
                                     </div>
                                   )}
                                   <div className="min-w-0">
-                                    <p className="text-[13px] font-bold text-gray-900 truncate leading-tight">
+                                    <p className="text-[13px] font-bold text-gray-900 dark:text-gray-100 truncate leading-tight">
                                       {ch.name}
                                     </p>
                                     <p className="text-[10px] text-gray-400 truncate leading-tight">
@@ -555,7 +555,7 @@ export default function DemoSection() {
                   )}
                 </AnimatePresence>
 
-                <div className="flex-1 flex flex-col min-w-0 bg-white">
+                <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-zinc-900">
                   {!sidebarOpen && (
                     <div className="hidden md:flex items-center gap-2 px-3 py-1.5 border-b border-gray-100">
                       <button
@@ -578,10 +578,10 @@ export default function DemoSection() {
                       <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-100 to-red-100 flex items-center justify-center mb-3">
                         <Sparkles size={24} className="text-purple-600" />
                       </div>
-                      <h3 className="text-base font-black text-gray-900 mb-1">
+                      <h3 className="text-base font-black text-gray-900 dark:text-gray-100 mb-1">
                         Scegli un canale
                       </h3>
-                      <p               className="text-sm text-gray-500 max-w-sm mb-4">
+                      <p               className="text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-4">
                         Seleziona un canale dalla sidebar per iniziare a chattare con i suoi contenuti.
                       </p>
                       <div className="flex flex-wrap justify-center gap-1.5 max-w-lg">
@@ -589,7 +589,7 @@ export default function DemoSection() {
                           <button
                             key={s}
                             onClick={() => handleSuggestionClick(s)}
-                            className="px-2.5 py-1.5 bg-gray-50 hover:bg-purple-50 hover:text-purple-700 border border-gray-100 hover:border-purple-200 rounded-xl text-[11px] font-semibold text-gray-600 transition-all"
+                            className="px-2.5 py-1.5 bg-gray-50 dark:bg-zinc-800 hover:bg-purple-50 dark:hover:bg-purple-950/40 hover:text-purple-700 dark:hover:text-purple-400 border border-gray-100 dark:border-zinc-700 hover:border-purple-200 dark:hover:border-purple-700 rounded-xl text-[11px] font-semibold text-gray-600 dark:text-gray-300 transition-all"
                           >
                             {s}
                           </button>
@@ -599,14 +599,14 @@ export default function DemoSection() {
                   ) : (
                     <div className="flex-1 flex flex-col overflow-hidden relative">
                       {selectedChannel && channelData[selectedChannel.id]?.channelThumbnail && (
-                        <div className="px-4 py-2.5 border-b border-gray-100 bg-gray-50/30 flex items-center gap-3 shrink-0">
+                        <div className="px-4 py-2.5 border-b border-gray-100 dark:border-zinc-800 bg-gray-50/30 dark:bg-zinc-950/60 flex items-center gap-3 shrink-0">
                           <img
                             src={channelData[selectedChannel.id].channelThumbnail}
                             alt=""
                             className="w-9 h-9 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
                           />
                           <div className="min-w-0 flex-1">
-                            <p className="text-xs font-bold text-gray-900 truncate leading-tight">
+                            <p className="text-xs font-bold text-gray-900 dark:text-gray-100 truncate leading-tight">
                               {channelData[selectedChannel.id]?.channelTitle || selectedChannel.name}
                             </p>
                           </div>
@@ -639,11 +639,11 @@ export default function DemoSection() {
                                 className={`px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed ${
                                   msg.sender === "user"
                                     ? msg.cancelled
-                                      ? "bg-red-50 text-red-600 rounded-br-sm border border-red-100"
-                                      : "bg-gray-900 text-white rounded-br-sm"
+                                      ? "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 rounded-br-sm border border-red-100 dark:border-red-900"
+                                      : "bg-gray-900 dark:bg-purple-600 text-white rounded-br-sm"
                                     : msg.cancelled
-                                      ? "bg-orange-50 text-orange-600 rounded-bl-sm border border-orange-100"
-                                      : "bg-purple-50 text-gray-800 rounded-bl-sm border border-purple-100"
+                                      ? "bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 rounded-bl-sm border border-orange-100 dark:border-orange-900"
+                                      : "bg-purple-50 dark:bg-purple-950/50 text-gray-800 dark:text-gray-200 rounded-bl-sm border border-purple-100 dark:border-purple-900"
                                 }`}
                               >
                                 {msg.sender === "user" ? (
@@ -719,14 +719,14 @@ export default function DemoSection() {
                     </div>
                   )}
 
-                  <div className="p-4 pt-3 border-t border-gray-100">
+                  <div className="p-4 pt-3 border-t border-gray-100 dark:border-zinc-800">
                     {userMsgCount > 0 && userMsgCount < DEMO_MESSAGE_LIMIT && messages.length > 0 && (
                       <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none">
                         {(aiSuggestions.length > 0 ? aiSuggestions : FALLBACK_SUGGESTIONS).map((s) => (
                           <button
                             key={s}
                             onClick={() => handleSuggestionClick(s)}
-                            className="shrink-0 px-2.5 py-1.5 bg-gray-50 hover:bg-purple-50 hover:text-purple-700 border border-gray-100 hover:border-purple-200 rounded-xl text-[11px] font-semibold text-gray-600 transition-all whitespace-nowrap"
+                            className="shrink-0 px-2.5 py-1.5 bg-gray-50 dark:bg-zinc-800 hover:bg-purple-50 dark:hover:bg-purple-950/40 hover:text-purple-700 dark:hover:text-purple-400 border border-gray-100 dark:border-zinc-700 hover:border-purple-200 dark:hover:border-purple-700 rounded-xl text-[11px] font-semibold text-gray-600 dark:text-gray-300 transition-all whitespace-nowrap"
                           >
                             {s}
                           </button>
@@ -746,7 +746,7 @@ export default function DemoSection() {
                             : "Chiedi qualcosa sul canale..."
                         }
                         disabled={userMsgCount >= DEMO_MESSAGE_LIMIT}
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-4 pr-12 py-2.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/10 focus:border-purple-200 transition-all disabled:opacity-50"
+                        className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl pl-4 pr-12 py-2.5 text-xs font-medium text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500/10 focus:border-purple-200 dark:focus:border-purple-700 transition-all disabled:opacity-50"
                       />
                       <button
                         onClick={loading ? handleCancel : handleSend}
@@ -769,9 +769,9 @@ export default function DemoSection() {
           </div>
 
           <div className="hidden xl:block w-80 shrink-0">
-            <div className="bg-white rounded-3xl border border-gray-200 shadow-xl shadow-purple-500/5 overflow-hidden">
-              <div className="p-3 border-b border-gray-100 flex items-center justify-between">
-                <span className="text-[10px] font-black text-gray-900 uppercase tracking-wider">
+            <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-200 dark:border-zinc-800 shadow-xl shadow-purple-500/5 overflow-hidden">
+              <div className="p-3 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
+                <span className="text-[10px] font-black text-gray-900 dark:text-gray-100 uppercase tracking-wider">
                   Video in riproduzione
                 </span>
               </div>
@@ -783,7 +783,7 @@ export default function DemoSection() {
                     onClose={() => { setCurrentVideo(null); setVideoStartTime(null); }}
                   />
                 ) : (
-                  <div className="aspect-video rounded-2xl bg-gray-50 border border-gray-100 flex flex-col items-center justify-center text-center p-6">
+                  <div className="aspect-video rounded-2xl bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 flex flex-col items-center justify-center text-center p-6">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" className="text-gray-300 mb-2">
                       <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.55 9.38.55 9.38.55s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z" />
                     </svg>
@@ -836,16 +836,16 @@ export default function DemoSection() {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.92, opacity: 0, y: 20 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl text-center"
+              className="bg-white dark:bg-zinc-900 rounded-3xl p-8 w-full max-w-sm shadow-2xl text-center"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600 to-red-500 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-purple-500/20">
                 <Sparkles size={26} className="text-white" />
               </div>
-              <h3 className="text-xl font-black text-gray-900 mb-2">
+              <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-2">
                 Limite di prova raggiunto
               </h3>
-              <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 leading-relaxed">
                 Hai utilizzato tutti i {DEMO_MESSAGE_LIMIT} messaggi gratuiti.
                 Registrati per continuare a usare Resumari senza limiti.
               </p>

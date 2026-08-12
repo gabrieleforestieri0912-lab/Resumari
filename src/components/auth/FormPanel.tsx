@@ -1,6 +1,5 @@
 'use client'
 
-import styles from "@/styles/auth.module.css";
 import LoginForm from "@/components/auth/LoginForm";
 import RegisterForm from "@/components/auth/RegisterForm";
 import { Sparkles } from "lucide-react";
@@ -28,19 +27,19 @@ export default function FormPanel({ view, animationState, side, onSwitch, locale
   const t = content[view];
   const animClass =
     animationState === 'leaving'
-      ? side === 'left' ? styles.panelLeavingLeft : styles.panelLeavingRight
+      ? side === 'left' ? 'auth-panel-leaving-left' : 'auth-panel-leaving-right'
       : animationState === 'entering'
-        ? side === 'left' ? styles.panelEnteringLeft : styles.panelEnteringRight
-        : styles.panelIdle;
+        ? side === 'left' ? 'auth-panel-entering-left' : 'auth-panel-entering-right'
+        : 'auth-panel-idle';
 
   return (
-    <div className={`${styles.formPanel} ${animClass}`}>
+    <div className={`auth-form-panel ${animClass}`}>
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <h2 className="text-3xl font-black text-gray-900 mb-2 tracking-tight">
+          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 mb-2 tracking-tight">
             {t.title[locale as 'it' | 'en'] || t.title.en}
           </h2>
-          <p className="text-gray-500 font-medium text-sm">
+          <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">
             {t.desc[locale as 'it' | 'en'] || t.desc.en}
           </p>
         </div>

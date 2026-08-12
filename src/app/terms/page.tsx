@@ -10,7 +10,7 @@ export default function TermsOfService() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-gray-900 dark:text-gray-100">
       <Navbar />
       <main className="max-w-3xl mx-auto px-6 pt-28 pb-20">
         <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
@@ -19,13 +19,13 @@ export default function TermsOfService() {
             Service
           </span>
         </h1>
-        <p className="text-sm text-gray-400 mb-12">
+        <p className="text-sm text-gray-400 dark:text-gray-500 mb-12">
           Ultimo aggiornamento: 28 marzo 2026
         </p>
 
-        <div className="space-y-10 text-gray-600 leading-relaxed">
+        <div className="space-y-10 text-gray-600 dark:text-gray-300 leading-relaxed">
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-3">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">
               1. Accettazione dei Termini
             </h2>
             <p>
@@ -36,7 +36,7 @@ export default function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-3">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">
               2. Descrizione del Servizio
             </h2>
             <p>
@@ -48,7 +48,7 @@ export default function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-3">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">
               3. Account Utente
             </h2>
             <ul className="list-disc pl-6 space-y-2">
@@ -71,7 +71,7 @@ export default function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-3">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">
               4. Piani e Pagamenti
             </h2>
             <ul className="list-disc pl-6 space-y-2">
@@ -95,7 +95,7 @@ export default function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-3">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">
               5. Utilizzo Consentito
             </h2>
             <p className="mb-3">Ti impegni a non utilizzare la Piattaforma per:</p>
@@ -115,7 +115,7 @@ export default function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-3">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">
               6. Proprietà Intellettuale
             </h2>
             <p>
@@ -127,7 +127,7 @@ export default function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-3">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">
               7. Limitazione di Responsabilità
             </h2>
             <p>
@@ -140,7 +140,7 @@ export default function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-3">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">
               8. Sospensione e Terminazione
             </h2>
             <p>
@@ -152,7 +152,7 @@ export default function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-3">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">
               9. Modifiche ai Termini
             </h2>
             <p>
@@ -164,7 +164,7 @@ export default function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-3">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">
               10. Legge Applicabile
             </h2>
             <p>
@@ -174,7 +174,7 @@ export default function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 mb-3">11. Contatti</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">11. Contatti</h2>
             <p>
               Per domande sui Termini di Servizio, contattaci all'indirizzo:{" "}
               <a

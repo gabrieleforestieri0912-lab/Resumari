@@ -55,7 +55,7 @@ export default function Supporto() {
   ];
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-gray-900 dark:text-gray-100">
       <Navbar />
       <main className="max-w-4xl mx-auto px-6 pt-28 pb-20">
         <div className="text-center mb-16">
@@ -68,7 +68,7 @@ export default function Supporto() {
               Supporto
             </span>
           </h1>
-          <p className="text-lg text-gray-500 max-w-xl mx-auto">
+          <p className="text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
             Hai bisogno di aiuto? Siamo qui per te. Trova le risposte che cerchi o contattaci direttamente.
           </p>
         </div>
@@ -80,14 +80,14 @@ export default function Supporto() {
               href={item.link || '#'}
               target={item.link?.startsWith('http') ? '_blank' : undefined}
               rel={item.link?.startsWith('http') ? 'noopener noreferrer' : undefined}
-              className="group p-6 rounded-2xl border border-gray-100 hover:border-purple-200 hover:shadow-xl hover:shadow-purple-500/10 transition-all"
+              className="group p-6 rounded-2xl border border-gray-100 dark:border-zinc-800 hover:border-purple-200 dark:hover:border-purple-700 hover:shadow-xl hover:shadow-purple-500/10 transition-all"
             >
               <item.icon
                 size={24}
                 className="text-purple-600 mb-4 group-hover:scale-110 transition-transform"
               />
-              <h3 className="font-bold text-gray-900 mb-1">{item.title}</h3>
-              <p className="text-sm text-gray-400 mb-2">{item.description}</p>
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-1">{item.title}</h3>
+              <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">{item.description}</p>
               <p className="text-sm font-semibold text-purple-600 group-hover:text-purple-700">
                 {item.action}
               </p>
@@ -95,16 +95,16 @@ export default function Supporto() {
           ))}
         </div>
 
-        <div className="bg-gray-50 rounded-3xl p-8 md:p-12">
+        <div className="bg-gray-50 dark:bg-zinc-900 rounded-3xl p-8 md:p-12">
           <h2 className="text-2xl font-black mb-8">Domande Frequenti</h2>
           <div className="space-y-6">
             {faq.map((item, i) => (
-              <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100">
-                <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+              <div key={i} className="bg-white dark:bg-zinc-950 rounded-2xl p-6 border border-gray-100 dark:border-zinc-800">
+                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
                   <CheckCircle size={18} className="text-purple-500" />
                   {item.q}
                 </h3>
-                <p className="text-gray-500 leading-relaxed">{item.a}</p>
+                <p className="text-gray-500 dark:text-gray-400 leading-relaxed">{item.a}</p>
               </div>
             ))}
           </div>

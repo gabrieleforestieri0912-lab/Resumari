@@ -78,20 +78,20 @@ function StepCard({ number, title, description, icon, index }: StepCardProps) {
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.2, duration: 0.5 }}
-      className="group relative bg-gray-50/50 rounded-2xl p-6 pt-12 transition-all duration-300 hover:bg-white hover:shadow-xl hover:shadow-purple-500/5 border border-transparent hover:border-purple-100 bg-linear-to-br hover:from-purple-50 hover:to-red-50"
+      className="group relative bg-gray-50/50 dark:bg-zinc-900 rounded-2xl p-6 pt-12 transition-all duration-300 hover:bg-white dark:hover:bg-zinc-800 hover:shadow-xl hover:shadow-purple-500/5 border border-transparent hover:border-purple-100 dark:hover:border-purple-800 bg-linear-to-br hover:from-purple-50 dark:hover:from-purple-950/40 hover:to-red-50 dark:hover:to-red-950/30"
     >
       {/* Number Badge */}
       <div className="absolute top-0 left-8 -translate-y-1/2 flex items-center gap-2">
         <div className="w-10 h-10 rounded-xl bg-linear-to-br from-purple-600 to-red-500 text-white flex items-center justify-center text-lg font-black shadow-lg group-hover:from-purple-700 group-hover:to-red-600 transition-all">
           {number}
         </div>
-        <div className="p-2 rounded-lg bg-white shadow-sm text-gray-400 group-hover:bg-linear-to-br group-hover:from-purple-600 group-hover:to-red-500 group-hover:text-white transition-all">
+        <div className="p-2 rounded-lg bg-white dark:bg-zinc-900 shadow-sm text-gray-400 dark:text-gray-500 group-hover:bg-linear-to-br group-hover:from-purple-600 group-hover:to-red-500 group-hover:text-white transition-all">
           {icon}
         </div>
       </div>
 
-      <h3 className="text-lg font-black text-gray-900 mb-2">{title}</h3>
-      <p className="text-sm text-gray-500 font-medium leading-relaxed">
+      <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 mb-2">{title}</h3>
+      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
         {description}
       </p>
 
@@ -101,7 +101,7 @@ function StepCard({ number, title, description, icon, index }: StepCardProps) {
 
 export default function StepsSection() {
   return (
-    <section id="steps" className="w-full px-6 py-16 bg-gradient-to-b from-white via-indigo-50/10 to-white relative overflow-hidden">
+    <section id="steps" className="w-full px-6 py-16 bg-gradient-to-b from-white via-indigo-50/10 to-white dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-950 relative overflow-hidden">
       <div className="max-w-7xl mx-auto">
         {/* Title */}
         <div className="mb-12">
@@ -110,7 +110,7 @@ export default function StepsSection() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight"
+            className="text-3xl md:text-4xl font-black text-gray-900 dark:text-gray-100 tracking-tight"
           >
             Come Funziona <br />
             <span className="bg-linear-to-r from-purple-600 to-red-500 bg-clip-text text-transparent">

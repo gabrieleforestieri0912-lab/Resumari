@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/components/LanguageContext";
+import { clearSession } from "@/lib/session";
 import {
   User,
   Mail,
@@ -67,8 +68,7 @@ export default function Profile() {
     })
       .then((res) => {
         if (!res.ok) {
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
+          clearSession();
           router.push("/login");
           return;
         }

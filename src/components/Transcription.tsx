@@ -102,7 +102,7 @@ export default function TranscriptionSection() {
   return (
     <section
       id="transcription"
-      className="w-full px-6 py-16 bg-gradient-to-b from-white via-[#f5f0ff]/20 to-white relative overflow-hidden"
+      className="w-full px-6 py-16 bg-gradient-to-b from-white via-[#f5f0ff]/20 to-white dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-950 relative overflow-hidden"
     >
       {/* Decorative background */}
       <div className="absolute top-0 right-0 w-125 h-125 bg-purple-500/10 rounded-full blur-[100px] -z-10" />
@@ -117,11 +117,11 @@ export default function TranscriptionSection() {
           className="text-center mb-12"
         >
           <div className="w-16 h-1 bg-gradient-to-r from-purple-600 to-red-500 rounded-full mb-4 mx-auto" />
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-gray-100 shadow-sm text-purple-600 text-xs font-bold uppercase tracking-wider mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-sm text-purple-600 text-xs font-bold uppercase tracking-wider mb-6">
             <Youtube size={14} fill="currentColor" />
             Prova Gratuita
           </div>
-          <h2 className="text-3xl md:text-5xl font-black text-gray-900 tracking-tight leading-tight">
+          <h2 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-gray-100 tracking-tight leading-tight">
             Trascrivi contenuti <br />
             <span className="text-purple-600 italic">in pochi secondi</span>
           </h2>
@@ -132,31 +132,31 @@ export default function TranscriptionSection() {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="bg-white rounded-2xl p-10 md:p-16 shadow-2xl shadow-purple-500/5 border border-white"
+          className="bg-white dark:bg-zinc-900 rounded-2xl p-10 md:p-16 shadow-2xl shadow-purple-500/5 border border-white dark:border-zinc-800"
         >
           <div className="max-w-2xl mx-auto text-center">
             {/* Mode Switcher */}
             <div className="flex justify-center mb-10">
-              <div className="bg-gray-100 p-1 rounded-2xl flex gap-1">
+              <div className="bg-gray-100 dark:bg-zinc-800 p-1 rounded-2xl flex gap-1">
                 <button
                   onClick={() => setRouteMode("video")}
-                  className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${mode === "video" ? "bg-white text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
+                  className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${mode === "video" ? "bg-white dark:bg-zinc-700 text-gray-900 dark:text-gray-100 shadow-sm" : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"}`}
                 >
                   Singolo Video
                 </button>
                 <button
                   onClick={() => setRouteMode("channel")}
-                  className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${mode === "channel" ? "bg-white text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
+                  className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${mode === "channel" ? "bg-white dark:bg-zinc-700 text-gray-900 dark:text-gray-100 shadow-sm" : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"}`}
                 >
                   Intero Canale
                 </button>
               </div>
             </div>
 
-            <h3 className="text-2xl font-black text-gray-900 mb-4">
+            <h3 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-4">
               {mode === "video" ? "Analizza un Video" : "Analizza un Canale"}
             </h3>
-            <p className="text-gray-500 font-medium mb-12">
+            <p className="text-gray-500 dark:text-gray-400 font-medium mb-12">
               {mode === "video"
                 ? "Incolla il link di un video YouTube per ottenere la trascrizione."
                 : "Incolla il link di un canale (es. @hubermanlab) per trascrivere tutti i video."}
@@ -184,7 +184,7 @@ export default function TranscriptionSection() {
                       ? "https://youtube.com/watch?v=..."
                       : "https://youtube.com/@nomecanale"
                   }
-                  className="w-full pl-14 pr-6 py-5 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-medium focus:outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-200 transition-all"
+                  className="w-full pl-14 pr-6 py-5 bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-2xl text-sm font-medium text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-200 dark:focus:border-purple-700 transition-all"
                 />
               </div>
 
@@ -196,7 +196,7 @@ export default function TranscriptionSection() {
 
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-3 px-8 py-4 bg-gray-900 text-white rounded-2xl font-black text-base hover:bg-black transition-all transform hover:-translate-y-1 shadow-xl shadow-gray-200 active:scale-95"
+                className="w-full flex items-center justify-center gap-3 px-8 py-4 bg-gray-900 dark:bg-purple-600 dark:hover:bg-purple-500 text-white rounded-2xl font-black text-base hover:bg-black transition-all transform hover:-translate-y-1 shadow-xl shadow-gray-200 dark:shadow-none active:scale-95"
               >
                 <Search size={20} />
                 {mode === "video" ? "Trascrivi Video" : "Trascrivi Canale"}
@@ -204,11 +204,11 @@ export default function TranscriptionSection() {
             </form>
 
             <div className="mt-8 flex items-center justify-center gap-6 opacity-40">
-              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-900">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-900 dark:text-gray-300">
                 <Sparkles size={12} /> No Account Req.
               </div>
-              <div className="w-1 h-1 rounded-full bg-gray-300" />
-              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-900">
+              <div className="w-1 h-1 rounded-full bg-gray-300 dark:bg-zinc-600" />
+              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-900 dark:text-gray-300">
                 <Sparkles size={12} /> IA Unlimited
               </div>
             </div>
@@ -231,7 +231,7 @@ export default function TranscriptionSection() {
               Vedi le Tue Trascrizioni
             </span>
           </Link>
-          <p className="mt-6 text-gray-500 font-bold text-xs tracking-tight">
+          <p className="mt-6 text-gray-500 dark:text-gray-400 font-bold text-xs tracking-tight">
             Tutte le tue trascrizioni salvate in un unico posto
           </p>
         </motion.div>

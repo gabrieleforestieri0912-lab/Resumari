@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/components/LanguageContext";
+import { clearSession } from "@/lib/session";
 import {
   ArrowLeft,
   Home,
@@ -150,8 +151,7 @@ export default function Settings() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    clearSession();
     router.push("/");
   };
 
@@ -165,8 +165,7 @@ export default function Settings() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+        clearSession();
         router.push("/");
       } else {
         const data = await res.json();

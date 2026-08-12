@@ -8,6 +8,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/components/LanguageContext";
 import { useToast } from "@/components/ToastProvider";
+import { clearSession } from "@/lib/session";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import MediaPanel from "@/components/chat/MediaPanel";
@@ -296,8 +297,7 @@ export default function Chat() {
   const displayName = user?.name || user?.email?.split("@")[0] || "Utente";
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    clearSession();
     localStorage.removeItem(CHATS_STORAGE_KEY);
     localStorage.removeItem(MESSAGES_STORAGE_KEY);
     router.push("/");

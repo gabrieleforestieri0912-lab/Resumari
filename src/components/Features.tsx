@@ -76,25 +76,25 @@ function FeatureCard({ title, description, icon, index, highlighted }: FeatureCa
       viewport={{ once: true }}
       transition={{ delay: index * 0.1 }}
       whileHover={{ y: -10 }}
-      className={`group relative bg-white rounded-2xl border p-10 text-center transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/10 ${
+      className={`group relative bg-white dark:bg-zinc-900 rounded-2xl border p-10 text-center transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/10 ${
         highlighted
-          ? "border-purple-100 shadow-xl shadow-purple-500/5 lg:col-span-2 row-span-1"
-          : "border-gray-100 shadow-xl shadow-gray-200/50 hover:border-purple-200"
+          ? "border-purple-100 dark:border-purple-900/40 shadow-xl shadow-purple-500/5 lg:col-span-2 row-span-1"
+          : "border-gray-100 dark:border-zinc-800 shadow-xl shadow-gray-200/50 dark:shadow-none hover:border-purple-200 dark:hover:border-purple-700"
       }`}
     >
       {/* Icon */}
       <div
         className={`mx-auto mb-8 flex items-center justify-center rounded-2xl transition-all duration-500 group-hover:bg-linear-to-br group-hover:from-purple-600 group-hover:to-red-600 group-hover:text-white group-hover:rotate-6 group-hover:shadow-lg group-hover:shadow-purple-200 ${
           highlighted
-            ? "w-20 h-20 bg-linear-to-br from-purple-100 to-red-100 text-purple-600 shadow-md shadow-purple-200"
-            : "w-16 h-16 bg-gray-50 text-gray-400"
+            ? "w-20 h-20 bg-linear-to-br from-purple-100 to-red-100 dark:from-purple-900/40 dark:to-red-900/40 text-purple-600 dark:text-purple-400 shadow-md shadow-purple-200 dark:shadow-none"
+            : "w-16 h-16 bg-gray-50 dark:bg-zinc-800 text-gray-400 dark:text-gray-500"
         }`}
       >
         {icon}
       </div>
 
-      <h3 className="text-xl font-black text-gray-900 mb-4">{title}</h3>
-      <p className="text-gray-500 leading-relaxed font-medium text-sm">
+      <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-4">{title}</h3>
+      <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium text-sm">
         {description}
       </p>
     </motion.div>
@@ -115,7 +115,7 @@ export default function FeaturesSection() {
     <section
       ref={sectionRef}
       id="features"
-      className="w-full px-6 py-16 bg-gradient-to-b from-white via-purple-50/10 to-white overflow-hidden"
+      className="w-full px-6 py-16 bg-gradient-to-b from-white via-purple-50/10 to-white dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-950 overflow-hidden"
       style={{ position: 'relative' }}
     >
       {/* Background Decor with Parallax */}
@@ -139,7 +139,7 @@ export default function FeaturesSection() {
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            className="text-3xl md:text-5xl font-black text-gray-900 tracking-tight"
+            className="text-3xl md:text-5xl font-black text-gray-900 dark:text-gray-100 tracking-tight"
           >
             Funzionalità Che Amerai
           </motion.h2>

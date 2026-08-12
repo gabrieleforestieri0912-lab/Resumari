@@ -3,17 +3,7 @@ import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/
 import { z } from 'zod'
 import { createJob, getJob, processJob } from '@/lib/mcp-jobs'
 
-let serverInstance: McpServer | null = null
-let transportInstance: WebStandardStreamableHTTPServerTransport | null = null
-
-function getOrCreateServer() {
-  if (serverInstance && transportInstance) return { server: serverInstance, transport: transportInstance }
-
-  const transport = new WebStandardStreamableHTTPServerTransport({
-    sessionIdGenerator: undefined,
-    enableJsonResponse: true,
-  })
-
+function createServer() {
   const server = new McpServer({
     name: 'Resumari YouTube Transcript',
     version: '1.0.0',
@@ -95,23 +85,30 @@ function getOrCreateServer() {
     }
   })
 
-  serverInstance = server
-  transportInstance = transport
+  return server
+}
 
-  return { server, transport }
+// The SDK's stateless transport (sessionIdGenerator: undefined) cannot be
+// reused across requests, and a Protocol instance cannot be reconnected.
+// Create a fresh server + transport per request instead.
+async function handleRequest(request: Request) {
+  const server = createServer()
+  const transport = new WebStandardStreamableHTTPServerTransport({
+    sessionIdGenerator: undefined,
+    enableJsonResponse: true,
+  })
+  await server.connect(transport)
+  return transport.handleRequest(request)
 }
 
 export async function GET(request: Request) {
-  const { transport } = getOrCreateServer()
-  return transport.handleRequest(request)
+  return handleRequest(request)
 }
 
 export async function POST(request: Request) {
-  const { transport } = getOrCreateServer()
-  return transport.handleRequest(request)
+  return handleRequest(request)
 }
 
 export async function DELETE(request: Request) {
-  const { transport } = getOrCreateServer()
-  return transport.handleRequest(request)
+  return handleRequest(request)
 }

@@ -4,6 +4,9 @@ Disallow: /api/
 Disallow: /dashboard/
 Disallow: /settings/
 Disallow: /profile/
+Disallow: /api-keys/
+Disallow: /videos/
+Disallow: /chat/
 
 # OpenAI GPTBot for AI training and browsing
 User-agent: GPTBot

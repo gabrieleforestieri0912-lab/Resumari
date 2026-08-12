@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useLanguage } from "@/components/LanguageContext";
-import styles from "@/styles/auth.module.css";
 import FormPanel from "@/components/auth/FormPanel";
 import DescriptionPanel from "@/components/auth/DescriptionPanel";
 
@@ -18,11 +17,14 @@ export default function AuthPage() {
   const [animationState, setAnimationState] = useState<AnimationState>('idle');
   const pendingViewRef = useRef<AuthView | null>(null);
 
-  useEffect(() => {
-    if (searchParams.get("mode") === "signup") {
-      setView('register');
-    }
-  }, [searchParams]);
+  // Sync the initial view from the URL by adjusting state during render
+  // (avoids calling setState synchronously inside an effect).
+  const urlMode = searchParams.get('mode');
+  const [prevMode, setPrevMode] = useState<string | null>(urlMode);
+  if (prevMode !== urlMode) {
+    setPrevMode(urlMode);
+    if (urlMode === 'signup') setView('register');
+  }
 
   useEffect(() => {
     document.title = "Accedi | Resumari";
@@ -58,7 +60,7 @@ export default function AuthPage() {
   const descSide = isLogin ? 'right' : 'left';
 
   return (
-    <div className={`min-h-screen bg-white flex overflow-hidden ${styles.container}`} aria-live="polite" aria-label={isLogin ? "Pagina di login" : "Pagina di registrazione"}>
+    <div className={`min-h-screen bg-white dark:bg-zinc-950 flex overflow-hidden auth-container`} aria-live="polite" aria-label={isLogin ? "Pagina di login" : "Pagina di registrazione"}>
       <Link
         href="/"
         className="absolute top-6 left-6 z-20 flex items-center gap-2 font-black text-xl text-purple-600 hover:scale-105 transition-transform"
@@ -69,7 +71,7 @@ export default function AuthPage() {
         </span>
       </Link>
 
-      <div className={`${styles.wrapper} ${!isLogin ? styles.wrapperRegister : ''}`}>
+      <div className={`auth-wrapper ${!isLogin ? 'auth-wrapper-register' : ''}`}>
         <FormPanel
           view={view}
           animationState={animationState}

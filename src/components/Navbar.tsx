@@ -17,6 +17,8 @@ import {
   Key,
   Server,
 } from "lucide-react";
+import ThemeToggle from "./ThemeToggle";
+import { clearSession } from "@/lib/session";
 
 interface UserData {
   name?: string;
@@ -77,8 +79,7 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    clearSession();
     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     setUser(null);
     setIsOpen(false);
@@ -108,7 +109,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed top-3 left-3 right-3 md:top-4 md:left-6 md:right-6 h-16 bg-white/70 backdrop-blur-xl z-50 flex items-center justify-between px-5 md:px-8 rounded-2xl border border-white/20 shadow-lg shadow-black/5">
+    <nav className="fixed top-3 left-3 right-3 md:top-4 md:left-6 md:right-6 h-16 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl z-50 flex items-center justify-between px-5 md:px-8 rounded-2xl border border-white/20 dark:border-white/10 shadow-lg shadow-black/5">
       <div className="flex items-center gap-8">
         <Link href="/" className="flex items-center gap-2 cursor-pointer group">
           <img
@@ -123,7 +124,7 @@ export default function Navbar() {
             <Link
               key={item.href}
               href={item.href}
-              className="px-4 py-2 text-sm font-semibold text-gray-500 hover:text-purple-600 hover:bg-purple-50/80 rounded-xl transition-all"
+              className="px-4 py-2 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/80 dark:hover:bg-white/10 rounded-xl transition-all"
             >
               {item.label}
             </Link>
@@ -132,6 +133,7 @@ export default function Navbar() {
       </div>
 
       <div className="flex items-center gap-3">
+        <ThemeToggle />
         {user ? (
           <div className="flex items-center gap-3">
             <Link
@@ -146,7 +148,7 @@ export default function Navbar() {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 p-1.5 rounded-full hover:bg-purple-50 transition-colors"
+                className="flex items-center gap-2 p-1.5 rounded-full hover:bg-purple-50 dark:hover:bg-white/10 transition-colors"
               >
                 {user?.picture ? (
                   <img
@@ -168,16 +170,16 @@ export default function Navbar() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.96 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50"
+                    className="absolute right-0 mt-3 w-64 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-gray-100 dark:border-zinc-800 overflow-hidden z-50"
                   >
-                    <div className="px-5 py-4 border-b border-gray-50">
+                    <div className="px-5 py-4 border-b border-gray-50 dark:border-zinc-800">
                       <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
                         Account
                       </p>
-                      <p className="text-sm font-bold text-gray-900 truncate">
+                      <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">
                         {displayName}
                       </p>
-                      <p className="text-xs text-gray-500 truncate">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                         {user.email}
                       </p>
                     </div>
@@ -188,7 +190,7 @@ export default function Navbar() {
                           key={item.href}
                           href={item.href}
                           onClick={() => setIsOpen(false)}
-                          className="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-600 rounded-xl hover:bg-purple-50 hover:text-purple-600 transition-all"
+                          className="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-600 dark:text-gray-300 rounded-xl hover:bg-purple-50 dark:hover:bg-white/10 hover:text-purple-600 dark:hover:text-purple-400 transition-all"
                         >
                           <item.icon size={18} />
                           {item.label}
@@ -196,10 +198,10 @@ export default function Navbar() {
                       ))}
                     </div>
 
-                    <div className="py-2 px-3 border-t border-gray-50">
+                    <div className="py-2 px-3 border-t border-gray-50 dark:border-zinc-800">
                       <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-red-500 rounded-xl hover:bg-red-50 transition-all text-left"
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-red-500 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 transition-all text-left"
                       >
                         <LogOut size={18} />
                         Esci
@@ -214,7 +216,7 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             <Link
               href="/login"
-              className="px-5 py-2.5 text-sm font-bold text-gray-600 hover:text-purple-600 transition-colors"
+              className="px-5 py-2.5 text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
             >
               Accedi
             </Link>
@@ -229,7 +231,7 @@ export default function Navbar() {
 
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="lg:hidden p-2.5 rounded-xl hover:bg-gray-100 text-gray-600 transition-colors"
+          className="lg:hidden p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 transition-colors"
         >
           {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
@@ -241,7 +243,7 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="lg:hidden absolute top-16 left-0 right-0 bg-white border-b border-gray-100 shadow-xl p-4 space-y-2"
+            className="lg:hidden absolute top-16 left-0 right-0 bg-white dark:bg-zinc-900 border-b border-gray-100 dark:border-zinc-800 shadow-xl p-4 space-y-2"
             ref={mobileMenuRef}
           >
             {navLinks.map((item) => (
@@ -249,17 +251,17 @@ export default function Navbar() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block px-5 py-3.5 text-base font-semibold text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all"
+                className="block px-5 py-3.5 text-base font-semibold text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-white/10 rounded-xl transition-all"
               >
                 {item.label}
               </Link>
             ))}
             {!user && (
-              <div className="pt-2 mt-2 border-t border-gray-100 flex gap-3">
+              <div className="pt-2 mt-2 border-t border-gray-100 dark:border-zinc-800 flex gap-3">
                 <Link
                   href="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex-1 px-5 py-3 text-center text-sm font-bold text-gray-600 hover:bg-gray-50 rounded-xl transition-colors"
+                  className="flex-1 px-5 py-3 text-center text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/10 rounded-xl transition-colors"
                 >
                   Accedi
                 </Link>

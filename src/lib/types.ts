@@ -34,6 +34,40 @@ export type ChatMessage = {
   videoId?: string
 }
 
+export type ApiKey = {
+  id: string
+  user_id: string
+  name: string
+  key_prefix: string
+  key_hash: string
+  created_at: string
+  last_used_at: string | null
+  revoked: boolean
+}
+
+export type TranscriptSegment = {
+  text: string
+  time?: number
+  start?: number
+  duration?: number
+}
+
+export type Transcript = {
+  id: string
+  user_id: string
+  video_id: string
+  title: string
+  channel?: string | null
+  thumbnail?: string | null
+  duration_sec?: number
+  language?: string | null
+  is_generated?: boolean
+  transcript: TranscriptSegment[]
+  credits_used?: number
+  created_at: string
+  updated_at: string
+}
+
 export type VerificationCode = {
   id: string
   email: string
@@ -51,16 +85,7 @@ export type ContactMessage = {
   created_at: string
 }
 
-export type ApiKey = {
-  id: string
-  user_id: string
-  name: string
-  key_prefix: string
-  key_hash: string
-  created_at: string
-  last_used_at: string | null
-  revoked: boolean
-}
+
 
 // Supabase table names
 export const TABLES = {
@@ -72,6 +97,7 @@ export const TABLES = {
   SESSIONS: 'nextauth_sessions',
   VERIFICATION_TOKENS: 'nextauth_verification_tokens',
   API_KEYS: 'api_keys',
+  TRANSCRIPTS: 'transcripts',
 } as const
 
 // For backward compatibility with existing MongoDB-based code

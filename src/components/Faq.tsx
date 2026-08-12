@@ -37,7 +37,7 @@ export default function Faq() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   return (
-    <section className="py-12 md:py-16 px-6 bg-gradient-to-b from-white via-purple-50/20 to-white relative" id="faq">
+    <section className="py-12 md:py-16 px-6 bg-gradient-to-b from-white via-purple-50/20 to-white dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-950 relative" id="faq">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-6">
           <div className="w-16 h-1 bg-gradient-to-r from-purple-600 to-red-500 rounded-full mb-4 mx-auto" />
@@ -52,7 +52,7 @@ export default function Faq() {
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            className="text-3xl md:text-4xl font-black text-gray-900 mb-2"
+            className="text-3xl md:text-4xl font-black text-gray-900 dark:text-gray-100 mb-2"
           >
             Domande Frequenti
           </motion.h2>
@@ -69,8 +69,8 @@ export default function Faq() {
                 transition={{ delay: index * 0.05 }}
                 className={`group rounded-2xl border transition-all duration-300 ${
                   isActive
-                    ? "bg-white border-purple-200 shadow-md"
-                    : "bg-white/50 border-gray-200 hover:border-purple-300 hover:bg-white"
+                    ? "bg-white dark:bg-zinc-900 border-purple-200 dark:border-purple-700 shadow-md"
+                    : "bg-white/50 dark:bg-zinc-900/50 border-gray-200 dark:border-zinc-800 hover:border-purple-300 dark:hover:border-purple-700 hover:bg-white dark:hover:bg-zinc-900"
                 }`}
               >
                 <button
@@ -78,12 +78,12 @@ export default function Faq() {
                   onClick={() => setActiveIndex(isActive ? null : index)}
                 >
                   <span
-                    className={`text-sm font-bold transition-colors duration-300 ${isActive ? "text-purple-700" : "text-gray-900 group-hover:text-purple-600"}`}
+                    className={`text-sm font-bold transition-colors duration-300 ${isActive ? "text-purple-700 dark:text-purple-400" : "text-gray-900 dark:text-gray-100 group-hover:text-purple-600 dark:group-hover:text-purple-400"}`}
                   >
                     {item.question}
                   </span>
                   <div
-                    className={`p-1.5 rounded-lg transition-all duration-300 ${isActive ? "bg-purple-600 text-white rotate-180" : "bg-gray-100 text-gray-400 group-hover:bg-purple-100 group-hover:text-purple-500"}`}
+                    className={`p-1.5 rounded-lg transition-all duration-300 ${isActive ? "bg-purple-600 text-white rotate-180" : "bg-gray-100 dark:bg-zinc-800 text-gray-400 dark:text-gray-500 group-hover:bg-purple-100 dark:group-hover:bg-zinc-700 group-hover:text-purple-500 dark:group-hover:text-purple-400"}`}
                   >
                     <ChevronDown size={16} strokeWidth={2.5} />
                   </div>
@@ -98,7 +98,7 @@ export default function Faq() {
                       transition={{ duration: 0.3, ease: "easeInOut" }}
                       className="overflow-hidden"
                     >
-                      <div className="px-4 pb-4 text-sm text-gray-600 leading-relaxed border-t border-gray-50 pt-3 mt-1">
+                      <div className="px-4 pb-4 text-sm text-gray-600 dark:text-gray-300 leading-relaxed border-t border-gray-50 dark:border-zinc-800 pt-3 mt-1">
                         {item.answer}
                       </div>
                     </motion.div>
@@ -114,7 +114,7 @@ export default function Faq() {
           whileInView={{ opacity: 1 }}
           className="mt-8 text-center p-6 rounded-2xl bg-linear-to-r from-purple-600/5 to-red-600/5 border border-purple-100"
         >
-          <p className="text-sm text-gray-700 font-medium mb-2">Hai altre domande?</p>
+          <p className="text-sm text-gray-700 dark:text-gray-200 font-medium mb-2">Hai altre domande?</p>
           <Link
             href="/supporto"
             className="text-sm text-purple-700 font-bold hover:underline"

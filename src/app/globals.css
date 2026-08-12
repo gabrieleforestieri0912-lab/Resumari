@@ -1,8 +1,26 @@
 @import "tailwindcss";
 
+/* Enable the `dark:` variant driven by the .dark class on <html>.
+   next-themes toggles that class; system preference is honored via
+   `defaultTheme="system"` in Providers. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --surface: #ffffff;
+  --surface-muted: #f9fafb;
+  --border: #e5e7eb;
+  --muted: #6b7280;
+}
+
+.dark {
+  --background: #0a0a0b;
+  --foreground: #f3f4f6;
+  --surface: #111113;
+  --surface-muted: #18181b;
+  --border: #27272a;
+  --muted: #a1a1aa;
 }
 
 a, button { cursor: pointer; }
@@ -10,19 +28,33 @@ a, button { cursor: pointer; }
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border-soft: var(--border);
+  --color-muted: var(--muted);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
 }
 
 html {
   scroll-behavior: smooth;
+  /* framer-motion's useScroll uses document.scrollingElement (the <html>
+     element) as the default scroll container and warns in dev if it is
+     position: static. Non-static position here is harmless and silences
+     the false positive. */
+  position: relative;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Inter, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* Color-scheme so native controls (scrollbars, inputs) follow the theme */
+:root { color-scheme: light; }
+.dark { color-scheme: dark; }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
@@ -49,44 +81,174 @@ body {
   scrollbar-color: #d1d5db transparent;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
+/* ============================================================
+   Auth pages (login / register)
+   Ex classi CSS module: src/styles/auth.module.css
+   ============================================================ */
+
+.auth-container {
+  --auth-easing: cubic-bezier(0.77, 0, 0.175, 1);
+  --auth-duration: 400ms;
+  --auth-bg-right: #f9fafb;
+  overflow-x: hidden;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Inter, sans-serif;
+.dark .auth-container {
+  --auth-bg-right: #111113;
 }
 
-html {
-  suppressHydrationWarning: true;
+.auth-wrapper {
+  display: flex;
+  width: 100%;
+  overflow-x: hidden;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.auth-wrapper-register {
+  flex-direction: row-reverse;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+.auth-form-panel {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  min-height: 100vh;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 4px;
+.auth-desc-panel {
+  display: none;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--auth-bg-right);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+.auth-panel-idle {
+  opacity: 1;
+  transform: translateX(0) translateY(0);
 }
 
-/* Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #d1d5db transparent;
+.auth-panel-leaving-left {
+  animation: auth-slide-out-left var(--auth-duration) var(--auth-easing) forwards;
+}
+
+.auth-panel-leaving-right {
+  animation: auth-slide-out-right var(--auth-duration) var(--auth-easing) forwards;
+}
+
+.auth-panel-entering-left {
+  animation: auth-slide-in-from-left var(--auth-duration) var(--auth-easing) forwards;
+}
+
+.auth-panel-entering-right {
+  animation: auth-slide-in-from-right var(--auth-duration) var(--auth-easing) forwards;
+}
+
+@media (min-width: 768px) {
+  .auth-form-panel {
+    width: 50%;
+  }
+
+  .auth-desc-panel {
+    display: flex;
+    width: 50%;
+    min-height: 100vh;
+  }
+}
+
+@media (max-width: 767px) {
+  .auth-wrapper,
+  .auth-wrapper-register {
+    flex-direction: column;
+  }
+
+  .auth-form-panel {
+    min-height: auto;
+    padding: 2rem 1.5rem;
+  }
+
+  .auth-desc-panel {
+    display: flex;
+    height: 180px;
+    min-height: 180px;
+    max-height: 180px;
+  }
+
+  .auth-panel-leaving-left,
+  .auth-panel-leaving-right {
+    animation-name: auth-slide-out-up;
+  }
+
+  .auth-panel-entering-left,
+  .auth-panel-entering-right {
+    animation-name: auth-slide-in-from-bottom;
+  }
+}
+
+@keyframes auth-slide-out-left {
+  to {
+    transform: translateX(-8%);
+    opacity: 0;
+  }
+}
+
+@keyframes auth-slide-out-right {
+  to {
+    transform: translateX(8%);
+    opacity: 0;
+  }
+}
+
+@keyframes auth-slide-in-from-right {
+  from {
+    transform: translateX(8%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes auth-slide-in-from-left {
+  from {
+    transform: translateX(-8%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes auth-slide-out-up {
+  to {
+    transform: translateY(-8%);
+    opacity: 0;
+  }
+}
+
+@keyframes auth-slide-in-from-bottom {
+  from {
+    transform: translateY(8%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-panel-leaving-left,
+  .auth-panel-leaving-right,
+  .auth-panel-entering-left,
+  .auth-panel-entering-right {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }

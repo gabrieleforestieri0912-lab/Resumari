@@ -2,13 +2,20 @@
   "name": "resumari",
   "version": "1.1.2",
   "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "dev": "next dev",
+    "dev:clean": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\" && next dev",
     "build": "next build",
     "build:extension": "next build && npm run copy:extension",
     "copy:extension": "node scripts/build-extension.js",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
@@ -24,6 +31,7 @@
     "lucide-react": "^1.7.0",
     "next": "16.2.2",
     "next-auth": "^4.24.14",
+    "next-themes": "^0.4.6",
     "openai": "^6.37.0",
     "pdf-parse": "^2.4.5",
     "react": "19.2.4",
@@ -41,6 +49,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.2",
-    "tailwindcss": "^4"
+    "tailwindcss": "^4",
+    "vitest": "^3.2.7"
   }
 }
