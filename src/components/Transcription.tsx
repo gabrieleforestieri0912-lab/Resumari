@@ -189,7 +189,7 @@ export default function TranscriptionSection() {
               </div>
 
               {error && (
-                <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm font-medium text-center">
+                <div className="px-4 py-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl text-red-600 dark:text-red-400 text-sm font-medium text-center">
                   {error}
                 </div>
               )}

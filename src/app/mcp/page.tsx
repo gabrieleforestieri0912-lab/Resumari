@@ -147,7 +147,7 @@ export default function McpPage() {
             </code>
             <button
               onClick={() => copy("https://resumari.it/api/mcp", "server-url")}
-              className="p-3 hover:bg-gray-100 rounded-xl transition-all"
+              className="p-3 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-xl transition-all"
             >
               {copied === "server-url" ? <Check size={18} className="text-green-600" /> : <Copy size={18} className="text-gray-400" />}
             </button>
@@ -235,7 +235,7 @@ export default function McpPage() {
                     <ol className="space-y-3 mb-5">
                       {client.steps.map((step, j) => (
                         <li key={j} className="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300">
-                          <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                          <span className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                             {j + 1}
                           </span>
                           <span>{step}</span>

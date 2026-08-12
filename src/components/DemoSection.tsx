@@ -421,7 +421,7 @@ export default function DemoSection() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-6">
           <div className="w-16 h-1 bg-gradient-to-r from-purple-600 to-red-500 rounded-full mb-4 mx-auto" />
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-wider">
             <Sparkles size={14} />
             Prova Gratuita
           </span>
@@ -455,7 +455,7 @@ export default function DemoSection() {
                           </span>
                           <button
                             onClick={() => setSidebarOpen(false)}
-                            className="p-1 rounded-lg hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors"
+                            className="p-1 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                           >
                             <X size={13} />
                           </button>
@@ -542,10 +542,10 @@ export default function DemoSection() {
                         )}
                       </div>
                       {!isLoggedIn && (
-                        <div className="p-3 border-t border-gray-100">
+                        <div className="p-3 border-t border-gray-100 dark:border-zinc-800">
                           <Link
                             href="/login?mode=signup"
-                            className="block w-full py-2 text-center text-[10px] font-bold text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                            className="block w-full py-2 text-center text-[10px] font-bold text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded-lg transition-colors"
                           >
                             Sblocca tutti i canali →
                           </Link>
@@ -557,10 +557,10 @@ export default function DemoSection() {
 
                 <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-zinc-900">
                   {!sidebarOpen && (
-                    <div className="hidden md:flex items-center gap-2 px-3 py-1.5 border-b border-gray-100">
+                    <div className="hidden md:flex items-center gap-2 px-3 py-1.5 border-b border-gray-100 dark:border-zinc-800">
                       <button
                         onClick={() => setSidebarOpen(true)}
-                        className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                        className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded-lg transition-colors"
                       >
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.55 9.38.55 9.38.55s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z" /></svg>
                         Canali
@@ -614,7 +614,7 @@ export default function DemoSection() {
                             href={`https://youtube.com/channel/${selectedChannel.id}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="shrink-0 p-1.5 rounded-lg hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-all"
+                            className="shrink-0 p-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all"
                           >
                             <ExternalLink size={13} />
                           </a>
@@ -669,28 +669,28 @@ export default function DemoSection() {
                                 <div className="flex items-center gap-0.5 ml-0.5">
                                   <button
                                     onClick={() => handleCopy(msg.text)}
-                                    className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+                                    className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-700 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all"
                                     title="Copia"
                                   >
                                     <Copy size={11} />
                                   </button>
                                   <button
                                     onClick={() => handleLike(msg.id)}
-                                    className={`p-1 rounded-md transition-all ${likedMessages.has(msg.id) ? "text-blue-500 bg-blue-50" : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"}`}
+                                    className={`p-1 rounded-md transition-all ${likedMessages.has(msg.id) ? "text-blue-500 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400" : "text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-zinc-700"}`}
                                     title="Mi piace"
                                   >
                                     <ThumbsUp size={11} />
                                   </button>
                                   <button
                                     onClick={() => handleDislike(msg.id)}
-                                    className={`p-1 rounded-md transition-all ${dislikedMessages.has(msg.id) ? "text-red-500 bg-red-50" : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"}`}
+                                    className={`p-1 rounded-md transition-all ${dislikedMessages.has(msg.id) ? "text-red-500 bg-red-50 dark:bg-red-950/40 dark:text-red-400" : "text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-zinc-700"}`}
                                     title="Non mi piace"
                                   >
                                     <ThumbsDown size={11} />
                                   </button>
                                   <button
                                     onClick={() => handleRetry(msg)}
-                                    className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+                                    className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-700 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all"
                                     title="Riprova"
                                   >
                                     <RefreshCw size={11} />
@@ -706,7 +706,7 @@ export default function DemoSection() {
                             <div className="w-6 h-6 shrink-0 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-md">
                               <Sparkles size={10} className="text-white" />
                             </div>
-                            <div className="bg-purple-50 px-3.5 py-2.5 rounded-2xl rounded-bl-sm border border-purple-100 flex items-center gap-1">
+                            <div className="bg-purple-50 dark:bg-purple-950/50 px-3.5 py-2.5 rounded-2xl rounded-bl-sm border border-purple-100 dark:border-purple-900 flex items-center gap-1">
                               <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
                               <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
                               <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" />
@@ -858,7 +858,7 @@ export default function DemoSection() {
                 </Link>
                 <button
                   onClick={() => setShowLimitPopup(false)}
-                  className="block w-full py-3 text-sm font-bold text-gray-500 hover:text-gray-700 rounded-xl hover:bg-gray-50 transition-all"
+                  className="block w-full py-3 text-sm font-bold text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all"
                 >
                   Più tardi
                 </button>

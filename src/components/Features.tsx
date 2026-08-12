@@ -119,8 +119,8 @@ export default function FeaturesSection() {
     >
       {/* Background Decor with Parallax */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full -z-10 pointer-events-none">
-        <motion.div style={{ y: blobLeftY }} className="absolute top-1/4 left-0 w-96 h-96 bg-purple-50 rounded-full blur-3xl opacity-50" />
-        <motion.div style={{ y: blobRightY }} className="absolute bottom-1/4 right-0 w-96 h-96 bg-red-50 rounded-full blur-3xl opacity-50" />
+        <motion.div style={{ y: blobLeftY }} className="absolute top-1/4 left-0 w-96 h-96 bg-purple-50 dark:bg-purple-950/40 rounded-full blur-3xl opacity-50" />
+        <motion.div style={{ y: blobRightY }} className="absolute bottom-1/4 right-0 w-96 h-96 bg-red-50 dark:bg-red-950/40 rounded-full blur-3xl opacity-50" />
       </div>
 
       <div className="max-w-7xl mx-auto">
