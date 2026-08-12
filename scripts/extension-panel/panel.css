@@ -16,6 +16,10 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* The hidden attribute must always win over any display rule (e.g. .field
+   uses display:flex, which would otherwise show elements marked hidden). */
+[hidden] { display: none !important; }
+
 html, body { height: 100%; }
 
 body {

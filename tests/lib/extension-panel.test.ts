@@ -73,6 +73,13 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       expect(css).toContain('.usage-event')
       expect(css).toContain('.toast')
     })
+
+    it('forces [hidden] to hide even on elements with a display rule (e.g. .field)', () => {
+      // Regression guard: .field uses display:flex, which would override the
+      // UA [hidden] rule and show the code field in password mode (and vice
+      // versa). The global [hidden] rule must exist and win.
+      expect(css).toMatch(/\[hidden\]\s*\{\s*display:\s*none\s*!important\s*;?\s*\}/i)
+    })
   })
 
   describe('panel.js', () => {
