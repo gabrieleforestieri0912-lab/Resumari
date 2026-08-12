@@ -5,6 +5,23 @@ const distDir = path.join(__dirname, '../dist-extension');
 const panelDir = path.join(__dirname, 'extension-panel');
 const VERSION = require('../package.json').version;
 
+// Mirror Next.js behavior for scripts that run outside `next build` (e.g.
+// `npm run copy:extension`): honor NEXT_PUBLIC_APP_URL from .env.local
+// without depending on dotenv. Already-set env vars always win.
+function loadLocalEnv() {
+  const envPath = path.join(__dirname, '../.env.local');
+  if (!fs.existsSync(envPath)) return;
+  const lines = fs.readFileSync(envPath, 'utf-8').split(/\r?\n/);
+  lines.forEach((line) => {
+    const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
+    if (!m) return;
+    const key = m[1];
+    if (key in process.env) return;
+    process.env[key] = m[2].replace(/^["']|["']$/g, '');
+  });
+}
+loadLocalEnv();
+
 // The side panel is a fully standalone app (plain HTML/CSS/JS under
 // scripts/extension-panel/) with NO dependency on the site's Next.js build:
 // it talks to the backend over the absolute API base and shares auth through
@@ -313,31 +330,31 @@ function panelJsWithBase() {
   return src.split('__RESUMARI_API_BASE__').join(apiBase);
 }
 
-function buildExtension() {
-  // Always start from a clean dist so stale files from older builds never
-  // ship inside the extension package (e.g. leftover Next.js chunks from
-  // previous builds of the old site-based panel).
-  if (fs.existsSync(distDir)) {
-    fs.rmSync(distDir, { recursive: true, force: true });
+function buildExtension(outputDir = distDir) {
+  // Always start from a clean output dir so stale files from older builds
+  // never ship inside the extension package. Tests pass a temporary dir so
+  // the real dist-extension/ is never touched by the test suite.
+  if (fs.existsSync(outputDir)) {
+    fs.rmSync(outputDir, { recursive: true, force: true });
   }
-  fs.mkdirSync(distDir, { recursive: true });
+  fs.mkdirSync(outputDir, { recursive: true });
 
-  fs.writeFileSync(path.join(distDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
+  fs.writeFileSync(path.join(outputDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
 
   const publicIcon = path.join(__dirname, '../public/resumari.png');
-  const distIcon = path.join(distDir, 'icon.png');
+  const distIcon = path.join(outputDir, 'icon.png');
   if (fs.existsSync(publicIcon)) fs.copyFileSync(publicIcon, distIcon);
 
-  const distResumariImg = path.join(distDir, 'resumari.png');
+  const distResumariImg = path.join(outputDir, 'resumari.png');
   if (fs.existsSync(publicIcon)) fs.copyFileSync(publicIcon, distResumariImg);
 
-  fs.writeFileSync(path.join(distDir, 'background.js'), background);
-  fs.writeFileSync(path.join(distDir, 'content.js'), content);
+  fs.writeFileSync(path.join(outputDir, 'background.js'), background);
+  fs.writeFileSync(path.join(outputDir, 'content.js'), content);
 
   // Standalone side panel: panel.html + panel.css + panel.js.
-  fs.copyFileSync(path.join(panelDir, 'panel.html'), path.join(distDir, 'panel.html'));
-  fs.copyFileSync(path.join(panelDir, 'panel.css'), path.join(distDir, 'panel.css'));
-  fs.writeFileSync(path.join(distDir, 'panel.js'), panelJsWithBase());
+  fs.copyFileSync(path.join(panelDir, 'panel.html'), path.join(outputDir, 'panel.html'));
+  fs.copyFileSync(path.join(panelDir, 'panel.css'), path.join(outputDir, 'panel.css'));
+  fs.writeFileSync(path.join(outputDir, 'panel.js'), panelJsWithBase());
 
   console.log(`✅ Extension version ${VERSION} created (standalone panel)`);
 }

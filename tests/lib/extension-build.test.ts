@@ -1,9 +1,20 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterAll } from 'vitest'
 import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import { manifest, background, content, panelJsWithBase, buildExtension, distDir } from '../../scripts/build-extension'
 
 const rootDir = path.resolve(__dirname, '../..')
+
+// The build tests must NEVER write into the real dist-extension/ (which the
+// user loads in Chrome): the suite runs with NEXT_PUBLIC_APP_URL set to a
+// test host (tests/setup.ts), and a real build baked from that env would
+// point the panel at a non-resolvable host. Build into a temp dir instead.
+const tmpBuildDir = fs.mkdtempSync(path.join(os.tmpdir(), 'resumari-ext-build-'))
+
+afterAll(() => {
+  fs.rmSync(tmpBuildDir, { recursive: true, force: true })
+})
 
 describe('extension build (scripts/build-extension.js)', () => {
   describe('manifest.json', () => {
@@ -179,28 +190,39 @@ describe('extension build (scripts/build-extension.js)', () => {
   })
 
   describe('buildExtension()', () => {
-    it('writes the standalone extension bundle to dist-extension/', () => {
-      buildExtension()
-      expect(fs.existsSync(path.join(distDir, 'manifest.json'))).toBe(true)
-      expect(fs.existsSync(path.join(distDir, 'background.js'))).toBe(true)
-      expect(fs.existsSync(path.join(distDir, 'content.js'))).toBe(true)
+    it('builds a standalone bundle in the given output dir (never the real dist)', () => {
+      buildExtension(tmpBuildDir)
+      expect(fs.existsSync(path.join(tmpBuildDir, 'manifest.json'))).toBe(true)
+      expect(fs.existsSync(path.join(tmpBuildDir, 'background.js'))).toBe(true)
+      expect(fs.existsSync(path.join(tmpBuildDir, 'content.js'))).toBe(true)
       // No popup: the toolbar action opens the side panel directly.
-      expect(fs.existsSync(path.join(distDir, 'popup.html'))).toBe(false)
-      expect(fs.existsSync(path.join(distDir, 'popup.js'))).toBe(false)
+      expect(fs.existsSync(path.join(tmpBuildDir, 'popup.html'))).toBe(false)
+      expect(fs.existsSync(path.join(tmpBuildDir, 'popup.js'))).toBe(false)
       // Standalone panel files
-      expect(fs.existsSync(path.join(distDir, 'panel.html'))).toBe(true)
-      expect(fs.existsSync(path.join(distDir, 'panel.css'))).toBe(true)
-      expect(fs.existsSync(path.join(distDir, 'panel.js'))).toBe(true)
-      expect(fs.existsSync(path.join(distDir, 'icon.png'))).toBe(true)
-      expect(fs.existsSync(path.join(distDir, 'resumari.png'))).toBe(true)
+      expect(fs.existsSync(path.join(tmpBuildDir, 'panel.html'))).toBe(true)
+      expect(fs.existsSync(path.join(tmpBuildDir, 'panel.css'))).toBe(true)
+      expect(fs.existsSync(path.join(tmpBuildDir, 'panel.js'))).toBe(true)
+      expect(fs.existsSync(path.join(tmpBuildDir, 'icon.png'))).toBe(true)
+      expect(fs.existsSync(path.join(tmpBuildDir, 'resumari.png'))).toBe(true)
       // No leftover site chunks from the old architecture
-      expect(fs.existsSync(path.join(distDir, 'index.html'))).toBe(false)
-      expect(fs.existsSync(path.join(distDir, 'assets'))).toBe(false)
+      expect(fs.existsSync(path.join(tmpBuildDir, 'index.html'))).toBe(false)
+      expect(fs.existsSync(path.join(tmpBuildDir, 'assets'))).toBe(false)
+    })
+
+    it('never overwrites the real dist-extension/ directory', () => {
+      const before = fs.existsSync(path.join(distDir, 'panel.js'))
+        ? fs.readFileSync(path.join(distDir, 'panel.js'), 'utf-8')
+        : null
+      buildExtension(tmpBuildDir)
+      const after = fs.existsSync(path.join(distDir, 'panel.js'))
+        ? fs.readFileSync(path.join(distDir, 'panel.js'), 'utf-8')
+        : null
+      expect(after).toBe(before)
     })
 
     it('writes a panel whose script has no inline event handlers (MV3 CSP)', () => {
-      buildExtension()
-      const html = fs.readFileSync(path.join(distDir, 'panel.html'), 'utf-8')
+      buildExtension(tmpBuildDir)
+      const html = fs.readFileSync(path.join(tmpBuildDir, 'panel.html'), 'utf-8')
       // No inline event-handler attributes: they would be blocked by CSP.
       expect(html).not.toMatch(/\son[a-z]+\s*=\s*["'][^"']*["']/i)
       expect(html).toContain('<script src="panel.js">')
@@ -211,12 +233,12 @@ describe('extension build (scripts/build-extension.js)', () => {
     })
 
     it('writes files whose content matches the exported constants', () => {
-      buildExtension()
+      buildExtension(tmpBuildDir)
       const writtenManifest = JSON.parse(
-        fs.readFileSync(path.join(distDir, 'manifest.json'), 'utf-8'),
+        fs.readFileSync(path.join(tmpBuildDir, 'manifest.json'), 'utf-8'),
       )
-      const writtenBackground = fs.readFileSync(path.join(distDir, 'background.js'), 'utf-8')
-      const writtenContent = fs.readFileSync(path.join(distDir, 'content.js'), 'utf-8')
+      const writtenBackground = fs.readFileSync(path.join(tmpBuildDir, 'background.js'), 'utf-8')
+      const writtenContent = fs.readFileSync(path.join(tmpBuildDir, 'content.js'), 'utf-8')
       expect(writtenManifest).toEqual(manifest)
       expect(writtenBackground).toBe(background)
       expect(writtenContent).toBe(content)
@@ -224,8 +246,8 @@ describe('extension build (scripts/build-extension.js)', () => {
 
     it('is idempotent and can run multiple times', () => {
       expect(() => {
-        buildExtension()
-        buildExtension()
+        buildExtension(tmpBuildDir)
+        buildExtension(tmpBuildDir)
       }).not.toThrow()
     })
   })
