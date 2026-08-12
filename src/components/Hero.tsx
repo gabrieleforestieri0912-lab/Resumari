@@ -36,7 +36,7 @@ export default function Hero() {
   const blob3Y = useTransform(scrollYProgress, [0, 1], ["0%", "8%"]);
 
   return (
-    <section ref={sectionRef} className="min-h-screen flex flex-col items-center justify-center text-center px-6 py-20 md:py-24 overflow-hidden bg-white dark:bg-zinc-950" style={{ position: 'relative' }}>
+    <section ref={sectionRef} className="min-h-screen flex flex-col items-center justify-center text-center px-6 pt-28 pb-16 md:pt-44 md:pb-20 overflow-hidden bg-white dark:bg-zinc-950" style={{ position: 'relative' }}>
       {/* Background Decorative Blobs with Parallax */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
         <motion.div style={{ y: blob1Y }} className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-100/50 dark:bg-purple-900/20 rounded-full blur-[140px] animate-pulse" />
