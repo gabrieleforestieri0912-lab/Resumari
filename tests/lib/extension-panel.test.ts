@@ -20,7 +20,10 @@ describe('standalone side panel (scripts/extension-panel)', () => {
 
     it('shows the login page for a new user with password and code modes', () => {
       expect(html).toContain('id="view-login"')
-      expect(html).toContain('Accedi a Resumari')
+      expect(html).toContain('Accedi a')
+      // The brand word carries the pulsing glow, same as the landing hero.
+      expect(html).toContain('class="text-glow-pulse"')
+      expect(html).toContain('>Resumari<')
       expect(html).toContain('login-email')
       expect(html).toContain('login-password')
       expect(html).toContain('login-code')
@@ -118,6 +121,17 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       expect(css).toContain('.theme-menu')
       expect(css).toContain('.theme-menu__item')
       expect(css).toContain('.theme-wrap')
+    })
+
+    it('follows the landing identity (Inter font, purple-600→red gradient, glow)', () => {
+      // Font: same family as the marketing site, with system fallbacks.
+      expect(css).toMatch(/font-family:\s*Inter,/)
+      // Signature gradient from the landing (purple-600 → red-600).
+      expect(css).toMatch(/linear-gradient\(135deg,\s*#9333ea 0%,\s*#dc2626 100%\)/)
+      // Brand glow-pulse used on the login title, same as the landing hero.
+      expect(css).toContain('@keyframes text-glow-pulse')
+      expect(css).toContain('.text-glow-pulse')
+      expect(html).toContain('class="text-glow-pulse"')
     })
   })
 

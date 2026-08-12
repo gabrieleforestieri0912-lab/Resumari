@@ -4,19 +4,21 @@
  * resolved from YouTube/system) and via a prefers-color-scheme fallback so
  * system-dark users never see a white flash before panel.js runs. */
 :root {
-  --purple: #7c3aed;
+  /* Landing palette: Tailwind zinc neutrals + the signature purple-600 →
+     red-600 gradient used across the marketing site. */
+  --purple: #9333ea;
   --purple-dark: #6d28d9;
   --red: #dc2626;
-  --gradient: linear-gradient(135deg, #7c3aed 0%, #dc2626 100%);
-  --bg: #f8f8fb;
+  --gradient: linear-gradient(135deg, #9333ea 0%, #dc2626 100%);
+  --bg: #fafafa;
   --card: #ffffff;
-  --border: #ececf2;
+  --border: #e5e7eb;
   --text: #17171f;
-  --muted: #8a8a99;
+  --muted: #6b7280;
   --ok: #16a34a;
   --green: #059669;
   --err: #dc2626;
-  --radius: 14px;
+  --radius: 16px;
 
   --bg-soft: #f3f0f7;
   --purple-soft: #f3edff;
@@ -51,11 +53,11 @@ html[data-theme="dark"] {
   --purple: #a78bfa;
   --purple-dark: #8b5cf6;
   --red: #f87171;
-  --bg: #0f0f13;
-  --card: #1a1a21;
-  --border: #2a2a33;
+  --bg: #0a0a0b;
+  --card: #111113;
+  --border: #27272a;
   --text: #f1f1f3;
-  --muted: #9b9ba8;
+  --muted: #a1a1aa;
   --ok: #4ade80;
   --green: #34d399;
   --err: #f87171;
@@ -96,11 +98,11 @@ html[data-theme="dark"] {
     --purple: #a78bfa;
     --purple-dark: #8b5cf6;
     --red: #f87171;
-    --bg: #0f0f13;
-    --card: #1a1a21;
-    --border: #2a2a33;
+    --bg: #0a0a0b;
+    --card: #111113;
+    --border: #27272a;
     --text: #f1f1f3;
-    --muted: #9b9ba8;
+    --muted: #a1a1aa;
     --ok: #4ade80;
     --green: #34d399;
     --err: #f87171;
@@ -144,7 +146,9 @@ html[data-theme="dark"] {
 html, body { height: 100%; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Match the landing font. The standalone panel can't bundle the webfont,
+     so it uses Inter when installed locally, with the same system fallbacks. */
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
   font-size: 14px;
@@ -204,7 +208,7 @@ body {
 /* ===== Login ===== */
 .login__wrap { width: 100%; max-width: 360px; margin: auto; padding: 24px 20px; }
 .login__brand { text-align: center; margin-bottom: 22px; }
-.login__logo { width: 56px; height: 56px; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 10px 24px rgba(124, 58, 237, 0.25); }
+.login__logo { width: 56px; height: 56px; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 10px 24px rgba(147, 51, 234, 0.25); }
 .login__title { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
 .login__subtitle { font-size: 13px; margin-top: 6px; line-height: 1.5; }
 .login__form { display: flex; flex-direction: column; gap: 14px; }
@@ -225,7 +229,7 @@ body {
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s, background 0.2s;
 }
-.input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15); }
+.input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.15); }
 .input--center { text-align: center; letter-spacing: 0.4em; font-weight: 700; font-size: 18px; }
 
 /* ===== Buttons ===== */
@@ -243,9 +247,9 @@ body {
   background: var(--gradient);
   color: #fff;
   padding: 13px;
-  box-shadow: 0 10px 22px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 10px 22px rgba(147, 51, 234, 0.3);
 }
-.btn--primary:hover:not(:disabled) { box-shadow: 0 12px 26px rgba(124, 58, 237, 0.4); }
+.btn--primary:hover:not(:disabled) { box-shadow: 0 12px 26px rgba(147, 51, 234, 0.4); }
 .btn--ghost {
   background: var(--card);
   color: var(--text);
@@ -388,7 +392,7 @@ body {
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s, background 0.2s;
 }
-.search__input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12); }
+.search__input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.12); }
 
 /* ===== Transcript list ===== */
 .tx__content { display: flex; flex-direction: column; gap: 10px; }
@@ -399,7 +403,7 @@ body {
   border-radius: 18px;
   padding: 20px;
   text-align: left;
-  box-shadow: 0 14px 30px rgba(124, 58, 237, 0.25);
+  box-shadow: 0 14px 30px rgba(147, 51, 234, 0.25);
   margin-bottom: 14px;
 }
 .tx-empty__label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.75; }
@@ -433,7 +437,7 @@ body {
   width: 100%;
   transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s, background 0.2s;
 }
-.tx-card:hover { border-color: var(--purple-border); box-shadow: 0 6px 18px rgba(124, 58, 237, 0.08); }
+.tx-card:hover { border-color: var(--purple-border); box-shadow: 0 6px 18px rgba(147, 51, 234, 0.08); }
 .tx-card:active { transform: scale(0.99); }
 .tx-card__thumb { position: relative; width: 96px; height: 60px; border-radius: 10px; overflow: hidden; background: var(--thumb-bg); flex-shrink: 0; }
 .tx-card__thumb img { width: 100%; height: 100%; object-fit: cover; }
@@ -543,7 +547,7 @@ body {
   background: var(--gradient);
   border: none;
   color: #fff;
-  box-shadow: 0 14px 30px rgba(124, 58, 237, 0.28);
+  box-shadow: 0 14px 30px rgba(147, 51, 234, 0.28);
 }
 .card--gradient__top { display: flex; justify-content: space-between; align-items: flex-start; }
 .card__label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
@@ -563,7 +567,7 @@ body {
   display: flex; align-items: center; justify-content: center;
   font-weight: 800; font-size: 17px;
   flex-shrink: 0;
-  box-shadow: 0 8px 18px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 8px 18px rgba(147, 51, 234, 0.3);
 }
 .account__info { display: flex; flex-direction: column; min-width: 0; }
 .account__name { font-size: 14px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -581,7 +585,7 @@ body {
   margin-bottom: 10px;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
-.plan--current { border-color: var(--purple-border-2); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12); }
+.plan--current { border-color: var(--purple-border-2); box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.12); }
 .plan--popular { border-color: var(--purple-border); }
 .plan__head { display: flex; align-items: flex-start; gap: 10px; }
 .plan__icon {
@@ -682,3 +686,36 @@ body {
   animation: toast-in 0.2s ease;
 }
 @keyframes toast-in { from { opacity: 0; transform: translateX(-50%) translateY(8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+/* ============================================================
+   Brand glow — same identity as the landing page (.text-glow-pulse):
+   dark purple with a strong pulsing glow, applied to select brand words.
+   ============================================================ */
+@keyframes text-glow-pulse {
+  0%, 100% {
+    text-shadow:
+      0 0 6px rgba(147, 51, 234, 0.5),
+      0 0 16px rgba(147, 51, 234, 0.4),
+      0 0 34px rgba(147, 51, 234, 0.3);
+  }
+  50% {
+    text-shadow:
+      0 0 10px rgba(147, 51, 234, 0.9),
+      0 0 26px rgba(147, 51, 234, 0.75),
+      0 0 60px rgba(147, 51, 234, 0.55);
+  }
+}
+
+.text-glow-pulse {
+  color: var(--purple-dark);
+  animation: text-glow-pulse 2.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-glow-pulse {
+    animation: none;
+    text-shadow:
+      0 0 10px rgba(147, 51, 234, 0.6),
+      0 0 24px rgba(147, 51, 234, 0.45);
+  }
+}
