@@ -803,7 +803,7 @@ body {
   margin-bottom: 10px;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
-.plan--current { border-color: var(--purple-border-2); box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.12); }
+.plan--current { border-color: var(--purple-border-2); }
 .plan--popular { border-color: var(--purple-border); }
 .plan__head { display: flex; align-items: flex-start; gap: 10px; }
 .plan__icon {

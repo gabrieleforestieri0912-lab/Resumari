@@ -175,15 +175,12 @@ export default function Pricing() {
               transition={{ delay: index * 0.1 }}
               className={`relative flex flex-col p-6 rounded-2xl transition-all duration-500 h-full ${
                 plan.popular
-                  ? "bg-white dark:bg-zinc-900 border-2 border-purple-600 shadow-[0_32px_64px_-16px_rgba(123,47,247,0.15)] scale-105 z-10 py-8"
+                  ? "bg-white dark:bg-zinc-900 border-2 border-purple-600 scale-105 z-10 py-8"
                   : "bg-gray-50/50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-600 hover:bg-white dark:hover:bg-zinc-800 shadow-sm hover:shadow-xl"
               }`}
             >
-              {plan.popular && (
-                <div className="absolute -inset-[2px] rounded-2xl bg-gradient-to-r from-purple-600/10 via-transparent to-red-600/10 blur-xl -z-10" />
-              )}
               {plan.badge && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-linear-to-r from-purple-600 to-red-600 text-white px-5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-lg shadow-purple-500/20">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-linear-to-r from-purple-600 to-red-600 text-white px-5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5">
                   {plan.popular && (
                     <Star
                       size={12}
