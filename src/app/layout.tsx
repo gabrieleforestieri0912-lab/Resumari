@@ -3,6 +3,7 @@ import "./globals.css";
 import { Providers } from "@/components/Providers";
 import PageTransition from "@/components/PageTransition";
 import PendingTranscriptHandler from "@/components/PendingTranscriptHandler";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -80,6 +81,7 @@ export default function RootLayout({
           <PendingTranscriptHandler />
           <PageTransition>{children}</PageTransition>
         </Providers>
+        <SpeedInsights />
       </body>
     </html>
   );
