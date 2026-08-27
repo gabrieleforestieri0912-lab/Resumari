@@ -35,7 +35,17 @@ export async function GET(request: Request) {
       .eq('user_id', decoded.userId)
       .order('updated_at', { ascending: false });
 
-    return NextResponse.json(chats || []);
+    // Clients consume a camelCase shape (chat page, dashboard); keep the raw
+    // snake_case columns too so existing consumers/tests stay compatible.
+    const normalized = (chats || []).map((c: any) => ({
+      ...c,
+      chatId: c.chat_id,
+      createdAt: c.created_at,
+      updatedAt: c.updated_at,
+      videoId: c.video_id ?? null,
+    }));
+
+    return NextResponse.json(normalized);
   } catch (error) {
     console.error('Get chats error:', error);
     return NextResponse.json({ message: 'Errore nel recupero chat' }, { status: 500 });

@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Breadcrumb from "@/components/Breadcrumb";
 import { FileText, Copy, Check, ArrowRightLeft } from "lucide-react";
 
 type Format = "srt" | "vtt" | "txt";
@@ -41,11 +42,19 @@ function srtToVtt(srt: string): string {
 }
 
 function vttToSrt(vtt: string): string {
-  return vtt
+  // VTT cue identifiers (when present) are arbitrary: SRT requires
+  // sequential numbering, so strip them per block and re-number 1..n.
+  const body = vtt
     .replace(/^WEBVTT.*\n/i, "")
-    .replace(/^\s*[\d]+\s*$/gm, "")
     .replace(/(\d{2}:\d{2}:\d{2})\.(\d{3})/g, "$1,$2")
     .trim();
+  const blocks = body.split(/\n\s*\n/).filter(Boolean);
+  return blocks
+    .map((b, i) => {
+      const lines = b.split("\n").filter((l) => !/^\s*\d+\s*$/.test(l));
+      return `${i + 1}\n${lines.join("\n")}`;
+    })
+    .join("\n\n");
 }
 
 function srtToTxt(srt: string): string {
@@ -86,6 +95,8 @@ export default function SubtitleConverterPage() {
       return;
     }
     if (from === "txt") {
+      // Plain text carries no timing info: nothing to convert, so the
+      // content is copied through unchanged (a hint below explains it).
       setOutput(input);
       return;
     }
@@ -104,18 +115,19 @@ export default function SubtitleConverterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white bg-[radial-gradient(#e5e7eb_0.5px,transparent_0.5px)] bg-[length:24px_24px]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 bg-[radial-gradient(#e5e7eb_0.5px,transparent_0.5px)] dark:bg-[radial-gradient(#27272a_0.5px,transparent_0.5px)] bg-[length:24px_24px]">
       <Navbar />
       <main className="pt-32 pb-24 px-6">
         <div className="max-w-4xl mx-auto">
+          <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Strumenti", href: "/tools" }, { label: "Subtitle Format Converter" }]} className="mb-6" />
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold uppercase tracking-wider mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-50 dark:bg-purple-950/40 border border-purple-200 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-wider mb-6">
               Strumento
             </div>
-            <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">
+            <h1 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-zinc-100 mb-4">
               Subtitle Format Converter
             </h1>
-            <p className="text-gray-500">
+            <p className="text-gray-500 dark:text-zinc-400">
               Converti tra formati SRT, VTT e testo semplice all'istante.
               Incolla, converti, copia.
             </p>
@@ -125,17 +137,17 @@ export default function SubtitleConverterPage() {
             <select
               value={from}
               onChange={(e) => setFrom(e.target.value as Format)}
-              className="px-4 py-2.5 rounded-xl border border-gray-300 font-bold text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              className="px-4 py-2.5 rounded-xl border border-gray-300 dark:border-zinc-700 font-bold text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
             >
               <option value="srt">SRT</option>
               <option value="vtt">VTT</option>
               <option value="txt">Testo normale</option>
             </select>
-            <ArrowRightLeft className="text-gray-400" size={24} />
+            <ArrowRightLeft className="text-gray-400 dark:text-zinc-500" size={24} />
             <select
               value={to}
               onChange={(e) => setTo(e.target.value as Format)}
-              className="px-4 py-2.5 rounded-xl border border-gray-300 font-bold text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              className="px-4 py-2.5 rounded-xl border border-gray-300 dark:border-zinc-700 font-bold text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
             >
               <option value="vtt">VTT</option>
               <option value="srt">SRT</option>
@@ -145,7 +157,7 @@ export default function SubtitleConverterPage() {
 
           <div className="grid gap-6 md:grid-cols-2">
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">
+              <label className="block text-sm font-bold text-gray-700 dark:text-zinc-300 mb-2">
                 Input
               </label>
               <textarea
@@ -153,18 +165,18 @@ export default function SubtitleConverterPage() {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={`Incolla il contenuto ${from.toUpperCase()} qui...`}
                 rows={12}
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-sm font-mono resize-y"
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-zinc-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm font-mono resize-y"
               />
             </div>
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-bold text-gray-700">
+                <label className="block text-sm font-bold text-gray-700 dark:text-zinc-300">
                   Output
                 </label>
                 {output && (
                   <button
                     onClick={handleCopy}
-                    className="flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                    className="flex items-center gap-1 text-sm font-semibold text-purple-600 hover:text-purple-800 transition-colors"
                   >
                     {copied ? (
                       <>
@@ -183,15 +195,21 @@ export default function SubtitleConverterPage() {
                 readOnly
                 rows={12}
                 placeholder="Il risultato convertito apparirà qui..."
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-mono resize-y"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800 text-sm font-mono resize-y"
               />
             </div>
           </div>
 
           <div className="mt-6 text-center">
+            {from === "txt" && to !== "txt" && (
+              <p className="text-xs text-gray-400 dark:text-zinc-500 font-medium mb-2">
+                Il testo semplice non contiene timestamp: il contenuto verrà
+                copiato invariato. Incolla SRT o VTT per una conversione reale.
+              </p>
+            )}
             <button
               onClick={convert}
-              className="px-8 py-3 bg-linear-to-r from-blue-500 to-cyan-600 text-white font-bold rounded-xl hover:scale-[1.02] transition-all shadow-lg shadow-blue-500/25 inline-flex items-center gap-2"
+              className="px-8 py-3 bg-linear-to-r from-purple-600 to-red-600 text-white font-bold rounded-xl hover:scale-[1.02] transition-all shadow-lg shadow-purple-500/25 inline-flex items-center gap-2"
             >
               <FileText size={18} />
               Converti in {to.toUpperCase()}

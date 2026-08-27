@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Breadcrumb from "@/components/Breadcrumb";
 import { Image, Download, LinkIcon, AlertCircle } from "lucide-react";
 
 const resolutions = [
@@ -62,25 +63,26 @@ export default function ThumbnailDownloaderPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white bg-[radial-gradient(#e5e7eb_0.5px,transparent_0.5px)] bg-[length:24px_24px]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 bg-[radial-gradient(#e5e7eb_0.5px,transparent_0.5px)] dark:bg-[radial-gradient(#27272a_0.5px,transparent_0.5px)] bg-[length:24px_24px]">
       <Navbar />
       <main className="pt-32 pb-24 px-6">
         <div className="max-w-3xl mx-auto">
+          <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Strumenti", href: "/tools" }, { label: "YouTube Thumbnail Downloader" }]} className="mb-6" />
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold uppercase tracking-wider mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-50 dark:bg-purple-950/40 border border-purple-200 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-wider mb-6">
               Strumento
             </div>
-            <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">
+            <h1 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-zinc-100 mb-4">
               YouTube Thumbnail Downloader
             </h1>
-            <p className="text-gray-500">
+            <p className="text-gray-500 dark:text-zinc-400">
               Scarica thumbnail YouTube in tutte le risoluzioni disponibili — da
               120x90 a Full HD 1280x720.
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
-            <label className="block text-sm font-bold text-gray-700 mb-2">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 mb-8">
+            <label className="block text-sm font-bold text-gray-700 dark:text-zinc-300 mb-2">
               URL YouTube o ID Video
             </label>
             <div className="flex gap-3">
@@ -90,11 +92,11 @@ export default function ThumbnailDownloaderPage() {
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleFetch()}
                 placeholder="https://youtube.com/watch?v=..."
-                className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all text-sm"
+                className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-zinc-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm"
               />
               <button
                 onClick={handleFetch}
-                className="px-6 py-3 bg-linear-to-r from-rose-500 to-pink-600 text-white font-bold rounded-xl hover:scale-[1.02] transition-all shadow-lg shadow-rose-500/25 flex items-center gap-2"
+                className="px-6 py-3 bg-linear-to-r from-purple-600 to-red-600 text-white font-bold rounded-xl hover:scale-[1.02] transition-all shadow-lg shadow-purple-500/25 flex items-center gap-2"
               >
                 <LinkIcon size={18} />
                 Cerca
@@ -113,9 +115,9 @@ export default function ThumbnailDownloaderPage() {
               {thumbnails.map((t) => (
                 <div
                   key={t.quality}
-                  className="bg-white rounded-2xl border border-gray-200 overflow-hidden group"
+                  className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 overflow-hidden group"
                 >
-                  <div className="aspect-video bg-gray-100 relative">
+                  <div className="aspect-video bg-gray-100 dark:bg-zinc-800 relative">
                     <img
                       src={t.url}
                       alt={t.label}
@@ -127,12 +129,12 @@ export default function ThumbnailDownloaderPage() {
                     />
                   </div>
                   <div className="p-4 flex items-center justify-between">
-                    <span className="text-sm font-bold text-gray-700">
+                    <span className="text-sm font-bold text-gray-700 dark:text-zinc-300">
                       {t.label}
                     </span>
                     <button
                       onClick={() => handleDownload(t.url, t.label)}
-                      className="p-2 rounded-xl bg-gray-100 hover:bg-rose-100 text-gray-600 hover:text-rose-600 transition-all"
+                      className="p-2 rounded-xl bg-gray-100 dark:bg-zinc-800 hover:bg-purple-100 text-gray-600 dark:text-zinc-400 hover:text-purple-600 transition-all"
                       title="Scarica"
                     >
                       <Download size={18} />

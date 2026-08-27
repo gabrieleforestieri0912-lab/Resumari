@@ -81,7 +81,7 @@ describe('MCP server (/api/mcp)', () => {
     })
 
     expect(init.status).toBe(200)
-    expect(init.body.result.serverInfo.name).toBe('Resumari YouTube Transcript')
+    expect(init.body.result.serverInfo.name).toBe('Resumari')
     expect(init.body.result.serverInfo.version).toBe('1.0.0')
 
     const notif = await POST(

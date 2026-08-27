@@ -145,22 +145,43 @@ describe('POST /api/video', () => {
     expect(client.getData('users')[0].credits).toBe(4)
   })
 
-  it('falls back to a third-party transcript source when timedtext is empty', async () => {
-    fetchMock.mockImplementation((url: string) => {
+  it('falls back to kome.ai when timedtext is empty and the package fails', async () => {
+    fetchMock.mockImplementation((url: string, init?: any) => {
       if (url.startsWith('https://youtube.com/api/timedtext')) {
         return Promise.resolve(jsonResponse({ events: [] }))
       }
-      if (url.startsWith('https://youtubetranscript.com')) {
-        return Promise.resolve(jsonResponse([{ text: 'Hello there', start: '0', duration: '2' }]))
+      if (url.startsWith('https://kome.ai/api/transcript')) {
+        // kome returns a plain-text transcript without timestamps
+        return Promise.resolve(jsonResponse({ transcript: 'Hello there\nWelcome back' }))
       }
-      return Promise.resolve(jsonResponse({ items: [] }))
+      // the youtube-transcript package's own requests: not mocked here, so
+      // they fail (status 404) and the fallback chain continues.
+      return Promise.resolve(jsonResponse({}, false, 404))
     })
 
     const res = await post({ videoUrl: 'abc123def45' })
     expect(res.status).toBe(200)
     const body = await res.json()
-    expect(body.transcript).toHaveLength(1)
+    expect(body.transcript.length).toBeGreaterThan(0)
     expect(body.transcript[0].text).toBe('Hello there')
     expect(body.transcriptLanguage).toBe('en')
+  })
+
+  it('returns 422 without deducting credits when no transcript is found', async () => {
+    fetchMock.mockImplementation((url: string) => {
+      if (url.startsWith('https://youtube.com/api/timedtext')) {
+        return Promise.resolve(jsonResponse({ events: [] }))
+      }
+      // package + kome fail too
+      return Promise.resolve(jsonResponse({}, false, 404))
+    })
+
+    const res = await post({ videoUrl: 'abc123def45' })
+    expect(res.status).toBe(422)
+    const body = await res.json()
+    expect(body.transcript).toEqual([])
+    expect(body.message).toContain('Nessun sottotitolo')
+    // no deduction happened
+    expect(client.getData('users')[0].credits).toBe(5)
   })
 })

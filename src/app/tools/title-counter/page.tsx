@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Breadcrumb from "@/components/Breadcrumb";
 import { Hash, Eye } from "lucide-react";
 
 const TITLE_LIMIT = 100;
@@ -29,13 +30,13 @@ export default function TitleCounterPage() {
           ? "border-red-500"
           : len > 70
           ? "border-amber-500"
-          : "border-gray-300",
+          : "border-gray-300 dark:border-zinc-700",
       barColor:
         len > TITLE_LIMIT
-          ? "bg-red-500"
+          ? "bg-red-50 dark:bg-red-950/400"
           : len > 70
-          ? "bg-amber-500"
-          : "bg-green-500",
+          ? "bg-amber-50 dark:bg-amber-950/400"
+          : "bg-green-50 dark:bg-green-950/400",
     };
   }, [title]);
 
@@ -53,35 +54,36 @@ export default function TitleCounterPage() {
           : "text-green-500",
       barColor:
         len > DESC_LIMIT
-          ? "bg-red-500"
+          ? "bg-red-50 dark:bg-red-950/400"
           : len > 4000
-          ? "bg-amber-500"
-          : "bg-blue-500",
+          ? "bg-amber-50 dark:bg-amber-950/400"
+          : "bg-blue-50 dark:bg-blue-950/400",
     };
   }, [description]);
 
   return (
-    <div className="min-h-screen bg-white bg-[radial-gradient(#e5e7eb_0.5px,transparent_0.5px)] bg-[length:24px_24px]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 bg-[radial-gradient(#e5e7eb_0.5px,transparent_0.5px)] dark:bg-[radial-gradient(#27272a_0.5px,transparent_0.5px)] bg-[length:24px_24px]">
       <Navbar />
       <main className="pt-32 pb-24 px-6">
         <div className="max-w-3xl mx-auto">
+          <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Strumenti", href: "/tools" }, { label: "YouTube Title & Description Counter" }]} className="mb-6" />
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-50 border border-violet-200 text-violet-700 text-xs font-bold uppercase tracking-wider mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-50 dark:bg-purple-950/40 border border-purple-200 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-wider mb-6">
               Strumento
             </div>
-            <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">
+            <h1 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-zinc-100 mb-4">
               YouTube Title & Description Counter
             </h1>
-            <p className="text-gray-500">
+            <p className="text-gray-500 dark:text-zinc-400">
               Conteggio caratteri e parole in tempo reale con limiti colorati e
               un'anteprima SERP live.
             </p>
           </div>
 
           <div className="space-y-8">
-            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+            <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6">
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-bold text-gray-700">
+                <label className="text-sm font-bold text-gray-700 dark:text-zinc-300">
                   Titolo Video
                 </label>
                 <span className={`text-sm font-bold ${titleStats.color}`}>
@@ -94,9 +96,9 @@ export default function TitleCounterPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Inserisci il titolo del video..."
-                className={`w-full px-4 py-3 rounded-xl border ${titleStats.borderColor} focus:border-violet-500 focus:ring-2 focus:ring-violet-200 outline-none transition-all text-sm`}
+                className={`w-full px-4 py-3 rounded-xl border ${titleStats.borderColor} focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm`}
               />
-              <div className="mt-3 h-2 rounded-full bg-gray-100 overflow-hidden">
+              <div className="mt-3 h-2 rounded-full bg-gray-100 dark:bg-zinc-800 overflow-hidden">
                 <div
                   className={`h-full ${titleStats.barColor} transition-all duration-200 rounded-full`}
                   style={{
@@ -106,9 +108,9 @@ export default function TitleCounterPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+            <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6">
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-bold text-gray-700">
+                <label className="text-sm font-bold text-gray-700 dark:text-zinc-300">
                   Descrizione
                 </label>
                 <span className={`text-sm font-bold ${descStats.color}`}>
@@ -120,9 +122,9 @@ export default function TitleCounterPage() {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Inserisci la descrizione del video..."
                 rows={8}
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-violet-500 focus:ring-2 focus:ring-violet-200 outline-none transition-all text-sm resize-y"
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-zinc-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm resize-y"
               />
-              <div className="mt-3 h-2 rounded-full bg-gray-100 overflow-hidden">
+              <div className="mt-3 h-2 rounded-full bg-gray-100 dark:bg-zinc-800 overflow-hidden">
                 <div
                   className={`h-full ${descStats.barColor} transition-all duration-200 rounded-full`}
                   style={{
@@ -133,21 +135,21 @@ export default function TitleCounterPage() {
             </div>
 
             {(title || description) && (
-              <div className="bg-white rounded-2xl border border-gray-200 p-6">
+              <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <Eye size={18} className="text-gray-500" />
-                  <span className="text-sm font-bold text-gray-700">
+                  <Eye size={18} className="text-gray-500 dark:text-zinc-400" />
+                  <span className="text-sm font-bold text-gray-700 dark:text-zinc-300">
                     SERP Preview
                   </span>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-4 max-w-lg">
-                  <p className="text-sm text-blue-700 hover:underline cursor-pointer truncate">
+                <div className="bg-white rounded-xl border border-gray-200 dark:border-zinc-800 p-4 max-w-lg">
+                  <p className="text-sm text-blue-700 dark:text-blue-300 hover:underline cursor-pointer truncate">
                     {title || "Il titolo del tuo video"}
                   </p>
-                  <p className="text-xs text-green-700 mt-1">
+                  <p className="text-xs text-green-700 dark:text-green-300 mt-1">
                     https://youtube.com/watch?v=...
                   </p>
-                  <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                  <p className="text-xs text-gray-600 dark:text-zinc-400 mt-1 line-clamp-2">
                     {description
                       ? description.slice(0, 300)
                       : "La descrizione del tuo video apparirà qui..."}

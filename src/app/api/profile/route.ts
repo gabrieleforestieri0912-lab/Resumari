@@ -32,10 +32,13 @@ export async function PUT(request: Request) {
   }
 
   try {
-    const { name, locale } = await request.json();
+    const { name, locale, picture } = await request.json();
     const updateData: Record<string, any> = { updated_at: new Date().toISOString() };
     if (name) updateData.name = name;
     if (locale) updateData.locale = locale;
+    // The avatar is stored as a data URL (or an OAuth image URL). Allow it to be
+    // cleared explicitly so users can remove a photo without deleting the row.
+    if (picture !== undefined) updateData.picture = picture || null;
 
     const client = getServiceClient();
     if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });

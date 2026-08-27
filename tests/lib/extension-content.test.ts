@@ -78,7 +78,9 @@ function makeElement(tag: string): Element {
   return el
 }
 
-function createHarness(opts: { hostname?: string; pathname?: string; href?: string } = {}) {
+function createHarness(
+  opts: { hostname?: string; pathname?: string; href?: string; origin?: string } = {},
+) {
   const captured = {
     storage: new Map<string, unknown>(),
     sentMessages: [] as unknown[],
@@ -179,6 +181,7 @@ function createHarness(opts: { hostname?: string; pathname?: string; href?: stri
       hostname: opts.hostname ?? 'www.youtube.com',
       pathname: opts.pathname ?? '/watch',
       href: opts.href ?? 'https://www.youtube.com/watch?v=abc123def45',
+      origin: opts.origin ?? 'https://' + (opts.hostname ?? 'www.youtube.com'),
     },
     window: {
       dispatchEvent: (e: any) => captured.dispatchedEvents.push({ type: e.type, detail: e.detail }),
@@ -266,7 +269,7 @@ describe('extension content script (content.js)', () => {
     })
 
     it('returns null platform for non-YouTube sites', () => {
-      const h = createHarness({ hostname: 'resumari.it' })
+      const h = createHarness({ hostname: 'resumari.com' })
       expect(h.call('getPlatform')).toBeNull()
       expect(h.call('isVideoPage')).toBe(false)
       expect(h.call('getVideoId')).toBeNull()
@@ -327,7 +330,7 @@ describe('extension content script (content.js)', () => {
 
   describe('auth sync messages', () => {
     it('stores the token and user on AUTH_SYNC (on the Resumari site)', () => {
-      const h = createHarness({ hostname: 'resumari.it' })
+      const h = createHarness({ hostname: 'resumari.com' })
       const responses = h.invokeMessage({
         type: 'AUTH_SYNC',
         token: 'aaa.bbb.ccc',
@@ -358,21 +361,21 @@ describe('extension content script (content.js)', () => {
     })
 
     it('rejects AUTH_SYNC payloads whose token is not a JWT', () => {
-      const h = createHarness({ hostname: 'resumari.it' })
+      const h = createHarness({ hostname: 'resumari.com' })
       h.invokeMessage({ type: 'AUTH_SYNC', token: 'not-a-jwt', user: { id: 'u1' } })
       expect(h.captured.storage.has('resumariAuth')).toBe(false)
       expect(h.captured.localStorage['token']).toBeUndefined()
     })
 
     it('ignores runtime messages from unknown senders', () => {
-      const h = createHarness({ hostname: 'resumari.it' })
+      const h = createHarness({ hostname: 'resumari.com' })
       h.invokeMessage({ type: 'AUTH_SYNC', token: 'aaa.bbb.ccc', user: { id: 'u1' } }, { id: 'evil-ext' })
       expect(h.captured.storage.has('resumariAuth')).toBe(false)
       expect(h.captured.localStorage['token']).toBeUndefined()
     })
 
     it('clears the session on AUTH_LOGOUT', () => {
-      const h = createHarness({ hostname: 'resumari.it' })
+      const h = createHarness({ hostname: 'resumari.com' })
       h.invokeMessage({ type: 'AUTH_SYNC', token: 'aaa.bbb.ccc', user: { id: 'u1' } })
       const responses = h.invokeMessage({ type: 'AUTH_LOGOUT' })
 
@@ -400,7 +403,7 @@ describe('extension content script (content.js)', () => {
     })
 
     it('writes chrome.storage when the site dispatches resumari-auth-change', () => {
-      const h = createHarness({ hostname: 'resumari.it' })
+      const h = createHarness({ hostname: 'resumari.com' })
       h.fireWindowEvent('resumari-auth-change', { token: 'aaa.bbb.ccc', user: { id: 'u2' } })
       expect(h.captured.storage.get('resumariAuth')).toEqual({ token: 'aaa.bbb.ccc', user: { id: 'u2' } })
     })
@@ -413,27 +416,27 @@ describe('extension content script (content.js)', () => {
     })
 
     it('ignores resumari-auth-change events with a non-JWT token', () => {
-      const h = createHarness({ hostname: 'resumari.it' })
+      const h = createHarness({ hostname: 'resumari.com' })
       h.fireWindowEvent('resumari-auth-change', { token: 'not-a-jwt', user: { id: 'u2' } })
       expect(h.captured.storage.has('resumariAuth')).toBe(false)
     })
 
     it('removes chrome.storage on a logout event from the site', () => {
-      const h = createHarness({ hostname: 'resumari.it' })
+      const h = createHarness({ hostname: 'resumari.com' })
       h.fireWindowEvent('resumari-auth-change', { token: 'aaa.bbb.ccc', user: { id: 'u2' } })
       h.fireWindowEvent('resumari-auth-change', null)
       expect(h.captured.storage.has('resumariAuth')).toBe(false)
     })
 
     it('honours a sticky panel logout: site login cannot re-inject auth', () => {
-      const h = createHarness({ hostname: 'resumari.it' })
+      const h = createHarness({ hostname: 'resumari.com' })
       h.captured.storage.set('resumariLoggedOut', true)
       h.fireWindowEvent('resumari-auth-change', { token: 'aaa.bbb.ccc', user: { id: 'u2' } })
       expect(h.captured.storage.has('resumariAuth')).toBe(false)
     })
 
-    it('mirrors panel logins into the site session on resumari.it', () => {
-      const h = createHarness({ hostname: 'resumari.it' })
+    it('mirrors panel logins into the site session on resumari.com', () => {
+      const h = createHarness({ hostname: 'resumari.com' })
       h.fireStorageChange({ resumariAuth: { newValue: { token: 'aaa.bbb.ccc', user: { id: 'u3' } } } })
       expect(h.captured.localStorage['token']).toBe('aaa.bbb.ccc')
       expect(JSON.parse(h.captured.localStorage['user'])).toEqual({ id: 'u3' })
@@ -450,7 +453,7 @@ describe('extension content script (content.js)', () => {
     })
 
     it('clears the site session when the shared auth is removed', () => {
-      const h = createHarness({ hostname: 'resumari.it' })
+      const h = createHarness({ hostname: 'resumari.com' })
       h.captured.localStorage['token'] = 'old'
       h.captured.localStorage['user'] = '{}'
       h.fireStorageChange({ resumariAuth: { newValue: undefined } })
@@ -470,7 +473,7 @@ describe('extension content script (content.js)', () => {
     })
 
     it('answers with null off YouTube', () => {
-      const h = createHarness({ hostname: 'resumari.it' })
+      const h = createHarness({ hostname: 'resumari.com' })
       const responses = h.invokeMessage({ type: 'GET_VIDEO_ID' })
       expect(responses).toEqual([{ videoId: null }])
     })
@@ -490,30 +493,45 @@ describe('extension content script (content.js)', () => {
 
     it('adds a button linked to the video id', () => {
       const h = createHarness()
-      const { thumb } = makeThumb()
+      const { thumb, link } = makeThumb()
       h.call('addThumbnailButton', thumb)
 
-      const btn = thumb.children.find((c: Element) => c.className === 'resumari-thumb-btn')
+      // The button is anchored to the wrapping link (it survives the hover
+      // preview re-render), not to the thumbnail itself.
+      const btn = link.children.find((c: Element) => c.className === 'resumari-thumb-btn')
       expect(btn).toBeDefined()
       expect(btn.innerHTML).toContain('chrome-extension://fake/resumari.png')
-      expect(thumb.style.position).toBe('relative')
+      expect(link.style.position).toBe('relative')
+    })
+
+    it('anchors the button to the link wrapper so the hover preview cannot remove it', () => {
+      const h = createHarness()
+      const { thumb, link } = makeThumb()
+      h.call('addThumbnailButton', thumb)
+
+      // YouTube re-renders the thumbnail's inner content (img -> video) when
+      // the preview plays: a button inside the thumbnail would be deleted,
+      // one inside the link wrapper survives.
+      expect(link.children.some((c: Element) => c.className === 'resumari-thumb-btn')).toBe(true)
+      expect(thumb.children.some((c: Element) => c.className === 'resumari-thumb-btn')).toBe(false)
+      expect(link.classList.add).toBeDefined()
     })
 
     it('does not add a duplicate button', () => {
       const h = createHarness()
-      const { thumb } = makeThumb()
+      const { thumb, link } = makeThumb()
       h.call('addThumbnailButton', thumb)
       h.call('addThumbnailButton', thumb)
-      const buttons = thumb.children.filter((c: Element) => c.className === 'resumari-thumb-btn')
+      const buttons = link.children.filter((c: Element) => c.className === 'resumari-thumb-btn')
       expect(buttons).toHaveLength(1)
     })
 
     it('opens the side panel when the button is clicked and shows a toast', () => {
       const h = createHarness()
-      const { thumb } = makeThumb()
+      const { thumb, link } = makeThumb()
       h.call('addThumbnailButton', thumb)
 
-      const btn = thumb.children.find((c: Element) => c.className === 'resumari-thumb-btn')
+      const btn = link.children.find((c: Element) => c.className === 'resumari-thumb-btn')
       const clickHandler = btn.listeners['click'][0]
       clickHandler({ stopPropagation: () => {}, preventDefault: () => {} })
 
@@ -550,7 +568,7 @@ describe('extension content script (content.js)', () => {
 
       h.call('addThumbnailButton', thumb)
 
-      const btn = thumb.children.find((c: Element) => c.className === 'resumari-thumb-btn')
+      const btn = link.children.find((c: Element) => c.className === 'resumari-thumb-btn')
       expect(btn).toBeDefined()
       expect(btn.innerHTML).toContain('chrome-extension://fake/resumari.png')
     })
@@ -568,7 +586,7 @@ describe('extension content script (content.js)', () => {
 
       h.call('addThumbnailButton', thumb)
 
-      const btn = thumb.children.find((c: Element) => c.className === 'resumari-thumb-btn')
+      const btn = link.children.find((c: Element) => c.className === 'resumari-thumb-btn')
       expect(btn).toBeDefined()
     })
 
@@ -586,7 +604,7 @@ describe('extension content script (content.js)', () => {
 
       h.call('addThumbnailButton', thumb)
 
-      const btn = thumb.children.find((c: Element) => c.className === 'resumari-thumb-btn')
+      const btn = link.children.find((c: Element) => c.className === 'resumari-thumb-btn')
       expect(btn).toBeDefined()
 
       const clickHandler = btn.listeners['click'][0]
@@ -613,10 +631,171 @@ describe('extension content script (content.js)', () => {
 
       h.call('injectThumbnailButtons')
 
-      const buttons = [...thumbA.children, ...thumbB.children].filter(
-        (c: Element) => c.className === 'resumari-thumb-btn',
-      )
+      const buttons = link.children.filter((c: Element) => c.className === 'resumari-thumb-btn')
       expect(buttons).toHaveLength(1)
+    })
+  })
+
+  describe('thumbnail button hover persistence (hover preview)', () => {
+    it('keeps the button visible with an active class while the pointer is inside the thumbnail', () => {
+      const h = createHarness()
+      const link = makeElement('a')
+      link.href = 'https://www.youtube.com/watch?v=abc123def45'
+      link.id = 'thumbnail'
+      const thumb = makeElement('ytd-thumbnail')
+      thumb.appendChild(link)
+      thumb.style.setProperty = () => {}
+      thumb.classList = { add: () => {} }
+      thumb.matches = (sel: string) => sel.includes('ytd-thumbnail')
+
+      const classes = new Set<string>()
+      link.classList = {
+        add: (c: string) => classes.add(c),
+        remove: (c: string) => classes.delete(c),
+      }
+
+      // The hover preview player is a child of the thumbnail but NOT a child
+      // of the link: moving onto it must not hide the button.
+      const preview = makeElement('div')
+      preview.parentElement = thumb
+      thumb.contains = (el: Element) => el === preview
+
+      // mouseover on the preview overlay -> inject + activate
+      h.call('handleThumbHover', { type: 'mouseover', target: preview })
+      expect(link.children.some((c: Element) => c.className === 'resumari-thumb-btn')).toBe(true)
+      expect(classes.has('resumari-thumb-active')).toBe(true)
+
+      // mouseout but the pointer is still inside the thumbnail -> stays active
+      h.call('handleThumbHover', { type: 'mouseout', target: preview, relatedTarget: preview })
+      expect(classes.has('resumari-thumb-active')).toBe(true)
+
+      // mouseout leaving the thumbnail entirely -> deactivates
+      thumb.contains = (el: Element) => false
+      h.call('handleThumbHover', { type: 'mouseout', target: preview, relatedTarget: makeElement('div') })
+      expect(classes.has('resumari-thumb-active')).toBe(false)
+    })
+
+    it('shows the button immediately when re-injected over an already-hovered link', () => {
+      const h = createHarness()
+      const link = makeElement('a')
+      link.href = 'https://www.youtube.com/watch?v=abc123def45'
+      link.matches = (sel: string) => sel === ':hover'
+      const added: string[] = []
+      link.classList = { add: (c: string) => added.push(c), remove: () => {} }
+
+      h.call('addButtonToLink', link)
+
+      expect(link.children.some((c: Element) => c.className === 'resumari-thumb-btn')).toBe(true)
+      expect(added).toContain('resumari-thumb-container')
+      expect(added).toContain('resumari-thumb-active')
+    })
+  })
+
+  describe('channel page "Trascrivi canale" chip', () => {
+    it('detects channel pages (/@handle, /channel/…, /user/…, /c/…)', () => {
+      expect(createHarness({ pathname: '/@handle' }).call('isChannelPage')).toBe(true)
+      expect(createHarness({ pathname: '/@handle/videos' }).call('isChannelPage')).toBe(true)
+      expect(createHarness({ pathname: '/channel/UCabc' }).call('isChannelPage')).toBe(true)
+      expect(createHarness({ pathname: '/user/SomeName' }).call('isChannelPage')).toBe(true)
+      expect(createHarness({ pathname: '/c/SomeName' }).call('isChannelPage')).toBe(true)
+      // Non-channel pages stay off.
+      expect(createHarness({ pathname: '/watch' }).call('isChannelPage')).toBe(false)
+      expect(createHarness({ pathname: '/' }).call('isChannelPage')).toBe(false)
+      expect(createHarness({ hostname: 'resumari.com', pathname: '/@handle' }).call('isChannelPage')).toBe(false)
+    })
+
+    it('builds the canonical channel URL from the current page', () => {
+      const h = createHarness({ hostname: 'www.youtube.com', pathname: '/@handle/videos' })
+      expect(h.call('getChannelUrl')).toBe('https://www.youtube.com/@handle')
+
+      const h2 = createHarness({ hostname: 'www.youtube.com', pathname: '/channel/UCabc' })
+      expect(h2.call('getChannelUrl')).toBe('https://www.youtube.com/channel/UCabc')
+
+      const h3 = createHarness({ hostname: 'www.youtube.com', pathname: '/user/SomeName' })
+      expect(h3.call('getChannelUrl')).toBe('https://www.youtube.com/user/SomeName')
+    })
+
+    it('asks the background to open the Resumari site queuing the whole channel', () => {
+      const h = createHarness({ pathname: '/@handle' })
+      h.call('openChannelTranscription', 'https://www.youtube.com/@handle')
+
+      const msg = h.captured.sentMessages.find(
+        (m: any) => m.type === 'openChannelTab',
+      ) as any
+      expect(msg).toBeDefined()
+      expect(msg.url).toContain('/videos?channel=')
+      expect(msg.url).toContain(encodeURIComponent('https://www.youtube.com/@handle'))
+      // Raw content (marker not yet replaced at build time) falls back to the
+      // local dev server; contentJsWithBase() bakes the real host instead.
+      expect(msg.url).toMatch(/^http:\/\/localhost:3000\/videos\?channel=/)
+    })
+
+    it('injects the chip next to the subscribe button and queues the channel on click', () => {
+      const h = createHarness({ hostname: 'www.youtube.com', pathname: '/@handle' })
+      const sub = makeElement('ytd-subscribe-button-renderer')
+      const host = makeElement('div')
+      host.appendChild(sub)
+      sub.parentElement = host
+      h.document.body.appendChild(host)
+      h.queryMap.set(
+        '#subscribe-button, ytd-subscribe-button-renderer, yt-subscribe-button-view-model',
+        sub,
+      )
+
+      h.call('injectChannelPageButton')
+
+      const chip = host.children.find((c: Element) => c.id === 'resumari-channel-btn')
+      expect(chip).toBeDefined()
+      expect(chip.className).toBe('resumari-chip')
+      expect(chip.innerHTML).toContain('Trascrivi canale')
+
+      chip.parentElement = host
+      chip.onclick()
+
+      const toast = h.document.getElementById('resumari-toast')
+      expect(toast).toBeTruthy()
+      expect(toast.textContent).toContain('Resumari')
+      const msg = h.captured.sentMessages.find(
+        (m: any) => m.type === 'openChannelTab',
+      ) as any
+      expect(msg).toBeDefined()
+      expect(msg.url).toContain(encodeURIComponent('https://www.youtube.com/@handle'))
+    })
+
+    it('does not inject the chip on video pages and removes a stale one', () => {
+      const h = createHarness({ hostname: 'www.youtube.com', pathname: '/watch' })
+      const sub = makeElement('ytd-subscribe-button-renderer')
+      const host = makeElement('div')
+      host.appendChild(sub)
+      sub.parentElement = host
+      h.document.body.appendChild(host)
+      h.queryMap.set(
+        '#subscribe-button, ytd-subscribe-button-renderer, yt-subscribe-button-view-model',
+        sub,
+      )
+
+      h.call('injectChannelPageButton')
+      expect(host.children).toHaveLength(1) // only the subscribe button, no chip
+    })
+
+    it('does not duplicate the chip when injection runs again (SPA navigation)', () => {
+      const h = createHarness({ hostname: 'www.youtube.com', pathname: '/@handle' })
+      const sub = makeElement('ytd-subscribe-button-renderer')
+      const host = makeElement('div')
+      host.appendChild(sub)
+      sub.parentElement = host
+      h.document.body.appendChild(host)
+      h.queryMap.set(
+        '#subscribe-button, ytd-subscribe-button-renderer, yt-subscribe-button-view-model',
+        sub,
+      )
+
+      h.call('injectChannelPageButton')
+      const chip = host.children.find((c: Element) => c.id === 'resumari-channel-btn')
+      chip.parentElement = host
+
+      h.call('injectChannelPageButton')
+      expect(host.children.filter((c: Element) => c.id === 'resumari-channel-btn')).toHaveLength(1)
     })
   })
 
@@ -646,16 +825,18 @@ describe('extension content script (content.js)', () => {
     })
   })
 
-  describe('YouTube 2025 button style', () => {
-    it('styles the "Trascrivi" chip below the player with the 2025 tonal UI', () => {
-      expect(content).toContain('.resumari-chip { display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:18px')
+  describe('YouTube action button style', () => {
+    it('styles the "Trascrivi" and "Trascrivi canale" chips as purple glow glassmorphic buttons', () => {
+      expect(content).toContain('.resumari-chip { display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:18px;border:1px solid rgba(167,139,250,0.6);background:rgba(147,51,234,0.55);color:#fff')
       expect(content).toContain('cubic-bezier(0.4,0,0.2,1)')
-      expect(content).toContain('html[dark] .resumari-chip { background:rgba(255,255,255,0.1);color:#f1f1f1')
-      expect(content).toContain('html[dark] .resumari-chip:hover { background:rgba(255,255,255,0.2)')
+      expect(content).toContain('backdrop-filter:blur(10px)')
+      expect(content).toContain('box-shadow:0 4px 20px rgba(147,51,234,0.45)')
+      expect(content).toContain('html[dark] .resumari-chip { background:rgba(147,51,234,0.4);color:#fff')
+      expect(content).toContain('html[dark] .resumari-chip:hover { background:rgba(147,51,234,0.62)')
     })
 
     it('gives the chip a tactile active state and honours prefers-reduced-motion', () => {
-      expect(content).toContain('resumari-chip:active { transform:scale(0.96)')
+      expect(content).toContain('resumari-chip:active { transform:scale(0.97)')
       expect(content).toContain('prefers-reduced-motion:reduce')
     })
 
@@ -666,8 +847,11 @@ describe('extension content script (content.js)', () => {
       expect(content).not.toContain('resumari-thumb-btn:hover { background:rgba(255,255,255,0.18)')
     })
 
-    it('shows the thumbnail button on the modern YouTube lockup/sidebar structure', () => {
-      expect(content).toContain('yt-thumbnail-view-model:hover .resumari-thumb-btn')
+    it('shows the thumbnail button on hover of the link wrapper and lockup/sidebar structures', () => {
+      // The button is a child of the wrapping link, so hover rules target the
+      // link/container plus the surrounding renderers.
+      expect(content).toContain('a#thumbnail:hover .resumari-thumb-btn')
+      expect(content).toContain('.resumari-thumb-container:hover .resumari-thumb-btn')
       expect(content).toContain('yt-lockup-view-model:hover .resumari-thumb-btn')
     })
   })
@@ -702,7 +886,7 @@ describe('extension content script (content.js)', () => {
 
       h.fireDOMContentLoaded()
 
-      expect(thumb.children.some((c: Element) => c.className === 'resumari-thumb-btn')).toBe(true)
+      expect(link.children.some((c: Element) => c.className === 'resumari-thumb-btn')).toBe(true)
     })
 
     it('debounces bursts of DOM mutations into a single injection pass', () => {

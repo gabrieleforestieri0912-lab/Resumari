@@ -8,13 +8,70 @@ Disallow: /api-keys/
 Disallow: /videos/
 Disallow: /chat/
 
-# OpenAI GPTBot for AI training and browsing
+# --- AI / LLM crawlers (GEO & AEO) ---
+# These agents are explicitly allowed so generative engines (ChatGPT, Claude,
+# Perplexity, Gemini, etc.) can discover and cite Resumari.
+
 User-agent: GPTBot
 Allow: /
 Disallow: /api/
 
-# Google AI (Bard/Gemini) Crawler
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /api/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /api/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /api/
+
+User-agent: Claude-Web
+Allow: /
+Disallow: /api/
+
+User-agent: anthropic-ai
+Allow: /
+Disallow: /api/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /api/
+
+User-agent: Perplexity-User
+Allow: /
+Disallow: /api/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /api/
+
+User-agent: GoogleOther
+Allow: /
+Disallow: /api/
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /api/
+
 User-agent: CCBot
 Allow: /
 
-Sitemap: https://resumari.it/sitemap.xml
+User-agent: meta-externalagent
+Allow: /
+Disallow: /api/
+
+User-agent: cohere-ai
+Allow: /
+Disallow: /api/
+
+User-agent: YouBot
+Allow: /
+Disallow: /api/
+
+Sitemap: https://resumari.com/sitemap.xml
+
+# Machine-readable site description for LLMs (GEO/AEO):
+# https://resumari.com/llms.txt

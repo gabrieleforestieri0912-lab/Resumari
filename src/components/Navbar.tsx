@@ -94,6 +94,8 @@ export default function Navbar() {
 
   const navLinks: NavLink[] = [
     { href: "/tools", label: "Free Tools" },
+    { href: "/api-keys", label: "API Keys" },
+    { href: "/mcp", label: "MCP" },
     { href: "/#steps", label: "Come funziona" },
     { href: "/#features", label: "Funzionalità" },
     { href: "/#pricing", label: "Prezzi" },

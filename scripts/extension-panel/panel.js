@@ -26,6 +26,7 @@
     query: "",
     usage: null,
     chat: [], // [{ role: "user" | "ai", text, time }]
+    chatId: null, // stable conversation id mirrored to /api/chats
     chatTyping: false,
     chatContext: null, // { videoId, title } set from a transcript detail
     loginMode: "password", // password | code
@@ -263,8 +264,12 @@
   }
 
   function renderHeader() {
-    var name = (state.user && (state.user.name || (state.user.email || "").split("@")[0])) || "Utente";
-    $("app-user").textContent = name;
+    var user = state.user || {};
+    var email = user.email || "";
+    var fallback = user.name || email.split("@")[0] || "Utente";
+    var label = email || fallback;
+    $("app-user").textContent = label;
+    $("app-user").title = label;
     $("credits-value").textContent = state.credits != null ? state.credits : "…";
   }
 
@@ -618,14 +623,55 @@
         var parsed = JSON.parse(raw);
         if (Array.isArray(parsed.messages)) state.chat = parsed.messages;
         if (parsed.context) state.chatContext = parsed.context;
+        if (parsed.chatId) state.chatId = parsed.chatId;
       }
     } catch (e) { /* ignore corrupt storage */ }
   }
 
   function saveChat() {
     try {
-      localStorage.setItem(CHAT_KEY, JSON.stringify({ messages: state.chat, context: state.chatContext }));
+      localStorage.setItem(CHAT_KEY, JSON.stringify({ messages: state.chat, context: state.chatContext, chatId: state.chatId }));
     } catch (e) { /* ignore */ }
+  }
+
+  function ensureChatId() {
+    if (!state.chatId) state.chatId = "ext-" + Date.now();
+    return state.chatId;
+  }
+
+  function extractVideoId(text) {
+    var m = String(text || "").match(
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    );
+    return m ? m[1] : null;
+  }
+
+  function chatTitle() {
+    var first = null;
+    for (var i = 0; i < state.chat.length; i++) {
+      if (state.chat[i].role === "user") { first = state.chat[i].text; break; }
+    }
+    if (!first && state.chatContext && state.chatContext.title) first = state.chatContext.title;
+    first = (first || "Nuova Conversazione").replace(/\s+/g, " ").trim();
+    return first.length > 40 ? first.slice(0, 37) + "..." : first;
+  }
+
+  // Mirror the conversation to the backend (/api/chats) so it shows up in the
+  // site chat and dashboard alongside conversations started on the site.
+  function syncChatToServer() {
+    if (!state.token || !state.chatId) return;
+    var messages = state.chat.map(function (m) {
+      return {
+        role: m.role === "user" ? "user" : "assistant",
+        content: m.text,
+        videoId: m.videoId || undefined,
+        time: m.time,
+      };
+    });
+    authFetch("/api/chats", {
+      method: "POST",
+      body: JSON.stringify({ chatId: state.chatId, title: chatTitle(), messages: messages }),
+    }).catch(function () { /* offline or transient — retried on the next message */ });
   }
 
   // Tiny safe markdown renderer (escaping first). Supports the subset the AI
@@ -780,18 +826,23 @@
     var text = (input.value || "").trim();
     if (!text || state.chatTyping) return;
 
-    state.chat.push({ role: "user", text: text, time: nowTime() });
+    // A pasted YouTube link or a pinned transcript both attach a video context
+    // to the message, so the server and the dashboard can link it back.
+    var videoId =
+      (state.chatContext && state.chatContext.videoId) || extractVideoId(text) || null;
+
+    state.chat.push({ role: "user", text: text, time: nowTime(), videoId: videoId || undefined });
     input.value = "";
     autoResizeChatInput();
     updateChatSendState();
     state.chatTyping = true;
+    ensureChatId();
     saveChat();
+    syncChatToServer(); // persist the user message immediately, even if the AI call fails
     renderChat();
 
     var payload = { message: text };
-    if (state.chatContext && state.chatContext.videoId) {
-      payload.videoId = state.chatContext.videoId;
-    }
+    if (videoId) payload.videoId = videoId;
 
     authFetch("/api/ai/chat", { method: "POST", body: JSON.stringify(payload) })
       .then(function (res) {
@@ -815,12 +866,14 @@
           state.chat.push({ role: "ai", text: r.d.response || "", time: nowTime() });
         }
         saveChat();
+        syncChatToServer();
         renderChat();
       })
       .catch(function () {
         state.chatTyping = false;
         state.chat.push({ role: "ai", text: "Errore di rete. Controlla la connessione e riprova.", time: nowTime() });
         saveChat();
+        syncChatToServer();
         renderChat();
       });
   }
@@ -832,6 +885,7 @@
   function newChat() {
     state.chat = [];
     state.chatContext = null;
+    state.chatId = null;
     saveChat();
     renderChat();
     var input = $("chat-input");
@@ -871,26 +925,29 @@
       id: "free", name: "Starter", price: "Gratis", period: "",
       icon: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/></svg>',
       desc: "Per provare Resumari senza impegno.",
-      features: ["10 Crediti omaggio", "Trascrizioni base", "Esporta in TXT"],
+      features: ["10 Crediti omaggio", "Trascrizioni base", "Esporta in TXT", "Supporto Community"],
     },
     {
       id: "standard", name: "Standard", price: "€7.99", period: "/mese", cta: "Passa a Standard",
       icon: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>',
       desc: "Per chi usa Resumari con costanza e vuole più spazio.",
-      features: ["1000 Crediti / mese", "Reset automatico ogni mese", "Esporta in TXT e JSON", "Supporto via email"],
+      features: ["1000 Crediti / mese", "Crediti per trascrizioni e chat AI", "Reset automatico ogni mese", "Esporta in TXT e JSON", "Supporto via email"],
     },
     {
       id: "pro", name: "Pro Pack", price: "€19.99", period: "/mese", cta: "Passa a Pro",
       icon: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
       desc: "Ideale per chi analizza video ogni giorno.",
-      features: ["2500 Crediti / mese", "Reset automatico ogni mese", "Formati avanzati (JSON, CSV, SRT)", "Accesso API Beta"],
+      features: ["2500 Crediti / mese", "Crediti per trascrizioni e chat AI", "Reset automatico ogni mese", "Formati avanzati (JSON, CSV, SRT)", "Accesso API Beta", "Supporto prioritario 24/7"],
       popular: true,
+      badge: "Più popolare",
     },
     {
       id: "business", name: "Business", price: "€39.99", period: "/mese", cta: "Passa a Business",
       icon: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="2"/><line x1="15" y1="22" x2="15" y2="2"/></svg>',
       desc: "Per team e analisi massive.",
-      features: ["6000 Crediti / mese", "Reset automatico ogni mese", "Team Management", "Account Manager"],
+      features: ["6000 Crediti / mese", "Crediti per trascrizioni e chat AI", "Reset automatico ogni mese", "Team Management", "Fatturazione aziendale", "Custom Workflow", "Account Manager dedicato"],
+      popular: true,
+      badge: "Best Value",
     },
   ];
 
@@ -925,11 +982,14 @@
     wrap.innerHTML = "";
     PLANS.forEach(function (p) {
       var isCurrent = p.id === currentPlan;
-      var card = el("div", { class: "plan" + (isCurrent ? " plan--current" : "") + (p.popular && !isCurrent ? " plan--popular" : "") }, [
+      var card = el("div", { class: "plan" + (p.id === "free" ? " plan--free" : "") + (isCurrent ? " plan--current" : "") + (p.popular && !isCurrent ? " plan--popular" : "") }, [
         el("div", { class: "plan__head" }, [
           el("div", { class: "plan__icon", html: p.icon }),
           el("div", {}, [
-            el("p", { class: "plan__name", text: p.name }),
+            el("div", { class: "plan__name-row" }, [
+              el("p", { class: "plan__name", text: p.name }),
+              p.badge ? el("span", { class: "plan__badge", text: p.badge }) : null,
+            ]),
             el("p", { class: "plan__price", html: p.price + (p.period ? " <span>" + p.period + "</span>" : "") }),
             el("p", { class: "plan__desc", text: p.desc }),
           ]),
@@ -942,9 +1002,13 @@
           ]);
         })),
         isCurrent
-          ? el("button", { class: "btn btn--block", disabled: true, text: "Piano corrente", style: "background:#f1f0f6;color:#9a9aa6" })
+          ? el("button", {
+              class: "btn btn--block plan__cta" + (p.id === "free" ? " plan__cta--free" : " plan__cta--current"),
+              disabled: true,
+              text: "Piano corrente",
+            })
           : p.id === "free"
-            ? el("button", { class: "btn btn--block", disabled: true, text: "Piano gratuito", style: "background:#f1f0f6;color:#9a9aa6" })
+            ? el("button", { class: "btn btn--block plan__cta plan__cta--free", disabled: true, text: "Piano gratuito" })
             : el("button", {
                 class: "btn btn--primary btn--block plan__cta",
                 text: p.cta || "Passa al piano",

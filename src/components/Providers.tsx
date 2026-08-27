@@ -40,7 +40,7 @@ export function Providers({ children }: { children: ReactNode }) {
       <SessionSync />
       <ThemeProvider
         attribute="class"
-        defaultTheme="system"
+        defaultTheme="light"
         enableSystem
         disableTransitionOnChange
       >

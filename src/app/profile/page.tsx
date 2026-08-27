@@ -123,6 +123,18 @@ export default function Profile() {
       const updated = { ...user, picture: dataUrl };
       setUser(updated);
       localStorage.setItem("user", JSON.stringify(updated));
+
+      // Persist immediately so the avatar survives a reload and shows in the
+      // navbar (the session reads it back from the DB).
+      const token = localStorage.getItem("token");
+      fetch("/api/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ picture: dataUrl }),
+      }).catch(() => {});
     };
     reader.readAsDataURL(file);
   };
@@ -139,7 +151,7 @@ export default function Profile() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name, picture: user?.picture }),
       });
       const data = await res.json();
       if (res.ok) {

@@ -15,6 +15,9 @@ import {
   Play,
   Video,
 } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import Breadcrumb from "@/components/Breadcrumb";
 
 const clients = [
   {
@@ -23,10 +26,10 @@ const clients = [
     steps: [
       "Apri le impostazioni dei connettori del tuo workspace.",
       "Crea un connettore personalizzato chiamato Resumari.",
-      `Usa https://resumari.it/api/mcp come URL server Streamable HTTP.`,
+      `Usa https://resumari.com/api/mcp come URL server Streamable HTTP.`,
     ],
-    code: "https://resumari.it/api/mcp",
-    codeLabel: "Server URL",
+    code: "https://resumari.com/api/mcp",
+    codeLabel: "URL del Server",
   },
   {
     name: "Claude.ai",
@@ -34,10 +37,10 @@ const clients = [
     steps: [
       "Apri le impostazioni di Claude e vai su Connectors.",
       "Aggiungi un connettore personalizzato chiamato Resumari.",
-      `Usa https://resumari.it/api/mcp come URL server MCP remoto.`,
+      `Usa https://resumari.com/api/mcp come URL server MCP remoto.`,
     ],
-    code: "https://resumari.it/api/mcp",
-    codeLabel: "Server URL",
+    code: "https://resumari.com/api/mcp",
+    codeLabel: "URL del Server",
   },
   {
     name: "Claude Code",
@@ -47,8 +50,8 @@ const clients = [
       "Apri Claude Code ed esegui /mcp.",
       "Scegli Resumari e completa il login nel browser.",
     ],
-    code: "claude mcp add --transport http transcribr https://resumari.it/api/mcp",
-    codeLabel: "Terminal",
+    code: "claude mcp add --transport http transcribr https://resumari.com/api/mcp",
+    codeLabel: "Terminale",
   },
   {
     name: "Codex",
@@ -58,8 +61,8 @@ const clients = [
       "Approva il prompt OAuth nel browser che Codex apre durante la configurazione.",
       "L'auth dovrebbe mostrare OAuth invece di Unsupported.",
     ],
-    code: "codex mcp add transcribr --url https://resumari.it/api/mcp\ncodex mcp list",
-    codeLabel: "Terminal",
+    code: "codex mcp add transcribr --url https://resumari.com/api/mcp\ncodex mcp list",
+    codeLabel: "Terminale",
   },
   {
     name: "Cursor",
@@ -69,7 +72,7 @@ const clients = [
       "Aggiungi la voce del server transcibr qui sotto.",
       "Connettiti e approva la schermata di consenso OAuth di Resumari.",
     ],
-    code: JSON.stringify({ mcpServers: { transcribr: { url: "https://resumari.it/api/mcp" } } }, null, 2),
+    code: JSON.stringify({ mcpServers: { transcribr: { url: "https://resumari.com/api/mcp" } } }, null, 2),
     codeLabel: "JSON",
   },
   {
@@ -80,18 +83,18 @@ const clients = [
       "Aggiungi la voce del server transcibr qui sotto.",
       "Connettiti e completa il flusso di login OAuth di Resumari.",
     ],
-    code: JSON.stringify({ servers: { transcribr: { type: "http", url: "https://resumari.it/api/mcp" } } }, null, 2),
+    code: JSON.stringify({ servers: { transcribr: { type: "http", url: "https://resumari.com/api/mcp" } } }, null, 2),
     codeLabel: "JSON",
   },
 ];
 
 const prompts = [
-  { icon: Users, title: "Creator Strategy", label: "Turn a video into a teardown", prompt: "Use Transcribr MCP to get the transcript for this video, then break down the hook, audience tension, structure, examples, retention devices, and CTA." },
-  { icon: BookOpen, title: "SEO Content", label: "Build an SEO brief", prompt: "Use Transcribr MCP to extract the transcript from this webinar, then turn it into an SEO brief with search intent, H1, meta description, H2/H3 outline, FAQs." },
-  { icon: Zap, title: "Competitor Messaging", label: "Analyze a product demo", prompt: "Use Transcribr MCP on this competitor demo, then extract ICP, pain points, promised outcomes, feature hierarchy, objections." },
-  { icon: Users, title: "Sales Enablement", label: "Create a sales battlecard", prompt: "Use Transcribr MCP to transcribe this competitor webinar, then create a sales battlecard with strongest claims, weak spots." },
-  { icon: BookOpen, title: "Research", label: "Extract claims to verify", prompt: "Use Transcribr MCP on this expert interview, then extract every factual claim, definition, prediction into a table." },
-  { icon: Zap, title: "Product", label: "Convert a review into a PM brief", prompt: "Use Transcribr MCP on this product review, then create a PM brief with pain points, delight moments, feature requests." },
+  { icon: Users, title: "Strategia Creator", label: "Trasforma un video in un teardown", prompt: "Usa Transcribr MCP per ottenere la trascrizione di questo video, poi analizza hook, tensione del pubblico, struttura, esempi, meccanismi di retention e CTA." },
+  { icon: BookOpen, title: "Contenuti SEO", label: "Crea un brief SEO", prompt: "Usa Transcribr MCP per estrarre la trascrizione di questo webinar, poi trasformala in un brief SEO con search intent, H1, meta description, struttura H2/H3 e FAQ." },
+  { icon: Zap, title: "Messaggistica competitor", label: "Analizza una demo prodotto", prompt: "Usa Transcribr MCP su questa demo di un competitor, poi estrai ICP, punti dolenti, risultati promessi, gerarchia delle funzionalità e obiezioni." },
+  { icon: Users, title: "Sales Enablement", label: "Crea una battlecard di vendita", prompt: "Usa Transcribr MCP per trascrivere questo webinar di un competitor, poi crea una battlecard di vendita con le affermazioni più forti e i punti deboli." },
+  { icon: BookOpen, title: "Ricerca", label: "Estrai affermazioni da verificare", prompt: "Usa Transcribr MCP su questa intervista a un esperto, poi estrai ogni affermazione fattuale, definizione e previsione in una tabella." },
+  { icon: Zap, title: "Prodotto", label: "Trasforma una recensione in un brief PM", prompt: "Usa Transcribr MCP su questa recensione prodotto, poi crea un brief PM con punti dolenti, momenti di piacere e richieste di funzionalità." },
 ];
 
 export default function McpPage() {
@@ -106,15 +109,19 @@ export default function McpPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950">
+      <Navbar />
       {/* ── Hero ── */}
       <section className="pt-32 pb-20 px-4">
+        <div className="max-w-5xl mx-auto mb-6">
+          <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "MCP Server" }]} />
+        </div>
         <div className="max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-purple-50 dark:bg-purple-950/40 rounded-full text-purple-700 dark:text-purple-300 text-sm font-bold mb-6">
             <Server size={14} />
-            Remote MCP Server
+            Server MCP Remoto
           </div>
           <h1 className="text-5xl md:text-6xl font-black text-gray-900 dark:text-gray-100 mb-4 tracking-tight">
-            YouTube Transcript MCP
+            Resumari MCP
           </h1>
           <p className="text-xl text-gray-500 dark:text-gray-400 font-semibold mb-3 max-w-3xl mx-auto">
             Trasforma video YouTube in contesto AI pulito e pronto per ChatGPT, Claude, Cursor e altri agenti compatibili con MCP.
@@ -139,14 +146,14 @@ export default function McpPage() {
         <div className="max-w-2xl mx-auto text-center">
           <div className="flex items-center gap-2 justify-center mb-4">
             <Globe size={20} className="text-purple-600" />
-            <h2 className="text-lg font-black text-gray-900 dark:text-gray-100">Server URL</h2>
+            <h2 className="text-lg font-black text-gray-900 dark:text-gray-100">URL del Server</h2>
           </div>
           <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm p-2 flex items-center gap-2">
             <code className="flex-1 text-sm font-mono text-gray-800 dark:text-gray-200 px-4 py-3 truncate">
-              https://resumari.it/api/mcp
+              https://resumari.com/api/mcp
             </code>
             <button
-              onClick={() => copy("https://resumari.it/api/mcp", "server-url")}
+              onClick={() => copy("https://resumari.com/api/mcp", "server-url")}
               className="p-3 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-xl transition-all"
             >
               {copied === "server-url" ? <Check size={18} className="text-green-600" /> : <Copy size={18} className="text-gray-400" />}
@@ -158,7 +165,7 @@ export default function McpPage() {
       {/* ── Tools ── */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Tools</h2>
+          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Strumenti</h2>
           <p className="text-gray-500 dark:text-gray-400 text-center mb-10 max-w-xl mx-auto">
             Due strumenti MCP per inviare video e ricevere trascrizioni pulite in formato markdown.
           </p>
@@ -212,7 +219,7 @@ export default function McpPage() {
       {/* ── Client Setup ── */}
       <section className="py-16 px-4 bg-gray-50 dark:bg-zinc-900">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Set up your MCP client</h2>
+          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Configura il tuo client MCP</h2>
           <p className="text-gray-500 dark:text-gray-400 text-center mb-10 max-w-xl mx-auto">
             Resumari usa OAuth. Il client apre una schermata di consenso nel browser, poi salva e aggiorna il token per richieste future.
           </p>
@@ -247,7 +254,7 @@ export default function McpPage() {
                       <code className="flex-1 text-xs font-mono text-gray-700 dark:text-gray-300 px-3 py-2 truncate">{client.code}</code>
                       <button
                         onClick={() => copy(client.code, `client-${i}`)}
-                        className="p-2 hover:bg-gray-200 rounded-lg transition-all shrink-0"
+                        className="p-2 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-all shrink-0"
                       >
                         {copied === `client-${i}` ? <Check size={14} className="text-green-600" /> : <Copy size={14} className="text-gray-400" />}
                       </button>
@@ -263,7 +270,7 @@ export default function McpPage() {
       {/* ── Docker & Registries ── */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Docker and Registries</h2>
+          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Docker e Registri</h2>
           <p className="text-gray-500 dark:text-gray-400 text-center mb-10 max-w-xl mx-auto">
             Usa l'URL del server remoto in Docker Desktop, Smithery-style o altre voci di registro MCP.
           </p>
@@ -286,7 +293,7 @@ export default function McpPage() {
               <pre className="text-sm text-gray-300 font-mono whitespace-pre">{`{
   "name": "transcribr",
   "transport": "streamable-http",
-  "url": "https://resumari.it/api/mcp",
+  "url": "https://resumari.com/api/mcp",
   "auth": "oauth"
 }`}</pre>
             </div>
@@ -297,7 +304,7 @@ export default function McpPage() {
       {/* ── Auth Troubleshooting ── */}
       <section className="py-16 px-4 bg-gray-50 dark:bg-zinc-900">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Seeing Auth: Unsupported?</h2>
+          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Vedi "Auth: Unsupported"?</h2>
           <p className="text-gray-500 dark:text-gray-400 text-center mb-8">
             Verifica che i metadati della risorsa protetta usino l'URL HTTPS canonico, che OAuth Server e Dynamic Client Registration siano abilitati,
             poi rimuovi e riaggiungi il server MCP dopo il deploy.
@@ -318,7 +325,7 @@ export default function McpPage() {
             </div>
             <div className="mt-4 bg-gray-50 dark:bg-zinc-800 rounded-xl p-4">
               <pre className="text-sm text-gray-600 dark:text-gray-300 font-mono whitespace-pre">{`codex mcp remove transcribr
-codex mcp add transcribr --url https://resumari.it/api/mcp
+codex mcp add transcribr --url https://resumari.com/api/mcp
 codex mcp list`}</pre>
             </div>
           </div>
@@ -328,7 +335,7 @@ codex mcp list`}</pre>
       {/* ── Prompts ── */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Prompts to Try</h2>
+          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Prompt da provare</h2>
           <p className="text-gray-500 dark:text-gray-400 text-center mb-10 max-w-xl mx-auto">
             Workflow MCP pratici da incollare nel tuo agente una volta connesso Resumari.
           </p>
@@ -349,15 +356,15 @@ codex mcp list`}</pre>
       {/* ── What the agent receives ── */}
       <section className="py-16 px-4 bg-gray-50 dark:bg-zinc-900">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">What the agent receives</h2>
+          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Cosa riceve l'agente</h2>
           <p className="text-gray-500 dark:text-gray-400 text-center mb-10 max-w-xl mx-auto">
             Resumari estrae il transcript nativo, addebita crediti, esegue la pulizia in modo asincrono e restituisce markdown pronto per il contesto AI.
           </p>
           <div className="grid md:grid-cols-3 gap-4 text-center">
             {[
-              { label: "One YouTube video per request", icon: Video },
-              { label: "Clean markdown output", icon: CheckCircle2 },
-              { label: "Existing YouTube captions only", icon: BookOpen },
+              { label: "Un video YouTube per richiesta", icon: Video },
+              { label: "Output markdown pulito", icon: CheckCircle2 },
+              { label: "Solo sottotitoli YouTube esistenti", icon: BookOpen },
             ].map((item, i) => (
               <div key={i} className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-gray-100 dark:border-zinc-800 shadow-sm">
                 <item.icon size={24} className="text-purple-600 mx-auto mb-3" />
@@ -371,9 +378,10 @@ codex mcp list`}</pre>
       {/* ── Footer note ── */}
       <section className="py-10 px-4">
         <p className="text-center text-xs text-gray-400">
-          Client names and logos are trademarks of their respective owners. No endorsement implied.
+          I nomi e i loghi dei client sono marchi dei rispettivi proprietari. Nessuna approvazione implicita.
         </p>
       </section>
+      <Footer />
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { describe, it, expect, afterAll } from 'vitest'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { manifest, background, content, panelJsWithBase, buildExtension, distDir } from '../../scripts/build-extension'
+import { manifest, background, content, contentJsWithBase, backgroundJsWithBase, panelJsWithBase, buildExtension, distDir, validateOutput } from '../../scripts/build-extension'
 
 const rootDir = path.resolve(__dirname, '../..')
 
@@ -31,7 +31,7 @@ describe('extension build (scripts/build-extension.js)', () => {
           '*://www.youtube.com/*',
           'http://localhost:3000/*',
           'http://127.0.0.1:3000/*',
-          'https://resumari.it/*',
+          'https://resumari.com/*',
         ]),
       )
     })
@@ -79,7 +79,7 @@ describe('extension build (scripts/build-extension.js)', () => {
       }
       expect(manifest.content_scripts[0].matches).toEqual(['*://www.youtube.com/*'])
       expect(manifest.content_scripts[1].matches).toEqual(
-        expect.arrayContaining(['https://resumari.it/*', 'http://localhost:3000/*']),
+        expect.arrayContaining(['https://resumari.com/*', 'http://localhost:3000/*']),
       )
     })
 
@@ -89,7 +89,7 @@ describe('extension build (scripts/build-extension.js)', () => {
       // The standalone panel ships no site chunks, so assets/* must not be exposed.
       expect(war.resources).not.toContain('assets/*')
       expect(war.matches).toEqual(
-        expect.arrayContaining(['*://*.youtube.com/*', 'https://resumari.it/*']),
+        expect.arrayContaining(['*://*.youtube.com/*', 'https://resumari.com/*']),
       )
     })
 
@@ -111,7 +111,7 @@ describe('extension build (scripts/build-extension.js)', () => {
     it('opens the welcome page on install', () => {
       expect(background).toContain('chrome.runtime.onInstalled.addListener')
       expect(background).toContain('details.reason === "install"')
-      expect(background).toContain('https://resumari.it/welcome')
+      expect(background).toContain('https://resumari.com/welcome')
       expect(background).toContain('chrome.tabs.create')
     })
 
@@ -127,6 +127,18 @@ describe('extension build (scripts/build-extension.js)', () => {
       expect(background).toContain('transcribe-video')
       expect(background).toContain('GET_VIDEO_ID')
       expect(background).toContain('pendingTranscript')
+    })
+
+    it('opens a Resumari tab for the channel transcription handoff', () => {
+      expect(background).toContain('msg.type === "openChannelTab"')
+      // Only URLs on our own handoff page are accepted, never arbitrary ones.
+      expect(background).toContain('msg.url.indexOf("__RESUMARI_APP_BASE__/videos?channel=") === 0')
+      expect(background).toContain('chrome.tabs.create({ url: msg.url, active: true })')
+    })
+
+    it('rejects background messages from unknown senders', () => {
+      expect(background).toContain('sender.id !== chrome.runtime.id')
+      expect(background).toContain('if (!sender || sender.id !== chrome.runtime.id) return;')
     })
   })
 
@@ -145,6 +157,19 @@ describe('extension build (scripts/build-extension.js)', () => {
       expect(content).toContain('pendingTranscript')
       expect(content).toContain('resumari-thumb-btn')
       expect(content).toContain('resumari-transcribe-btn')
+    })
+
+    it('implements the channel-page transcription button (next to Subscribe)', () => {
+      expect(content).toContain('function isChannelPage')
+      expect(content).toContain('function getChannelUrl')
+      expect(content).toContain('function openChannelTranscription')
+      expect(content).toContain('function injectChannelPageButton')
+      expect(content).toContain('resumari-channel-btn')
+      expect(content).toContain('Trascrivi canale')
+      expect(content).toContain('openChannelTab')
+      expect(content).toContain('/videos?channel=')
+      // The API base is baked at build time (see contentJsWithBase).
+      expect(content).toContain('__RESUMARI_API_BASE__')
     })
 
     it('handles auth sync between the site and the extension', () => {
@@ -184,6 +209,35 @@ describe('extension build (scripts/build-extension.js)', () => {
       // On the Resumari site there is no dark attribute; writing 'light'
       // there would clobber the YouTube value the panel needs.
       expect(content).toContain('if (getPlatform() !== "youtube") return;')
+    })
+  })
+
+  describe('backgroundJsWithBase()', () => {
+    it('bakes the backend base URL into the background allow-list', () => {
+      const js = backgroundJsWithBase()
+      expect(js).not.toContain('__RESUMARI_APP_BASE__')
+      const expected = process.env.NEXT_PUBLIC_APP_URL
+      if (expected) {
+        expect(js).toContain(`msg.url.indexOf("${expected}/videos?channel=") === 0`)
+      }
+      expect(js).toMatch(/msg.url.indexOf\("https?:\/\/[^"]+\/videos\?channel="\) === 0/)
+    })
+  })
+
+  describe('contentJsWithBase()', () => {
+    it('bakes the backend base URL into the content script (no marker left)', () => {
+      const js = contentJsWithBase()
+      expect(js).not.toContain('__RESUMARI_API_BASE__')
+      expect(js).toMatch(/var base = "https?:\/\/[^"]+"/)
+      expect(js).toContain('openChannelTab')
+      expect(js).toContain('/videos?channel=')
+      // The inlined value comes from NEXT_PUBLIC_APP_URL when set (tests/setup.ts).
+      const expected = process.env.NEXT_PUBLIC_APP_URL
+      if (expected) {
+        expect(js).toContain(`var base = "${expected}"`)
+      }
+      // The raw source keeps the local dev fallback for unset environments.
+      expect(content).toContain('if (base.indexOf("__RESUMARI") === 0) base = "http://localhost:3000";')
     })
   })
 
@@ -255,8 +309,9 @@ describe('extension build (scripts/build-extension.js)', () => {
       const writtenBackground = fs.readFileSync(path.join(tmpBuildDir, 'background.js'), 'utf-8')
       const writtenContent = fs.readFileSync(path.join(tmpBuildDir, 'content.js'), 'utf-8')
       expect(writtenManifest).toEqual(manifest)
-      expect(writtenBackground).toBe(background)
-      expect(writtenContent).toBe(content)
+      // Background and content scripts carry the baked base (marker replaced).
+      expect(writtenBackground).toBe(backgroundJsWithBase())
+      expect(writtenContent).toBe(contentJsWithBase())
     })
 
     it('is idempotent and can run multiple times', () => {
@@ -264,6 +319,31 @@ describe('extension build (scripts/build-extension.js)', () => {
         buildExtension(tmpBuildDir)
         buildExtension(tmpBuildDir)
       }).not.toThrow()
+    })
+
+    it('leaves no staging/backup folders behind', () => {
+      buildExtension(tmpBuildDir)
+      const leftovers = fs.readdirSync(tmpBuildDir).filter((f) => f.startsWith('.extension-'))
+      expect(leftovers).toEqual([])
+    })
+
+    it('refuses to swap in a broken bundle (validation catches a bad script)', () => {
+      // A corrupted source must fail the build BEFORE the output dir is touched.
+      buildExtension(tmpBuildDir)
+      const before = fs.readFileSync(path.join(tmpBuildDir, 'background.js'), 'utf-8')
+      const bak = path.join(tmpBuildDir, '.extension-backup')
+      expect(fs.existsSync(bak)).toBe(false)
+      // Simulate a broken build by validating a directory with a broken script.
+      const { validateOutput } = require('../../scripts/build-extension')
+      const brokenDir = fs.mkdtempSync(path.join(tmpBuildDir, 'broken-'))
+      fs.writeFileSync(path.join(brokenDir, 'background.js'), 'function { this is not js')
+      fs.writeFileSync(path.join(brokenDir, 'content.js'), 'var x = 1')
+      fs.writeFileSync(path.join(brokenDir, 'panel.js'), 'var y = 1')
+      expect(() => validateOutput(brokenDir)).toThrow(/not valid JS/)
+      // The previous build is untouched and no backup dir was created.
+      expect(fs.readFileSync(path.join(tmpBuildDir, 'background.js'), 'utf-8')).toBe(before)
+      expect(fs.existsSync(bak)).toBe(false)
+      fs.rmSync(brokenDir, { recursive: true, force: true })
     })
   })
 })

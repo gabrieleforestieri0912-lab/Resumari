@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Mail, MessageSquare, Send, CheckCircle, Loader2 } from "lucide-react";
+import Breadcrumb from "../../components/Breadcrumb";
 
 const Navbar = dynamic(() => import("../../components/Navbar"), { ssr: false });
 const Footer = dynamic(() => import("../../components/Footer"), { ssr: false });
@@ -41,6 +42,7 @@ export default function Contattaci() {
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-gray-900 dark:text-gray-100">
       <Navbar />
       <main className="max-w-4xl mx-auto px-6 pt-28 pb-20">
+        <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Contattaci" }]} className="mb-6" />
         <div className="text-center mb-16">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-linear-to-br from-purple-600 to-red-500 text-white mb-6">
             <MessageSquare size={32} />
@@ -163,7 +165,7 @@ export default function Contattaci() {
 
               <div className="space-y-6">
                 <a
-                  href="mailto:support@resumari.it"
+                  href="mailto:support@resumari.com"
                   className="flex items-start gap-4 p-4 bg-white dark:bg-zinc-950 rounded-2xl border border-gray-100 dark:border-zinc-800 hover:border-purple-200 dark:hover:border-purple-700 transition-all group"
                 >
                   <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -171,7 +173,7 @@ export default function Contattaci() {
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 dark:text-gray-100">Email</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">support@resumari.it</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">support@resumari.com</p>
                   </div>
                 </a>
 

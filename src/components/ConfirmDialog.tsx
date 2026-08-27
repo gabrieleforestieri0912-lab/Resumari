@@ -28,20 +28,20 @@ export default function ConfirmDialog({ open, title, message, confirmLabel, onCo
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 10 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+            className="bg-white dark:bg-zinc-900 rounded-2xl p-6 w-full max-w-sm shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-950 flex items-center justify-center shrink-0">
                 <AlertTriangle size={20} className="text-red-600" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-base font-black text-gray-900 mb-1">{title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{message}</p>
+                <h3 className="text-base font-black text-gray-900 dark:text-gray-100 mb-1">{title}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{message}</p>
               </div>
               <button
                 onClick={onCancel}
-                className="p-1 rounded-lg hover:bg-gray-100 text-gray-400 transition-all shrink-0"
+                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-400 dark:text-gray-500 transition-all shrink-0"
               >
                 <X size={16} />
               </button>
@@ -49,7 +49,7 @@ export default function ConfirmDialog({ open, title, message, confirmLabel, onCo
             <div className="flex gap-2 mt-5">
               <button
                 onClick={onCancel}
-                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-bold text-sm hover:bg-gray-50 transition-all"
+                className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-gray-200 font-bold text-sm hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all"
               >
                 Annulla
               </button>

@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Breadcrumb from "@/components/Breadcrumb";
 import { Mic, Copy, Check, FileText } from "lucide-react";
 
 type Template = "minimal" | "detailed" | "seo";
@@ -134,25 +135,26 @@ export default function ShowNotesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white bg-[radial-gradient(#e5e7eb_0.5px,transparent_0.5px)] bg-[length:24px_24px]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 bg-[radial-gradient(#e5e7eb_0.5px,transparent_0.5px)] dark:bg-[radial-gradient(#27272a_0.5px,transparent_0.5px)] bg-[length:24px_24px]">
       <Navbar />
       <main className="pt-32 pb-24 px-6">
         <div className="max-w-4xl mx-auto">
+          <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Strumenti", href: "/tools" }, { label: "Podcast Show Notes Generator" }]} className="mb-6" />
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-fuchsia-50 border border-fuchsia-200 text-fuchsia-700 text-xs font-bold uppercase tracking-wider mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-50 dark:bg-purple-950/40 border border-purple-200 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-wider mb-6">
               Strumento
             </div>
-            <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">
+            <h1 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-zinc-100 mb-4">
               Podcast Show Notes Generator
             </h1>
-            <p className="text-gray-500">
+            <p className="text-gray-500 dark:text-zinc-400">
               Crea note show professionali per podcast dalla tua trascrizione.
               Scegli tra template Minimal, Dettagliato o SEO.
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
-            <label className="block text-sm font-bold text-gray-700 mb-2">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 mb-8">
+            <label className="block text-sm font-bold text-gray-700 dark:text-zinc-300 mb-2">
               Trascrizione
             </label>
             <textarea
@@ -160,7 +162,7 @@ export default function ShowNotesPage() {
               onChange={(e) => setTranscript(e.target.value)}
               placeholder="Incolla la trascrizione del podcast qui..."
               rows={8}
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-200 outline-none transition-all text-sm resize-y"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-zinc-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm resize-y"
             />
           </div>
 
@@ -175,28 +177,28 @@ export default function ShowNotesPage() {
                 onClick={() => setTemplate(t.key)}
                 className={`flex-1 min-w-[120px] p-4 rounded-2xl border-2 transition-all text-center ${
                   template === t.key
-                    ? "border-fuchsia-500 bg-fuchsia-50"
-                    : "border-gray-200 bg-white hover:border-gray-300"
+                    ? "border-purple-500 bg-purple-50 dark:bg-purple-950/40"
+                    : "border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-300 dark:hover:border-zinc-600"
                 }`}
               >
-                <p className="text-sm font-bold text-gray-900">{t.label}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{t.desc}</p>
+                <p className="text-sm font-bold text-gray-900 dark:text-zinc-100">{t.label}</p>
+                <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">{t.desc}</p>
               </button>
             ))}
           </div>
 
           {output && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+            <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <FileText size={18} className="text-fuchsia-500" />
-                  <span className="text-sm font-bold text-gray-700">
+                  <FileText size={18} className="text-purple-500" />
+                  <span className="text-sm font-bold text-gray-700 dark:text-zinc-300">
                     Note Show
                   </span>
                 </div>
                 <button
                   onClick={handleCopy}
-                  className="flex items-center gap-1 text-sm font-semibold text-fuchsia-600 hover:text-fuchsia-800 transition-colors"
+                  className="flex items-center gap-1 text-sm font-semibold text-purple-600 hover:text-purple-800 transition-colors"
                 >
                   {copied ? (
                     <>
@@ -210,7 +212,7 @@ export default function ShowNotesPage() {
                 </button>
               </div>
               <div className="prose prose-sm max-w-none">
-                <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700 leading-relaxed bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700 dark:text-zinc-300 leading-relaxed bg-gray-50 dark:bg-zinc-800 rounded-xl p-4 border border-gray-200 dark:border-zinc-800">
                   {output}
                 </pre>
               </div>

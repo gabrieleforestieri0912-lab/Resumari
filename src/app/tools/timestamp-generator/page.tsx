@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Breadcrumb from "@/components/Breadcrumb";
 import { List, Copy, Check, Plus, Trash2, AlertCircle } from "lucide-react";
 
 interface Chapter {
@@ -48,7 +49,7 @@ function parseTranscriptForChapters(text: string): { timestamp: string; title: s
 export default function TimestampGeneratorPage() {
   const [transcript, setTranscript] = useState("");
   const [chapters, setChapters] = useState<Chapter[]>([
-    { timestamp: "0:00", title: "Introduction" },
+    { timestamp: "0:00", title: "Introduzione" },
   ]);
   const [copied, setCopied] = useState(false);
   const [validationMsg, setValidationMsg] = useState("");
@@ -118,31 +119,32 @@ export default function TimestampGeneratorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white bg-[radial-gradient(#e5e7eb_0.5px,transparent_0.5px)] bg-[length:24px_24px]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 bg-[radial-gradient(#e5e7eb_0.5px,transparent_0.5px)] dark:bg-[radial-gradient(#27272a_0.5px,transparent_0.5px)] bg-[length:24px_24px]">
       <Navbar />
       <main className="pt-32 pb-24 px-6">
         <div className="max-w-3xl mx-auto">
+          <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Strumenti", href: "/tools" }, { label: "YouTube Timestamp & Chapter Generator" }]} className="mb-6" />
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-50 border border-red-200 text-red-700 text-xs font-bold uppercase tracking-wider mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-50 dark:bg-purple-950/40 border border-purple-200 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-wider mb-6">
               Strumento
             </div>
-            <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">
+            <h1 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-zinc-100 mb-4">
               YouTube Timestamp & Chapter Generator
             </h1>
-            <p className="text-gray-500">
+            <p className="text-gray-500 dark:text-zinc-400">
               Crea capitoli compatibili YouTube dalla trascrizione o da timestamp
               manuali. Convalida il formato automaticamente.
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 mb-8">
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-bold text-gray-700">
+              <label className="text-sm font-bold text-gray-700 dark:text-zinc-300">
             Trascrizione (opzionale)
               </label>
               <button
                 onClick={generateFromTranscript}
-                className="text-sm font-semibold text-red-600 hover:text-red-800 transition-colors"
+                className="text-sm font-semibold text-purple-600 hover:text-purple-800 transition-colors"
               >
             Estrai Capitoli
               </button>
@@ -152,7 +154,7 @@ export default function TimestampGeneratorPage() {
               onChange={(e) => setTranscript(e.target.value)}
               placeholder={`Incolla la trascrizione con timestamp (es. "0:00 - Introduzione")`}
               rows={5}
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all text-sm resize-y"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-zinc-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm resize-y"
             />
             {validationMsg && (
               <p className="mt-2 text-sm text-red-500 flex items-center gap-1">
@@ -162,12 +164,12 @@ export default function TimestampGeneratorPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 mb-8">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-bold text-gray-700">Capitoli</span>
+              <span className="text-sm font-bold text-gray-700 dark:text-zinc-300">Capitoli</span>
               <button
                 onClick={addChapter}
-                className="flex items-center gap-1 text-sm font-semibold text-red-600 hover:text-red-800 transition-colors"
+                className="flex items-center gap-1 text-sm font-semibold text-purple-600 hover:text-purple-800 transition-colors"
               >
                 <Plus size={16} />
                 Aggiungi Capitolo
@@ -175,9 +177,9 @@ export default function TimestampGeneratorPage() {
             </div>
 
             {validation.length > 0 && (
-              <div className="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 space-y-1">
+              <div className="mb-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 space-y-1">
                 {validation.map((err, i) => (
-                  <p key={i} className="text-xs text-amber-700 flex items-center gap-1">
+                  <p key={i} className="text-xs text-amber-700 dark:text-amber-300 flex items-center gap-1">
                     <AlertCircle size={12} />
                     {err}
                   </p>
@@ -195,7 +197,7 @@ export default function TimestampGeneratorPage() {
                       updateChapter(i, "timestamp", e.target.value)
                     }
                     placeholder="0:00"
-                    className="w-28 px-3 py-2 rounded-xl border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all text-sm font-mono text-center"
+                    className="w-28 px-3 py-2 rounded-xl border border-gray-300 dark:border-zinc-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm font-mono text-center"
                   />
                   <input
                     type="text"
@@ -204,11 +206,11 @@ export default function TimestampGeneratorPage() {
                       updateChapter(i, "title", e.target.value)
                     }
                     placeholder="Titolo capitolo"
-                    className="flex-1 px-3 py-2 rounded-xl border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all text-sm"
+                    className="flex-1 px-3 py-2 rounded-xl border border-gray-300 dark:border-zinc-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm"
                   />
                   <button
                     onClick={() => removeChapter(i)}
-                    className="p-2 rounded-xl hover:bg-red-50 text-gray-400 hover:text-red-500 transition-all"
+                    className="p-2 rounded-xl hover:bg-red-50 dark:bg-red-950/40 text-gray-400 dark:text-zinc-500 hover:text-red-500 transition-all"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -217,14 +219,14 @@ export default function TimestampGeneratorPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6">
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-bold text-gray-700">
+              <label className="text-sm font-bold text-gray-700 dark:text-zinc-300">
                 Output Capitoli YouTube
               </label>
               <button
                 onClick={handleCopy}
-                className="flex items-center gap-1 text-sm font-semibold text-red-600 hover:text-red-800 transition-colors"
+                className="flex items-center gap-1 text-sm font-semibold text-purple-600 hover:text-purple-800 transition-colors"
               >
                 {copied ? (
                   <>
@@ -241,7 +243,7 @@ export default function TimestampGeneratorPage() {
               value={output}
               readOnly
               rows={6}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-mono resize-y"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800 text-sm font-mono resize-y"
             />
           </div>
         </div>

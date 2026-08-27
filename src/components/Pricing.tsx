@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Check, Star, Zap, Sparkles, Building2, Gem, LucideIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
+import AddToChromeButton from "./AddToChromeButton";
 
 const getToken = (): string | null => {
   return typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -31,7 +32,7 @@ export default function Pricing() {
       name: "Starter",
       price: "0",
       icon: Sparkles,
-      color: "gray",
+      color: "purple",
       description: "Perfetto per provare la potenza di Resumari senza impegno.",
       features: [
         "10 Crediti omaggio",
@@ -146,7 +147,6 @@ export default function Pricing() {
   const colorConfig: Record<string, string> = {
     gray: "from-gray-500/20 to-gray-600/5 text-gray-600 border-gray-200",
     purple: "from-purple-600/20 to-red-600/5 text-purple-600 border-purple-200",
-    blue: "from-blue-600/20 to-cyan-600/5 text-blue-600 border-blue-200",
   };
 
   return (
@@ -242,7 +242,11 @@ export default function Pricing() {
                     className="flex items-start gap-3 text-gray-700 dark:text-gray-300 text-[13px] font-semibold leading-tight"
                   >
                     <div
-                      className={`mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center ${plan.popular ? "bg-purple-600 text-white" : "bg-gray-200 dark:bg-zinc-700 text-gray-500 dark:text-gray-400"}`}
+                      className={`mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center ${
+                        plan.popular
+                          ? "bg-purple-600 text-white"
+                          : "bg-gray-200 dark:bg-zinc-700 text-gray-500 dark:text-gray-400"
+                      }`}
                     >
                       <Check size={10} strokeWidth={4} />
                     </div>
@@ -252,8 +256,8 @@ export default function Pricing() {
               </ul>
 
               {plan.isFree ? (
-                <button className="group relative px-1 py-1 rounded-4xl bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 transition-all cursor-pointer w-full">
-                  <span className="block px-7 py-2 bg-white dark:bg-zinc-900 text-gray-500 dark:text-gray-300 text-sm font-bold rounded-[1.8rem] transition-colors group-hover:bg-gray-50 dark:group-hover:bg-zinc-800">
+                <button className="group relative px-1 py-1 rounded-4xl bg-linear-to-r from-purple-600 to-red-600 hover:scale-[1.02] transition-all shadow-lg shadow-purple-500/25 cursor-pointer w-full">
+                  <span className="block px-7 py-2 bg-white dark:bg-zinc-950 text-gray-900 dark:text-white text-sm font-bold rounded-[1.8rem] transition-colors group-hover:bg-gray-50 dark:group-hover:bg-zinc-900">
                     {plan.buttonText}
                   </span>
                 </button>
@@ -272,7 +276,19 @@ export default function Pricing() {
         })}
       </div>
 
-      <div className="mt-20 text-center">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="mt-20 flex flex-col items-center justify-center gap-4"
+      >
+        <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
+          Preferisci lavorare direttamente su YouTube?
+        </p>
+        <AddToChromeButton variant="section" />
+      </motion.div>
+
+      <div className="mt-12 text-center">
         <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
           Hai bisogno di un piano personalizzato?{" "}
           <button className="text-purple-600 font-bold hover:underline">

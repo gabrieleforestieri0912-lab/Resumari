@@ -3,6 +3,8 @@ import "./globals.css";
 import { Providers } from "@/components/Providers";
 import PageTransition from "@/components/PageTransition";
 import PendingTranscriptHandler from "@/components/PendingTranscriptHandler";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -10,8 +12,59 @@ const inter = Inter({
   display: "swap",
 });
 
+// Global structured data (JSON-LD) so search engines and AI crawlers can
+// understand what Resumari is, who publishes it and what it offers.
+const structuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": "https://resumari.com/#organization",
+    name: "Resumari",
+    url: "https://resumari.com",
+    logo: "https://resumari.com/resumari.png",
+    description:
+      "Piattaforma AI che riassume video YouTube, PDF e documenti con trascrizioni automatiche, riassunti intelligenti e chat interattiva.",
+    knowsAbout: [
+      "intelligenza artificiale",
+      "riassunti video",
+      "trascrizione automatica",
+      "YouTube summarizer",
+      "analisi documenti",
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": "https://resumari.com/#website",
+    url: "https://resumari.com",
+    name: "Resumari",
+    description:
+      "Riassumi video YouTube, PDF e documenti con l'intelligenza artificiale.",
+    inLanguage: "it-IT",
+    publisher: { "@id": "https://resumari.com/#organization" },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "@id": "https://resumari.com/#app",
+    name: "Resumari",
+    url: "https://resumari.com",
+    applicationCategory: "AIApplication",
+    operatingSystem: "Web",
+    description:
+      "Trasforma video YouTube, PDF e documenti in riassunti e trascrizioni con l'IA. Include estensione Chrome, server MCP e API pubblica.",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "EUR",
+      description: "Piano gratuito con 10 crediti omaggio",
+    },
+    publisher: { "@id": "https://resumari.com/#organization" },
+  },
+];
+
 export const metadata = {
-  metadataBase: new URL('https://resumari.it'),
+  metadataBase: new URL('https://resumari.com'),
   title: {
     default: "Resumari - AI Video & YouTube Summarizer | Trascrizione Video Automatica",
     template: "%s | Resumari",
@@ -21,6 +74,8 @@ export const metadata = {
   authors: [{ name: "Resumari" }],
   creator: "Resumari",
   publisher: "Resumari",
+  applicationName: "Resumari",
+  category: "productivity",
   robots: {
     index: true,
     follow: true,
@@ -38,7 +93,7 @@ export const metadata = {
     siteName: "Resumari",
     title: "Resumari - AI Video & YouTube Summarizer",
     description: "Trasforma video YouTube, PDF e documenti in riassunti intelligenti con l'IA.",
-    url: "https://resumari.it",
+    url: "https://resumari.com",
     images: [{
       url: "/resumari.png",
       width: 512,
@@ -53,7 +108,10 @@ export const metadata = {
     images: ["/resumari.png"],
   },
   alternates: {
-    canonical: "https://resumari.it",
+    canonical: "https://resumari.com",
+    languages: {
+      "it-IT": "https://resumari.com",
+    },
   },
 };
 
@@ -62,14 +120,12 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const jsonLd = {};
-
   return (
     <html lang="it" suppressHydrationWarning data-scroll-behavior="smooth" className="">
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
         <link rel="preload" href="/resumari.png" as="image" />
         <link rel="icon" href="/resumari.png" type="image/png" />
@@ -79,6 +135,8 @@ export default function RootLayout({
         <Providers>
           <PendingTranscriptHandler />
           <PageTransition>{children}</PageTransition>
+          <SpeedInsights />
+          <Analytics />
         </Providers>
       </body>
     </html>

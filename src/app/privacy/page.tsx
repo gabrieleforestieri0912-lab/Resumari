@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import Breadcrumb from "../../components/Breadcrumb";
 
 export default function PrivacyPolicy() {
   useEffect(() => {
@@ -13,6 +14,7 @@ export default function PrivacyPolicy() {
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-gray-900 dark:text-gray-100">
       <Navbar />
       <main className="max-w-3xl mx-auto px-6 pt-28 pb-20">
+        <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Privacy Policy" }]} className="mb-6" />
         <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
           Privacy{" "}
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-red-600">

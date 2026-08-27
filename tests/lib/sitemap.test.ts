@@ -26,7 +26,7 @@ describe('public/sitemap.xml', () => {
     const urls = extractUrls(sitemap)
     expect(urls.length).toBeGreaterThan(10)
     for (const u of urls) {
-      expect(u).toMatch(/^https:\/\/resumari\.it/)
+      expect(u).toMatch(/^https:\/\/resumari\.com/)
     }
   })
 
@@ -41,13 +41,13 @@ describe('public/sitemap.xml', () => {
 
   it('includes the home page and the tools hub', () => {
     const urls = extractUrls(sitemap)
-    expect(urls).toContain('https://resumari.it/')
-    expect(urls).toContain('https://resumari.it/tools')
-    expect(urls.some(u => u.startsWith('https://resumari.it/tools/'))).toBe(true)
+    expect(urls).toContain('https://resumari.com/')
+    expect(urls).toContain('https://resumari.com/tools')
+    expect(urls.some(u => u.startsWith('https://resumari.com/tools/'))).toBe(true)
   })
 
   it('is referenced from robots.txt', () => {
-    expect(robots).toContain('Sitemap: https://resumari.it/sitemap.xml')
+    expect(robots).toContain('Sitemap: https://resumari.com/sitemap.xml')
   })
 
   it('robots.txt disallows the auth-only areas that are excluded from the sitemap', () => {

@@ -6,6 +6,7 @@ import { Globe, CheckCircle2, Zap, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export default function WelcomePage() {
   useEffect(() => {
@@ -13,14 +14,17 @@ export default function WelcomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-zinc-950">
       <Navbar />
       <main className="pt-32 pb-24 px-6">
+        <div className="max-w-4xl mx-auto mb-6">
+          <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Benvenuto" }]} />
+        </div>
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8"
+            className="w-20 h-20 bg-green-100 dark:bg-green-950/40 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto mb-8"
           >
             <CheckCircle2 size={40} />
           </motion.div>
@@ -28,12 +32,12 @@ export default function WelcomePage() {
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-6xl font-black text-gray-900 mb-6"
+            className="text-4xl md:text-6xl font-black text-gray-900 dark:text-gray-100 mb-6"
           >
             Resumari è pronta! 🚀
           </motion.h1>
 
-          <p className="text-xl text-gray-600 mb-12">
+          <p className="text-xl text-gray-600 dark:text-gray-300 mb-12">
             L'estensione è stata installata correttamente. Ecco come iniziare a risparmiare ore di tempo.
           </p>
 
@@ -60,18 +64,18 @@ export default function WelcomePage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 + i * 0.1 }}
-                className="p-6 rounded-3xl bg-gray-50 border border-gray-100"
+                className="p-6 rounded-3xl bg-gray-50 dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800"
               >
                 <div className="mb-4 flex justify-center">{step.icon}</div>
-                <h3 className="font-bold text-gray-900 mb-2">{step.title}</h3>
-                <p className="text-sm text-gray-500">{step.desc}</p>
+                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-2">{step.title}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{step.desc}</p>
               </motion.div>
             ))}
           </div>
 
           <Link
             href="/chat"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-gray-900 text-white font-black rounded-2xl hover:scale-105 transition-transform"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-gray-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-black rounded-2xl hover:scale-105 transition-transform"
           >
             Vai alla Dashboard
             <ArrowRight size={20} />

@@ -53,6 +53,22 @@ export const authOptions = {
         session.user.plan = token.plan;
         session.customToken = token.customToken;
       }
+      // Surface the latest avatar from the DB: the JWT only stores `picture`
+      // at sign-in, so an uploaded avatar (or an OAuth photo change) would
+      // otherwise stay stale until the next login.
+      try {
+        const userId = session.user.id || token?.id;
+        if (userId) {
+          const { data: dbUser } = await getServiceClient()
+            .from(TABLES.USERS)
+            .select('picture')
+            .eq('id', userId)
+            .single();
+          if (dbUser?.picture) session.user.image = dbUser.picture;
+        }
+      } catch (e) {
+        console.error('Error fetching user picture for session:', e);
+      }
       return session;
     },
     async jwt({ token, user, trigger, session }: any) {

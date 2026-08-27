@@ -62,10 +62,10 @@ COME SI USA
 1. Installa l'estensione e apri YouTube.
 2. Passa il mouse su un video e clicca il pulsante "Trascrivi" (oppure usa il bottone "Trascrivi" nella pagina del video, la scorciatoia Alt+R o il popup dell'icona).
 3. Il side panel si apre e trascrive il video da solo: copia la trascrizione, riassumila con l'IA o apri il risultato sul sito.
-4. Se non hai un account, creane uno gratis su resumari.it.
+4. Se non hai un account, creane uno gratis su resumari.com.
 
 SUPPORTO
-Per assistenza: support@resumari.it
+Per assistenza: support@resumari.com
 
 Resumari — Trascrizioni AI per YouTube
 ```
@@ -87,7 +87,7 @@ Resumari — Trascrizioni AI per YouTube
 - sidePanel: consente di aprire il pannello laterale di Resumari accanto a YouTube
   per mostrare trascrizioni, riassunti e chat senza cambiare scheda.
 - storage: sincronizza la sessione (token di accesso e utente) tra il sito
-  resumari.it e il side panel — basta accedere una volta — e salva localmente
+  resumari.com e il side panel — basta accedere una volta — e salva localmente
   il video in attesa di trascrizione per ripristinare il pannello tra le sessioni.
 Nessun dato viene trasmesso a terze parti; le trascrizioni vengono elaborate
 tramite i servizi Resumari con il consenso esplicito dell'utente.
@@ -104,4 +104,4 @@ Quando richiesto, indica:
   autonomo; l'accesso avviene tramite l'account Resumari. Le trascrizioni elaborate
   restano associate all'account e non vengono condivise con terze parti.
 - **Remote code**: l'estensione non esegue codice remoto non firmato.
-- **Sicurezza**: le comunicazioni avvengono su HTTPS verso resumari.it.
+- **Sicurezza**: le comunicazioni avvengono su HTTPS verso resumari.com.

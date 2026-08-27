@@ -18,8 +18,8 @@ incorporate al momento della build):
 
 | Variabile | Valore di produzione |
 |---|---|
-| `NEXT_PUBLIC_APP_URL` | `https://resumari.it` |
-| `NEXTAUTH_URL` | `https://resumari.it` |
+| `NEXT_PUBLIC_APP_URL` | `https://resumari.com` |
+| `NEXTAUTH_URL` | `https://resumari.com` |
 | `NEXTAUTH_SECRET` | segreto nuovo, lungo e casuale |
 | `JWT_SECRET` | segreto nuovo, lungo e casuale (diverso dal precedente) |
 | `NEXT_PUBLIC_SUPABASE_URL` | URL del progetto Supabase di produzione |
@@ -31,17 +31,17 @@ incorporate al momento della build):
 | `STRIPE_SECRET_KEY` | chiave **live** (sk_live_...) |
 | `STRIPE_WEBHOOK_SECRET` | whsec_ dell'endpoint webhook di produzione |
 | `RESEND_API_KEY` | chiave Resend |
-| `SUPPORT_EMAIL` | `support@resumari.it` — **obbligatoria**: se non impostata il codice usa il fallback su un indirizzo personale |
+| `SUPPORT_EMAIL` | `support@resumari.com` — **obbligatoria**: se non impostata il codice usa il fallback su un indirizzo personale |
 
 ## 3. Dopo il deploy
 
-- **Stripe**: registra il webhook endpoint `https://resumari.it/api/webhooks/stripe` con gli eventi
+- **Stripe**: registra il webhook endpoint `https://resumari.com/api/webhooks/stripe` con gli eventi
   `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
   e incolla il secret in `STRIPE_WEBHOOK_SECRET`.
-- **Google OAuth**: nella Google Cloud Console aggiungi `https://resumari.it/api/auth/callback/google`
+- **Google OAuth**: nella Google Cloud Console aggiungi `https://resumari.com/api/auth/callback/google`
   (e l'URI di callback di NextAuth) alle **Authorized redirect URIs**.
-- **Resend**: verifica il dominio `resumari.it` (record DNS SPF/DKIM) così le email da
-  `noreply@resumari.it` non finiscono in spam.
+- **Resend**: verifica il dominio `resumari.com` (record DNS SPF/DKIM) così le email da
+  `noreply@resumari.com` non finiscono in spam.
 - **Supabase**: applica le migration (`scripts/migration-api-keys.sql`, `scripts/migration-transcripts.sql`) e verifica le policy RLS.
 - **SEO**: la sitemap è in `public/sitemap.xml` e referenziata dal `robots.txt`; registra
   il dominio nella **Google Search Console** e invia la sitemap.
@@ -52,7 +52,7 @@ incorporate al momento della build):
 > ⚠️ **`NEXT_PUBLIC_APP_URL` è critica per l'estensione.** Il side panel gira su un'origine
 > `chrome-extension://` e chiama le API con URL assoluti: il valore di `NEXT_PUBLIC_APP_URL`
 > viene **incorporato in `panel.js` al momento della build** (placeholder sostituito da
-> `scripts/build-extension.js`). Se su Vercel non è impostata a `https://resumari.it`, il
+> `scripts/build-extension.js`). Se su Vercel non è impostata a `https://resumari.com`, il
 > pannello pubblicato punterà a localhost o a un altro host e non funzionerà. Non fare build
 > locali con `.env.local` che la punti a localhost e poi caricare quel bundle nello store.
 

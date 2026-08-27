@@ -59,7 +59,7 @@ export async function POST(request: Request) {
       try {
         const resend = new Resend(process.env.RESEND_API_KEY);
         await resend.emails.send({
-          from: 'Resumari <noreply@resumari.it>',
+          from: 'Resumari <noreply@resumari.com>',
           to: email.toLowerCase(),
           subject: 'Il tuo codice di verifica - Resumari',
           html: `

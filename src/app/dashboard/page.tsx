@@ -19,16 +19,71 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-function groupByDate(msgsMap: Record<string, any>) {
-  const days: Record<string, number> = {};
-  Object.values(msgsMap).forEach((chatMsgs: any) => {
-    chatMsgs.forEach((msg: any) => {
-      const d = msg.time ? new Date(msg.time) : new Date();
-      const key = d.toISOString().split("T")[0];
-      days[key] = (days[key] || 0) + 1;
+function safeParse<T>(raw: string | null, fallback: T): T {
+  if (!raw) return fallback;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+}
+
+function toTimestamp(value: any): number {
+  if (value == null || value === "") return Date.now();
+  const t = new Date(value).getTime();
+  return Number.isNaN(t) ? Date.now() : t;
+}
+
+function msgVideoId(msg: any): string | null {
+  const v = msg?.videoId || msg?.video_id;
+  return v ? String(v) : null;
+}
+
+// Build the dashboard stats from a unified chat list + messages map. Handles
+// both the site message shape ({ text, sender, videoId }) and the
+// extension/backend shape ({ role, content, videoId }).
+function computeStats(chats: any[], msgsMap: Record<string, any>) {
+  let totalMessages = 0;
+  const videoIds = new Set<string>();
+  const dayCounts: Record<string, number> = {};
+
+  chats.forEach((chat) => {
+    const msgs = Array.isArray(msgsMap[chat.id]) ? msgsMap[chat.id] : [];
+    const dayKey = new Date(toTimestamp(chat.createdAt)).toISOString().split("T")[0];
+    totalMessages += msgs.length;
+    msgs.forEach((msg: any) => {
+      const vid = msgVideoId(msg) || (chat.videoId ? String(chat.videoId) : null);
+      if (vid) videoIds.add(vid);
+      dayCounts[dayKey] = (dayCounts[dayKey] || 0) + 1;
     });
   });
-  return days;
+
+  const last7Days = getLast7Days();
+  const activity = last7Days.map((d) => ({
+    ...d,
+    count: dayCounts[d.date] || 0,
+  }));
+  const maxCount = Math.max(...activity.map((d) => d.count), 1);
+  const totalDays = Object.keys(dayCounts).length;
+  const avgPerDay = totalDays > 0 ? (totalMessages / totalDays).toFixed(1) : "0";
+  const avgPerChat = chats.length > 0 ? (totalMessages / chats.length).toFixed(1) : "0";
+
+  const recentChats = [...chats]
+    .sort((a, b) => toTimestamp(b.createdAt) - toTimestamp(a.createdAt))
+    .slice(0, 8);
+
+  return {
+    totalChats: chats.length,
+    totalMessages,
+    videoCount: videoIds.size,
+    documents: 0,
+    activity,
+    maxCount,
+    avgPerDay,
+    avgPerChat,
+    recentChats,
+    hasActivity: totalMessages > 0,
+  };
 }
 
 function getLast7Days() {
@@ -53,50 +108,84 @@ export default function Dashboard() {
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const storedUser = localStorage.getItem("user");
-    if (storedUser) setUser(JSON.parse(storedUser));
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch {
+        /* ignore corrupt user */
+      }
+    }
 
-    const storedChats = localStorage.getItem("resumari_chats");
-    const storedMsgs = localStorage.getItem("resumari_chat_messages");
+    const token = localStorage.getItem("token");
+    const localChats: any[] = safeParse(localStorage.getItem("resumari_chats"), []);
+    const localMsgs: Record<string, any> = safeParse(
+      localStorage.getItem("resumari_chat_messages"),
+      {},
+    );
 
-    const chats = storedChats ? JSON.parse(storedChats) : [];
-    const msgsMap = storedMsgs ? JSON.parse(storedMsgs) : {};
+    const apply = (chats: any[], msgsMap: Record<string, any>) => {
+      if (cancelled) return;
+      setData(computeStats(chats, msgsMap));
+    };
 
-    let totalMessages = 0;
-    let videoCount = 0;
+    // Fallback to the site-only data when the session token is missing or the
+    // server is unreachable.
+    const applyLocal = () => apply(localChats, localMsgs);
 
-    Object.values(msgsMap).forEach((chatMsgs: any) => {
-      chatMsgs.forEach((msg: any) => {
-        totalMessages++;
-        if (msg.videoId) videoCount++;
-      });
-    });
+    if (!token) {
+      applyLocal();
+      return;
+    }
 
-    const dayCounts = groupByDate(msgsMap);
-    const last7Days = getLast7Days();
-    const activity = last7Days.map((d) => ({
-      ...d,
-      count: dayCounts[d.date] || 0,
-    }));
+    // The dashboard must also surface activity produced by the browser
+    // extension: its chats are saved server-side (not in the site's
+    // localStorage), so merge /api/chats with the local data.
+    fetch("/api/chats", { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((serverChats: any) => {
+        if (cancelled) return;
+        if (!Array.isArray(serverChats) || serverChats.length === 0) {
+          applyLocal();
+          return;
+        }
 
-    const maxCount = Math.max(...activity.map((d) => d.count), 1);
+        const chats: any[] = [];
+        const msgsMap: Record<string, any> = {};
+        const seen = new Set<string>();
 
-    const totalDays = Object.keys(dayCounts).length;
-    const avgPerDay = totalDays > 0 ? (totalMessages / totalDays).toFixed(1) : 0;
-    const avgPerChat = chats.length > 0 ? (totalMessages / chats.length).toFixed(1) : 0;
+        // Local chats first so unsynced edits never disappear; server rows are
+        // added only for chat ids the local store does not know about.
+        localChats.forEach((c: any) => {
+          const id = String(c.id);
+          if (!id) return;
+          seen.add(id);
+          chats.push(c);
+          msgsMap[id] = Array.isArray(localMsgs[id]) ? localMsgs[id] : [];
+        });
 
-    setData({
-      totalChats: chats.length,
-      totalMessages,
-      videoCount,
-      documents: 0,
-      activity,
-      maxCount,
-      avgPerDay,
-      avgPerChat,
-      recentChats: chats.slice(0, 8),
-      hasActivity: totalMessages > 0,
-    });
+        serverChats.forEach((c: any) => {
+          const id = String(c.chatId ?? c.chat_id ?? c.id ?? "");
+          if (!id || seen.has(id)) return;
+          seen.add(id);
+          chats.push({
+            id,
+            title: c.title || "Nuova Conversazione",
+            createdAt: c.createdAt ?? c.created_at ?? Date.now(),
+            videoId: c.videoId ?? c.video_id ?? null,
+          });
+          msgsMap[id] = Array.isArray(c.messages) ? c.messages : [];
+        });
+
+        apply(chats, msgsMap);
+      })
+      .catch(applyLocal);
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Breadcrumb from "@/components/Breadcrumb";
 import {
   Image,
   FileText,
@@ -91,21 +92,22 @@ const tools = [
 
 export default function ToolsPage() {
   return (
-    <div className="min-h-screen bg-white bg-[radial-gradient(#e5e7eb_0.5px,transparent_0.5px)] bg-[length:24px_24px]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 bg-[radial-gradient(#e5e7eb_0.5px,transparent_0.5px)] dark:bg-[radial-gradient(#27272a_0.5px,transparent_0.5px)] bg-[length:24px_24px]">
       <Navbar />
       <main className="pt-32 pb-24 px-6">
         <div className="max-w-6xl mx-auto">
+          <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Strumenti" }]} className="mb-6" />
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-xs font-bold uppercase tracking-wider mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-50 dark:bg-purple-950/40 border border-purple-200 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-wider mb-6">
               Strumenti Gratuiti
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-4 tracking-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 dark:text-zinc-100 mb-4 tracking-tight">
               Free YouTube Tools
             </h1>
-            <p className="text-xl text-gray-500 font-semibold mb-3">
+            <p className="text-xl text-gray-500 dark:text-zinc-400 font-semibold mb-3">
               Nessuna registrazione. Nessun costo API. 100% lato client.
             </p>
-            <p className="text-gray-400 max-w-xl mx-auto">
+            <p className="text-gray-400 dark:text-zinc-500 max-w-xl mx-auto">
               Tutto funziona nel tuo browser — i tuoi dati non lasciano mai il
               tuo dispositivo.
             </p>
@@ -116,17 +118,17 @@ export default function ToolsPage() {
               <Link
                 key={tool.href}
                 href={tool.href}
-                className="group relative bg-white rounded-2xl border border-gray-200 p-6 transition-all duration-300 hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 hover:border-gray-300"
+                className="group relative bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 transition-all duration-300 hover:shadow-xl hover:shadow-gray-200/50 dark:hover:shadow-zinc-900/40 hover:-translate-y-1 hover:border-gray-300 dark:hover:border-zinc-600"
               >
                 {/* Badge with the brand gradient + white icon, coherent across
                     every card (same identity as the landing/extension). */}
                 <div className="w-12 h-12 rounded-2xl bg-linear-to-r from-purple-600 to-red-600 flex items-center justify-center mb-4 shadow-lg shadow-purple-500/25">
                   <tool.icon className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-zinc-100 mb-2 group-hover:text-purple-600 transition-colors">
                   {tool.title}
                 </h3>
-                <p className="text-sm text-gray-500 leading-relaxed">
+                <p className="text-sm text-gray-500 dark:text-zinc-400 leading-relaxed">
                   {tool.description}
                 </p>
                 <div className="mt-4 flex items-center gap-1 text-sm font-semibold text-purple-600 opacity-0 group-hover:opacity-100 transition-all translate-y-1 group-hover:translate-y-0">

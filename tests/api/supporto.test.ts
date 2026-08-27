@@ -13,11 +13,12 @@ vi.mock('@/lib/supabase', () => ({
 
 import { POST } from '@/app/api/supporto/route'
 
-const client = createMockSupabaseClient()
+let client: ReturnType<typeof createMockSupabaseClient>
 
 describe('POST /api/supporto', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    client = createMockSupabaseClient()
     vi.mocked(getServiceClientMock).mockReturnValue(client)
   })
 
@@ -61,5 +62,35 @@ describe('POST /api/supporto', () => {
     expect(rows[0].email).toBe('pinco@example.com')
     expect(rows[0].messaggio).toBe('Ciao resumari')
     expect(rows[0].created_at).toBeTypeOf('string')
+  })
+
+  it('accepts anonymous feedback with only the message', async () => {
+    const res = await POST(
+      new Request('http://localhost/api/supporto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messaggio: 'Solo un feedback' }),
+      }),
+    )
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.success).toBe(true)
+
+    const rows = client.getData('messages')
+    expect(rows).toHaveLength(1)
+    expect(rows[0].nome).toBe('Anonimo')
+    expect(rows[0].email).toBe('')
+    expect(rows[0].messaggio).toBe('Solo un feedback')
+  })
+
+  it('returns 400 when the message is empty', async () => {
+    const res = await POST(
+      new Request('http://localhost/api/supporto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messaggio: '   ' }),
+      }),
+    )
+    expect(res.status).toBe(400)
   })
 })

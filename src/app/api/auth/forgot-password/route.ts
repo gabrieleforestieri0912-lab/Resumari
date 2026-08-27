@@ -140,7 +140,7 @@ export async function POST(request: Request) {
 
       try {
         await resend.emails.send({
-          from: 'Resumari <noreply@resumari.it>',
+          from: 'Resumari <noreply@resumari.com>',
           to: email.toLowerCase(),
           subject,
           html,

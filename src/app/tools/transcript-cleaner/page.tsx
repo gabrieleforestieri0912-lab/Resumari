@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Breadcrumb from "@/components/Breadcrumb";
 import { Eraser, Copy, Check, RotateCcw } from "lucide-react";
 
 export default function TranscriptCleanerPage() {
@@ -70,33 +71,34 @@ export default function TranscriptCleanerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white bg-[radial-gradient(#e5e7eb_0.5px,transparent_0.5px)] bg-[length:24px_24px]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 bg-[radial-gradient(#e5e7eb_0.5px,transparent_0.5px)] dark:bg-[radial-gradient(#27272a_0.5px,transparent_0.5px)] bg-[length:24px_24px]">
       <Navbar />
       <main className="pt-32 pb-24 px-6">
         <div className="max-w-4xl mx-auto">
+          <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Strumenti", href: "/tools" }, { label: "Transcript Cleaner" }]} className="mb-6" />
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-50 dark:bg-purple-950/40 border border-purple-200 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-wider mb-6">
               Strumento
             </div>
-            <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">
+            <h1 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-zinc-100 mb-4">
               Transcript Cleaner
             </h1>
-            <p className="text-gray-500">
+            <p className="text-gray-500 dark:text-zinc-400">
               Rimuovi timestamp, parole di riempimento, etichette relatori e
               correggi la formattazione in qualsiasi trascrizione.
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 mb-8">
             <div className="flex flex-wrap gap-4 mb-6">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={removeTimestamps}
                   onChange={(e) => setRemoveTimestamps(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                  className="w-4 h-4 rounded border-gray-300 dark:border-zinc-700 text-purple-600 focus:ring-purple-500"
                 />
-                <span className="text-sm font-semibold text-gray-700">
+                <span className="text-sm font-semibold text-gray-700 dark:text-zinc-300">
                   Rimuovi Timestamp
                 </span>
               </label>
@@ -105,9 +107,9 @@ export default function TranscriptCleanerPage() {
                   type="checkbox"
                   checked={removeFillers}
                   onChange={(e) => setRemoveFillers(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                  className="w-4 h-4 rounded border-gray-300 dark:border-zinc-700 text-purple-600 focus:ring-purple-500"
                 />
-                <span className="text-sm font-semibold text-gray-700">
+                <span className="text-sm font-semibold text-gray-700 dark:text-zinc-300">
                   Rimuovi Parole di Riempimento
                 </span>
               </label>
@@ -116,9 +118,9 @@ export default function TranscriptCleanerPage() {
                   type="checkbox"
                   checked={removeSpeakers}
                   onChange={(e) => setRemoveSpeakers(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                  className="w-4 h-4 rounded border-gray-300 dark:border-zinc-700 text-purple-600 focus:ring-purple-500"
                 />
-                <span className="text-sm font-semibold text-gray-700">
+                <span className="text-sm font-semibold text-gray-700 dark:text-zinc-300">
                   Rimuovi Etichette Relatori
                 </span>
               </label>
@@ -127,9 +129,9 @@ export default function TranscriptCleanerPage() {
                   type="checkbox"
                   checked={fixFormatting}
                   onChange={(e) => setFixFormatting(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                  className="w-4 h-4 rounded border-gray-300 dark:border-zinc-700 text-purple-600 focus:ring-purple-500"
                 />
-                <span className="text-sm font-semibold text-gray-700">
+                <span className="text-sm font-semibold text-gray-700 dark:text-zinc-300">
                   Correggi Formattazione
                 </span>
               </label>
@@ -137,7 +139,7 @@ export default function TranscriptCleanerPage() {
 
             <div className="grid gap-6 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-gray-700 dark:text-zinc-300 mb-2">
                   Trascrizione Input
                 </label>
                 <textarea
@@ -145,18 +147,18 @@ export default function TranscriptCleanerPage() {
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Incolla la tua trascrizione qui..."
                   rows={14}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all text-sm resize-y"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-zinc-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm resize-y"
                 />
               </div>
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-bold text-gray-700">
+                  <label className="block text-sm font-bold text-gray-700 dark:text-zinc-300">
                     Output Pulito
                   </label>
                   <div className="flex gap-2">
                     <button
                       onClick={handleReset}
-                      className="flex items-center gap-1 text-sm font-semibold text-gray-500 hover:text-gray-700 transition-colors"
+                      className="flex items-center gap-1 text-sm font-semibold text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-300 transition-colors"
                     >
                       <RotateCcw size={14} />
                       Reimposta
@@ -164,7 +166,7 @@ export default function TranscriptCleanerPage() {
                     {output && (
                       <button
                         onClick={handleCopy}
-                        className="flex items-center gap-1 text-sm font-semibold text-emerald-600 hover:text-emerald-800 transition-colors"
+                        className="flex items-center gap-1 text-sm font-semibold text-purple-600 hover:text-purple-800 transition-colors"
                       >
                         {copied ? (
                           <>
@@ -184,7 +186,7 @@ export default function TranscriptCleanerPage() {
                   readOnly
                   rows={14}
                   placeholder="La trascrizione pulita apparirà qui..."
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm resize-y"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800 text-sm resize-y"
                 />
               </div>
             </div>

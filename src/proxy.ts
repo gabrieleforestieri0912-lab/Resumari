@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 // The extension side panel runs on a chrome-extension:// origin. Its fetches to
-// https://resumari.it/api/* are cross-origin, so every API response needs CORS
+// https://resumari.com/api/* are cross-origin, so every API response needs CORS
 // headers for that origin. We only relax CORS for extension origins (and local
 // dev origins), never for arbitrary websites.
 //

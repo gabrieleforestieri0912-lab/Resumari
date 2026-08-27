@@ -102,22 +102,22 @@ function ResetPasswordForm() {
 
   if (isValidToken === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="animate-pulse">{locale === 'it' ? 'Caricamento...' : 'Loading...'}</div>
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-zinc-950">
+        <div className="animate-pulse text-gray-500 dark:text-zinc-400 dark:text-zinc-400">{locale === 'it' ? 'Caricamento...' : 'Loading...'}</div>
       </div>
     );
   }
 
   if (!isValidToken) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-zinc-950">
         <div className="text-center p-8">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle size={32} className="text-red-600" />
+          <div className="w-16 h-16 bg-red-100 dark:bg-red-950/40 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle size={32} className="text-red-600 dark:text-red-400" />
           </div>
-          <h1 className="text-2xl font-black text-gray-900 mb-2">{locale === 'it' ? 'Link non valido' : 'Invalid link'}</h1>
-          <p className="text-gray-500 mb-6">{locale === 'it' ? 'Il link di recupero password non è valido o è scaduto.' : 'The password recovery link is invalid or has expired.'}</p>
-          <Link href="/login" className="text-purple-600 font-bold hover:underline">
+          <h1 className="text-2xl font-black text-gray-900 dark:text-zinc-100 mb-2">{locale === 'it' ? 'Link non valido' : 'Invalid link'}</h1>
+          <p className="text-gray-500 dark:text-zinc-400 mb-6">{locale === 'it' ? 'Il link di recupero password non è valido o è scaduto.' : 'The password recovery link is invalid or has expired.'}</p>
+          <Link href="/login" className="text-purple-600 dark:text-purple-400 font-bold hover:underline">
             {locale === 'it' ? 'Torna al login' : 'Back to login'}
           </Link>
         </div>
@@ -127,18 +127,18 @@ function ResetPasswordForm() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-zinc-950">
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           className="text-center p-8"
         >
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle2 size={32} className="text-green-600" />
+          <div className="w-16 h-16 bg-green-100 dark:bg-green-950/40 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle2 size={32} className="text-green-600 dark:text-green-400" />
           </div>
-          <h1 className="text-2xl font-black text-gray-900 mb-2">{locale === 'it' ? 'Password aggiornata!' : 'Password updated!'}</h1>
-          <p className="text-gray-500 mb-6">{locale === 'it' ? 'Ora puoi accedere con la tua nuova password.' : 'Now you can log in with your new password.'}</p>
-          <Link href="/login" className="text-purple-600 font-bold hover:underline">
+          <h1 className="text-2xl font-black text-gray-900 dark:text-zinc-100 mb-2">{locale === 'it' ? 'Password aggiornata!' : 'Password updated!'}</h1>
+          <p className="text-gray-500 dark:text-zinc-400 mb-6">{locale === 'it' ? 'Ora puoi accedere con la tua nuova password.' : 'Now you can log in with your new password.'}</p>
+          <Link href="/login" className="text-purple-600 dark:text-purple-400 font-bold hover:underline">
             {locale === 'it' ? 'Accedi ora' : 'Login now'}
           </Link>
         </motion.div>
@@ -147,7 +147,7 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 flex">
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-8 lg:p-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -155,13 +155,13 @@ function ResetPasswordForm() {
           className="w-full max-w-md"
         >
           <div className="mb-8">
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4 text-purple-600">
+            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/40 rounded-xl flex items-center justify-center mb-4 text-purple-600 dark:text-purple-400">
               <KeyRound size={24} />
             </div>
-            <h2 className="text-3xl font-black text-gray-900 mb-2 tracking-tight">
+            <h2 className="text-3xl font-black text-gray-900 dark:text-zinc-100 mb-2 tracking-tight">
               {locale === 'it' ? 'Nuova password' : 'New password'}
             </h2>
-            <p className="text-gray-500 font-medium text-sm">
+            <p className="text-gray-500 dark:text-zinc-400 font-medium text-sm">
               {locale === 'it' ? 'Inserisci la tua nuova password.' : 'Enter your new password.'}
             </p>
           </div>
@@ -171,9 +171,7 @@ function ResetPasswordForm() {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               className={`mb-5 p-3 rounded-xl flex items-center gap-2 text-xs font-bold ${
-                systemMessage.type === "error"
-                  ? "bg-red-50 text-red-600"
-                  : "bg-green-50 text-green-600"
+                systemMessage.type === "error"? "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400" : "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400"
               }`}
             >
               {systemMessage.type === "error" ? (
@@ -187,12 +185,12 @@ function ResetPasswordForm() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+              <label className="text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider ml-1">
                 {locale === 'it' ? 'Nuova password' : 'New password'}
               </label>
               <div className="relative group">
                 <Lock
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 group-focus-within:text-purple-600 dark:text-purple-400 transition-colors"
                   size={18}
                 />
                 <input
@@ -201,12 +199,12 @@ function ResetPasswordForm() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder={locale === 'it' ? "Minimo 6 caratteri" : "Min 6 characters"}
-                  className="w-full pl-11 pr-11 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/5 focus:border-purple-200 transition-all text-sm font-medium"
+                  className="w-full pl-11 pr-11 py-3 bg-gray-50 dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 border border-gray-100 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/5 focus:border-purple-200 transition-all text-sm font-medium"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 hover:text-purple-600 dark:hover:text-purple-400 dark:text-purple-400 transition-colors"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -214,12 +212,12 @@ function ResetPasswordForm() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+              <label className="text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider ml-1">
                 {locale === 'it' ? 'Conferma password' : 'Confirm password'}
               </label>
               <div className="relative group">
                 <Lock
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 group-focus-within:text-purple-600 dark:text-purple-400 transition-colors"
                   size={18}
                 />
                 <input
@@ -228,7 +226,7 @@ function ResetPasswordForm() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder={locale === 'it' ? "Conferma la password" : "Confirm the password"}
-                  className="w-full pl-11 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/5 focus:border-purple-200 transition-all text-sm font-medium"
+                  className="w-full pl-11 py-3 bg-gray-50 dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 border border-gray-100 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/5 focus:border-purple-200 transition-all text-sm font-medium"
                 />
               </div>
             </div>
@@ -236,31 +234,31 @@ function ResetPasswordForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 bg-gray-900 text-white font-bold rounded-xl hover:bg-purple-600 transition-all shadow-lg shadow-gray-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+              className="w-full py-3 bg-gray-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-bold rounded-xl hover:bg-purple-600 transition-all shadow-lg shadow-gray-200 dark:shadow-none flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
             >
               {isLoading ? (locale === 'it' ? "Aggiornamento..." : "Updating...") : (locale === 'it' ? "Salva nuova password" : "Save new password")}
               {!isLoading && <ArrowRight size={16} />}
             </button>
           </form>
 
-          <div className="mt-6 text-center text-xs font-bold text-gray-400">
-            <Link href="/login" className="text-purple-600 hover:text-purple-700 transition-colors">
+          <div className="mt-6 text-center text-xs font-bold text-gray-400 dark:text-zinc-500">
+            <Link href="/login" className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-400 transition-colors">
               {locale === 'it' ? 'Torna al login' : 'Back to login'}
             </Link>
           </div>
         </motion.div>
       </div>
 
-      <div className="hidden lg:flex lg:w-1/2 bg-gray-50 relative overflow-hidden items-center justify-center">
+      <div className="hidden lg:flex lg:w-1/2 bg-gray-50 dark:bg-zinc-900 relative overflow-hidden items-center justify-center">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-red-600/10 z-0" />
         <div className="relative z-10 flex flex-col items-center justify-center px-12 py-16 text-center">
-          <div className="w-20 h-20 bg-white rounded-[2rem] shadow-2xl flex items-center justify-center mb-8 text-purple-600">
+          <div className="w-20 h-20 bg-white dark:bg-zinc-800 rounded-[2rem] shadow-2xl flex items-center justify-center mb-8 text-purple-600 dark:text-purple-400">
             <KeyRound size={40} />
           </div>
-          <h3 className="text-3xl font-black text-gray-900 mb-5 leading-tight">
+          <h3 className="text-3xl font-black text-gray-900 dark:text-zinc-100 mb-5 leading-tight">
             {locale === 'it' ? 'Reimposta la tua\npassword in sicurezza.' : 'Reset your\npassword securely.'}
           </h3>
-          <p className="text-gray-500 font-medium max-w-sm leading-relaxed text-sm">
+          <p className="text-gray-500 dark:text-zinc-400 font-medium max-w-sm leading-relaxed text-sm">
             {locale === 'it' ? 'Scegli una password sicura che ricorderai facilmente.' : 'Choose a secure password you will easily remember.'}
           </p>
         </div>
@@ -272,8 +270,8 @@ function ResetPasswordForm() {
 function Loading() {
   const { locale } = useLanguage();
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="animate-pulse">{locale === 'it' ? 'Caricamento...' : 'Loading...'}</div>
+    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-zinc-950">
+      <div className="animate-pulse text-gray-500 dark:text-zinc-400 dark:text-zinc-400">{locale === 'it' ? 'Caricamento...' : 'Loading...'}</div>
     </div>
   );
 }

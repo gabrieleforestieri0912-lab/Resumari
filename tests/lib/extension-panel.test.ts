@@ -297,6 +297,11 @@ describe('standalone side panel (scripts/extension-panel)', () => {
       expect(js).toContain('state.chatTyping')
       // Send posts to the same AI chat endpoint the site uses.
       expect(js).toContain('authFetch("/api/ai/chat"')
+      // The conversation is mirrored to /api/chats with a stable chat id so the
+      // dashboard and site chat can surface extension conversations.
+      expect(js).toContain('function syncChatToServer')
+      expect(js).toContain('authFetch("/api/chats"')
+      expect(js).toContain('function ensureChatId')
       // The payload carries the pinned video context when one is set.
       expect(js).toContain('payload.videoId')
       // AI answers are rendered as markdown; user messages are escaped text.

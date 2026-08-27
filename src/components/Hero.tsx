@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Zap, Shield, Sparkles } from "lucide-react";
 import { useRef } from "react";
 import Link from "next/link";
+import AddToChromeButton from "./AddToChromeButton";
 
 export default function Hero() {
   const containerVariants = {
@@ -85,7 +86,7 @@ export default function Hero() {
         {/* CTA Buttons */}
         <motion.div
           variants={itemVariants}
-          className="mt-10 flex flex-col sm:flex-row gap-4 w-full max-w-lg justify-center"
+          className="mt-10 flex flex-col sm:flex-row flex-wrap gap-4 w-full max-w-2xl justify-center items-center"
         >
           <Link
             href="/chat"
@@ -98,12 +99,7 @@ export default function Hero() {
               className="group-hover:translate-x-1 transition-transform"
             />
           </Link>
-          <a
-            href="#demo"
-            className="group flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl text-gray-700 dark:text-gray-200 font-black text-base bg-white dark:bg-zinc-900 border-2 border-gray-200 dark:border-zinc-700 hover:border-purple-300 dark:hover:border-purple-500 hover:text-purple-700 dark:hover:text-purple-400 transition-all transform hover:-translate-y-1 hover:shadow-xl active:scale-95"
-          >
-            Scopri la demo
-          </a>
+          <AddToChromeButton variant="hero" />
         </motion.div>
 
         {/* Trust Badges */}

@@ -127,6 +127,22 @@ export default function Footer() {
                 FAQ
               </Link>
             </li>
+            <li>
+              <Link
+                href="/api-keys"
+                className="transition-all hover:text-[#7b2ff7] hover:pl-1"
+              >
+                API Keys
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/mcp"
+                className="transition-all hover:text-[#7b2ff7] hover:pl-1"
+              >
+                MCP Server
+              </Link>
+            </li>
           </ul>
         </div>
 

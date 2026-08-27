@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Breadcrumb from "@/components/Breadcrumb";
 import { CheckSquare, AlertTriangle, XCircle } from "lucide-react";
 
 interface ValidationIssue {
@@ -128,25 +129,26 @@ export default function SubtitleValidatorPage() {
   const warningCount = issues.filter((i) => i.type === "warning").length;
 
   return (
-    <div className="min-h-screen bg-white bg-[radial-gradient(#e5e7eb_0.5px,transparent_0.5px)] bg-[length:24px_24px]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 bg-[radial-gradient(#e5e7eb_0.5px,transparent_0.5px)] dark:bg-[radial-gradient(#27272a_0.5px,transparent_0.5px)] bg-[length:24px_24px]">
       <Navbar />
       <main className="pt-32 pb-24 px-6">
         <div className="max-w-3xl mx-auto">
+          <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Strumenti", href: "/tools" }, { label: "Subtitle Validator" }]} className="mb-6" />
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold uppercase tracking-wider mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-50 dark:bg-purple-950/40 border border-purple-200 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-wider mb-6">
               Strumento
             </div>
-            <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">
+            <h1 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-zinc-100 mb-4">
               Subtitle Validator
             </h1>
-            <p className="text-gray-500">
+            <p className="text-gray-500 dark:text-zinc-400">
               Controlla i sottotitoli per timecode sovrapposti, problemi di
               velocità di lettura, didascalie vuote e altro.
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
-            <label className="block text-sm font-bold text-gray-700 mb-2">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 mb-8">
+            <label className="block text-sm font-bold text-gray-700 dark:text-zinc-300 mb-2">
               Contenuto SRT
             </label>
             <textarea
@@ -154,31 +156,31 @@ export default function SubtitleValidatorPage() {
               onChange={(e) => setInput(e.target.value)}
               placeholder={`Incolla il contenuto SRT qui...\n\nEsempio:\n1\n00:00:01,000 --> 00:00:04,000\nCiao, benvenuti nel mio video`}
               rows={12}
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all text-sm font-mono resize-y"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-zinc-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm font-mono resize-y"
             />
           </div>
 
           {input.trim() && (
             <>
               <div className="flex gap-4 mb-6">
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-50 border border-green-200">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-50 dark:bg-green-950/40 border border-green-200">
                   <CheckSquare size={18} className="text-green-600" />
-                  <span className="text-sm font-bold text-green-700">
+                  <span className="text-sm font-bold text-green-700 dark:text-green-300">
                     {parseSRT(input).length} blocchi
                   </span>
                 </div>
                 {errorCount > 0 && (
-                  <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 border border-red-200">
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200">
                     <XCircle size={18} className="text-red-600" />
-                    <span className="text-sm font-bold text-red-700">
+                    <span className="text-sm font-bold text-red-700 dark:text-red-300">
                       {errorCount} errori
                     </span>
                   </div>
                 )}
                 {warningCount > 0 && (
-                  <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 border border-amber-200">
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200">
                     <AlertTriangle size={18} className="text-amber-600" />
-                    <span className="text-sm font-bold text-amber-700">
+                    <span className="text-sm font-bold text-amber-700 dark:text-amber-300">
                       {warningCount} avvisi
                     </span>
                   </div>
@@ -192,8 +194,8 @@ export default function SubtitleValidatorPage() {
                       key={i}
                       className={`flex items-start gap-3 p-4 rounded-xl border ${
                         issue.type === "error"
-                          ? "bg-red-50 border-red-200"
-                          : "bg-amber-50 border-amber-200"
+                          ? "bg-red-50 dark:bg-red-950/40 border-red-200"
+                          : "bg-amber-50 dark:bg-amber-950/40 border-amber-200"
                       }`}
                     >
                       {issue.type === "error" ? (
@@ -211,8 +213,8 @@ export default function SubtitleValidatorPage() {
                         <p
                           className={`text-sm font-bold ${
                             issue.type === "error"
-                              ? "text-red-700"
-                              : "text-amber-700"
+                              ? "text-red-700 dark:text-red-300"
+                              : "text-amber-700 dark:text-amber-300"
                           }`}
                         >
                           Riga {issue.line}
@@ -233,9 +235,9 @@ export default function SubtitleValidatorPage() {
               )}
 
               {issues.length === 0 && (
-                <div className="p-6 rounded-2xl bg-green-50 border border-green-200 text-center">
+                <div className="p-6 rounded-2xl bg-green-50 dark:bg-green-950/40 border border-green-200 text-center">
                   <CheckSquare size={24} className="text-green-600 mx-auto mb-2" />
-                  <p className="text-sm font-bold text-green-700">
+                  <p className="text-sm font-bold text-green-700 dark:text-green-300">
                     Nessun problema trovato! I tuoi sottotitoli sono a posto.
                   </p>
                 </div>

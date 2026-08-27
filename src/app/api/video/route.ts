@@ -1,16 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { hasEnoughCredits, deductCredits, CREDIT_COSTS } from '@/lib/credits';
+import { fetchTranscriptForVideo } from '@/lib/youtube';
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || '';
-
-const BROWSER_HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-  'Accept': 'application/json, text/plain, */*',
-  'Accept-Language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
-  'Referer': 'https://www.youtube.com/',
-  'Origin': 'https://www.youtube.com',
-};
 
 function getYouTubeVideoId(url: string): string | null {
   if (!url) return null;
@@ -50,75 +43,7 @@ async function getVideoDetails(videoId: string) {
   }
 }
 
-async function getTranscriptTimedText(videoId: string): Promise<{ transcript: any[]; language: string } | null> {
-  const languages = ['it', 'en'];
-  for (const lang of languages) {
-    try {
-      const url = `https://youtube.com/api/timedtext?v=${videoId}&lang=${lang}&fmt=json3`;
-      const response = await fetch(url, { headers: BROWSER_HEADERS });
-      if (response.ok) {
-        const captionData = await response.json();
-        if (captionData.events && captionData.events.length > 0) {
-          const segments = captionData.events
-            .filter((e: any) => e.segs)
-            .map((e: any) => ({
-              text: e.segs.map((s: any) => s.utf8).join(' '),
-              time: (e.tStartMs || 0) / 1000,
-              duration: (e.dDurationMs || 0) / 1000,
-            }));
-          if (segments.length > 0) {
-            return { transcript: segments, language: lang };
-          }
-        }
-      }
-    } catch (e) {
-      console.error(`timedtext error for ${lang}:`, e);
-    }
-  }
-  return null;
-}
 
-async function getTranscriptFrom3rdParty(videoId: string): Promise<{ transcript: any[]; language: string } | null> {
-  try {
-    const response = await fetch(`https://youtubetranscript.com/?v=${videoId}`, {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-    });
-    if (response.ok) {
-      const data = await response.json();
-      if (Array.isArray(data) && data.length > 0) {
-        const segments = data.map((s: any) => ({
-          text: s.text || '',
-          time: parseFloat(s.start) || 0,
-          duration: parseFloat(s.duration) || 0,
-        }));
-        return { transcript: segments, language: 'en' };
-      }
-    }
-  } catch (e) {
-    console.error('youtubetranscript error:', e);
-  }
-
-  try {
-    const response = await fetch(`https://youtubetranscriptapi.vercel.app/api?videoId=${videoId}`, {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-    });
-    if (response.ok) {
-      const data = await response.json();
-      if (data && data.transcript) {
-        const segments = data.transcript.map((s: any) => ({
-          text: s.text || s.subtitle || '',
-          time: parseFloat(s.start) || parseFloat(s.seconds) || 0,
-          duration: parseFloat(s.duration) || 0,
-        }));
-        return { transcript: segments, language: data.language || 'en' };
-      }
-    }
-  } catch (e) {
-    console.error('youtubetranscriptapi error:', e);
-  }
-
-  return null;
-}
 
 export async function POST(request: Request) {
   try {
@@ -143,18 +68,31 @@ export async function POST(request: Request) {
 
     const [details, transcriptData] = await Promise.all([
       getVideoDetails(videoId),
-      getTranscriptTimedText(videoId),
+      fetchTranscriptForVideo(videoId),
     ]);
 
-    let transcript = transcriptData?.transcript || [];
-    let transcriptLanguage = transcriptData?.language || null;
+    const transcript = transcriptData?.transcript || [];
+    const transcriptLanguage = transcriptData?.language || null;
 
-    if (!transcript || transcript.length === 0) {
-      const fallbackData = await getTranscriptFrom3rdParty(videoId);
-      if (fallbackData) {
-        transcript = fallbackData.transcript;
-        transcriptLanguage = fallbackData.language;
-      }
+    // No transcript, no charge: the user keeps their credits and gets a clear
+    // error instead of paying for an empty result.
+    //
+    // NOTE: the 422 body deliberately includes videoId + details. The /videos
+    // page checks `data.videoId` (not res.ok) and renders the video card with
+    // the "no transcript available" panel — nicer than a generic error. Keep
+    // this coupling in sync if the client changes.
+    if (transcript.length === 0) {
+      return NextResponse.json(
+        {
+          message: 'Nessun sottotitolo disponibile per questo video. Prova con un video che ha i sottotitoli (anche automatici) abilitati.',
+          videoId,
+          title: details?.title || 'Video',
+          channelTitle: details?.channelTitle || 'Canale sconosciuto',
+          thumbnail: details?.thumbnail || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+          transcript: [],
+        },
+        { status: 422 },
+      );
     }
 
     // Atomic deduction — blocks every plan (pool model) and prevents overspending.

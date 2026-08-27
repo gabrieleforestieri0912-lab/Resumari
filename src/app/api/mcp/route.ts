@@ -5,7 +5,7 @@ import { createJob, getJob, processJob } from '@/lib/mcp-jobs'
 
 function createServer() {
   const server = new McpServer({
-    name: 'Resumari YouTube Transcript',
+    name: 'Resumari',
     version: '1.0.0',
   })
 

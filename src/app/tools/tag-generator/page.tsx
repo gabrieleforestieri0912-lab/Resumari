@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Breadcrumb from "@/components/Breadcrumb";
 import { Tag, Copy, Check, Sparkles, X } from "lucide-react";
 
 const TAG_LIMIT = 500;
@@ -63,27 +64,28 @@ export default function TagGeneratorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white bg-[radial-gradient(#e5e7eb_0.5px,transparent_0.5px)] bg-[length:24px_24px]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 bg-[radial-gradient(#e5e7eb_0.5px,transparent_0.5px)] dark:bg-[radial-gradient(#27272a_0.5px,transparent_0.5px)] bg-[length:24px_24px]">
       <Navbar />
       <main className="pt-32 pb-24 px-6">
         <div className="max-w-3xl mx-auto">
+          <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Strumenti", href: "/tools" }, { label: "YouTube Tag Generator" }]} className="mb-6" />
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-50 border border-sky-200 text-sky-700 text-xs font-bold uppercase tracking-wider mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-50 dark:bg-purple-950/40 border border-purple-200 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-wider mb-6">
               Strumento
             </div>
-            <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">
+            <h1 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-zinc-100 mb-4">
               YouTube Tag Generator
             </h1>
-            <p className="text-gray-500">
+            <p className="text-gray-500 dark:text-zinc-400">
               Genera tag YouTube ottimizzati dal tuo argomento video. Mostra il
               contatore del limite di 500 caratteri.
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 mb-8">
             <div className="grid gap-4 sm:grid-cols-3 mb-4">
               <div className="sm:col-span-2">
-                <label className="block text-sm font-bold text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-gray-700 dark:text-zinc-300 mb-2">
                   Argomento Video
                 </label>
                 <input
@@ -92,17 +94,17 @@ export default function TagGeneratorPage() {
                   onChange={(e) => setTopic(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
                   placeholder="es. Recensione iPhone 16"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none transition-all text-sm"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-zinc-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm"
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-gray-700 dark:text-zinc-300 mb-2">
                   Categoria
                 </label>
                 <select
                   value={niche}
                   onChange={(e) => setNiche(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none transition-all text-sm font-bold"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-zinc-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm font-bold"
                 >
                   <option value="tech">Tecnologia</option>
                   <option value="gaming">Gaming</option>
@@ -116,7 +118,7 @@ export default function TagGeneratorPage() {
 
             <button
               onClick={handleGenerate}
-              className="w-full px-6 py-3 bg-linear-to-r from-sky-500 to-blue-600 text-white font-bold rounded-xl hover:scale-[1.02] transition-all shadow-lg shadow-sky-500/25 flex items-center justify-center gap-2"
+              className="w-full px-6 py-3 bg-linear-to-r from-purple-600 to-red-600 text-white font-bold rounded-xl hover:scale-[1.02] transition-all shadow-lg shadow-purple-500/25 flex items-center justify-center gap-2"
             >
               <Sparkles size={18} />
               Genera Tag
@@ -126,7 +128,7 @@ export default function TagGeneratorPage() {
           {tags.length > 0 && (
             <>
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-bold text-gray-700">
+                <span className="text-sm font-bold text-gray-700 dark:text-zinc-300">
                   Tag Generati ({tags.length})
                 </span>
                 <div className="flex items-center gap-3">
@@ -143,7 +145,7 @@ export default function TagGeneratorPage() {
                   </span>
                   <button
                     onClick={handleCopy}
-                    className="flex items-center gap-1 text-sm font-semibold text-sky-600 hover:text-sky-800 transition-colors"
+                    className="flex items-center gap-1 text-sm font-semibold text-purple-600 hover:text-purple-800 transition-colors"
                   >
                     {copied ? (
                       <>
@@ -158,14 +160,14 @@ export default function TagGeneratorPage() {
                 </div>
               </div>
 
-              <div className="h-2 rounded-full bg-gray-100 overflow-hidden mb-4">
+              <div className="h-2 rounded-full bg-gray-100 dark:bg-zinc-800 overflow-hidden mb-4">
                 <div
                   className={`h-full rounded-full transition-all ${
                     remaining < 0
-                      ? "bg-red-500"
+                      ? "bg-red-50 dark:bg-red-950/400"
                       : remaining < 50
-                      ? "bg-amber-500"
-                      : "bg-green-500"
+                      ? "bg-amber-50 dark:bg-amber-950/400"
+                      : "bg-green-50 dark:bg-green-950/400"
                   }`}
                   style={{
                     width: `${Math.min(
@@ -176,12 +178,12 @@ export default function TagGeneratorPage() {
                 />
               </div>
 
-              <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
+              <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 mb-8">
                 <div className="flex flex-wrap gap-2">
                   {tags.map((tag, i) => (
                     <span
                       key={i}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-sky-50 border border-sky-200 text-sky-700 text-sm font-medium"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200 text-purple-700 dark:text-purple-300 text-sm font-medium"
                     >
                       {tag}
                       <button
@@ -200,11 +202,11 @@ export default function TagGeneratorPage() {
                     type="text"
                     placeholder="Aggiungi tag personalizzato..."
                     onKeyDown={(e) => e.key === "Enter" && addCustomTag()}
-                    className="flex-1 px-3 py-2 rounded-xl border border-gray-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none transition-all text-sm"
+                    className="flex-1 px-3 py-2 rounded-xl border border-gray-300 dark:border-zinc-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm"
                   />
                   <button
                     onClick={addCustomTag}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-all text-sm"
+                    className="px-4 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-zinc-700 transition-all text-sm"
                   >
                     Aggiungi
                   </button>

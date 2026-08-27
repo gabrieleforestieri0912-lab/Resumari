@@ -10,6 +10,8 @@
   --purple-dark: #6d28d9;
   --red: #dc2626;
   --gradient: linear-gradient(135deg, #9333ea 0%, #dc2626 100%);
+  --gradient-blue: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+  --blue-border: #bfdbfe;
   --bg: #fafafa;
   --card: #ffffff;
   --border: #e5e7eb;
@@ -53,6 +55,8 @@ html[data-theme="dark"] {
   --purple: #a78bfa;
   --purple-dark: #8b5cf6;
   --red: #f87171;
+  --gradient-blue: linear-gradient(135deg, #3b82f6 0%, #22d3ee 100%);
+  --blue-border: #274a6e;
   --bg: #0a0a0b;
   --card: #111113;
   --border: #27272a;
@@ -98,6 +102,8 @@ html[data-theme="dark"] {
     --purple: #a78bfa;
     --purple-dark: #8b5cf6;
     --red: #f87171;
+    --gradient-blue: linear-gradient(135deg, #3b82f6 0%, #22d3ee 100%);
+    --blue-border: #274a6e;
     --bg: #0a0a0b;
     --card: #111113;
     --border: #27272a;
@@ -289,7 +295,7 @@ body {
 .app__logo { width: 36px; height: 36px; border-radius: 10px; }
 .app__identity { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .app__name { font-weight: 800; font-size: 14px; }
-.app__user { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app__user { font-size: 11px; color: var(--muted); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .credits-badge {
   display: inline-flex; align-items: center; gap: 4px;
   background: var(--purple-soft); color: var(--purple);
@@ -357,7 +363,7 @@ body {
 .theme-wrap--nav .theme-btn { color: var(--muted); }
 .theme-wrap--nav .theme-btn:hover { color: var(--purple); background: var(--purple-soft); }
 .theme-wrap--nav .theme-menu {
-  /* The nav column is narrow (86px): centering the 148px menu under the
+  /* The nav column is narrow (48px): centering the 148px menu under the
      button would push its left edge past the panel edge and get clipped.
      Anchor it to the wrap's left edge so it opens rightward over the
      content area, fully visible. */
@@ -386,21 +392,19 @@ body {
   flex-direction: column;
   align-items: stretch;
   gap: 4px;
-  width: 86px;
+  width: 48px;
   background: var(--card);
   border-right: 1px solid var(--border);
-  padding: 10px 8px;
+  padding: 10px 4px;
   flex-shrink: 0;
 }
 .nav__item {
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  /* Icon-only: the labels were removed from the sidebar; each button keeps
+     a title/aria-label so a native tooltip names the section on hover. */
+  display: flex; align-items: center; justify-content: center;
   background: none; border: none; cursor: pointer;
   color: var(--muted);
-  font-family: inherit;
-  font-size: 9.5px; font-weight: 700;
-  line-height: 1.25;
-  text-align: center;
-  padding: 9px 4px;
+  padding: 9px 0;
   border-radius: 12px;
   transition: color 0.15s, background 0.15s;
 }
@@ -905,8 +909,19 @@ body {
   margin-bottom: 10px;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
-.plan--current { border-color: var(--purple-border-2); }
+.plan--current {
+  border-color: var(--purple-border-2);
+  border-width: 2px;
+  background: linear-gradient(180deg, var(--purple-soft-3) 0%, var(--card) 55%);
+}
 .plan--popular { border-color: var(--purple-border); }
+.plan--free {
+  border-color: var(--blue-border);
+  background: linear-gradient(180deg, var(--blue-soft) 0%, var(--card) 60%);
+}
+.plan--free .plan__icon { background: var(--gradient-blue); color: #fff; box-shadow: 0 6px 14px rgba(59, 130, 246, 0.25); }
+.plan--free.plan--current .plan__icon { background: var(--gradient-blue); }
+.plan--free .plan__feature svg { color: var(--blue); }
 .plan__head { display: flex; align-items: flex-start; gap: 10px; }
 .plan__icon {
   width: 36px; height: 36px;
@@ -917,6 +932,18 @@ body {
 }
 .plan--current .plan__icon { background: var(--gradient); color: #fff; }
 .plan__name { font-size: 13px; font-weight: 800; }
+.plan__name-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; }
+.plan__badge {
+  font-size: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--gradient);
+  color: #fff;
+  padding: 2px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
 .plan__price { font-size: 19px; font-weight: 800; margin-top: 1px; }
 .plan__price span { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
 .plan__desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
@@ -925,6 +952,18 @@ body {
 .plan__feature { display: flex; align-items: flex-start; gap: 7px; font-size: 11.5px; color: var(--text-soft); }
 .plan__feature svg { color: var(--purple); flex-shrink: 0; margin-top: 2px; }
 .plan__cta { margin-top: 12px; width: 100%; }
+.plan__cta--free {
+  background: var(--gradient-blue);
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(59, 130, 246, 0.28);
+}
+.plan__cta--free:disabled { opacity: 1; cursor: default; }
+.plan__cta--current {
+  background: var(--purple-soft);
+  color: var(--purple);
+  border: 1.5px solid var(--purple-border);
+}
+.plan__cta--current:disabled { opacity: 1; cursor: default; }
 
 .links { display: flex; flex-direction: column; gap: 8px; }
 .link-card {
