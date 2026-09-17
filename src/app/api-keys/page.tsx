@@ -34,13 +34,13 @@ type ApiKeyEntry = {
 };
 
 const codeExamples = {
-  curl: `curl -X POST https://resumari.com/api/v1/transcript \\
+  curl: `curl -X POST https://resumari.vercel.app/api/v1/transcript \\
   -H "Content-Type: application/json" \\
   -H "X-API-Key: rsm_live_YOUR_KEY_HERE" \\
   -d '{"video_id": "dQw4w9WgXcQ"}'`,
   python: `import requests
 
-url = "https://resumari.com/api/v1/transcript"
+url = "https://resumari.vercel.app/api/v1/transcript"
 headers = {"X-API-Key": "rsm_live_YOUR_KEY_HERE"}
 data = {"video_id": "dQw4w9WgXcQ"}
 
@@ -48,20 +48,20 @@ response = requests.post(url, headers=headers, json=data)
 print(response.json())`,
   node: `const fetch = require('node-fetch');
 
-const url = "https://resumari.com/api/v1/transcript";
+const url = "https://resumari.vercel.app/api/v1/transcript";
 const headers = { "X-API-Key": "rsm_live_YOUR_KEY_HERE" };
 const body = { video_id: "dQw4w9WgXcQ" };
 
 fetch(url, { method: "POST", headers, body: JSON.stringify(body) })
   .then(res => res.json())
   .then(console.log);`,
-  bulkCurl: `curl -N -X POST https://resumari.com/api/v1/transcript/bulk \\
+  bulkCurl: `curl -N -X POST https://resumari.vercel.app/api/v1/transcript/bulk \\
   -H "Content-Type: application/json" \\
   -H "X-API-Key: rsm_live_YOUR_KEY_HERE" \\
   -d '{"url": "https://www.youtube.com/@edmundyong"}'`,
   bulkPython: `import requests
 
-url = "https://resumari.com/api/v1/transcript/bulk"
+url = "https://resumari.vercel.app/api/v1/transcript/bulk"
 headers = {"X-API-Key": "rsm_live_YOUR_KEY_HERE"}
 data = {"url": "https://www.youtube.com/@edmundyong"}
 
@@ -71,7 +71,7 @@ for line in response.iter_lines():
         print(line.decode())`,
   bulkNode: `const fetch = require('node-fetch');
 
-const url = "https://resumari.com/api/v1/transcript/bulk";
+const url = "https://resumari.vercel.app/api/v1/transcript/bulk";
 const headers = { "X-API-Key": "rsm_live_YOUR_KEY_HERE" };
 const body = { url: "https://www.youtube.com/@edmundyong" };
 
@@ -617,7 +617,7 @@ data: {"stats":{"total":21,"succeeded":20,"failed":1}}`}</pre>
             </a>
           </div>
           <p className="text-sm text-gray-400 dark:text-gray-500 mt-6">
-            Ti serve un volume elevato? <a href="/contattaci" className="text-purple-600 dark:text-purple-400 hover:underline font-semibold">Contattaci</a> per un piano personalizzato.
+            Ti serve un volume elevato? <a href="/contact" className="text-purple-600 dark:text-purple-400 hover:underline font-semibold">Contattaci</a> per un piano personalizzato.
           </p>
         </div>
       </section>

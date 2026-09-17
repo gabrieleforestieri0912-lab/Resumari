@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://resumari.com'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://resumari.vercel.app'
   return NextResponse.json({
     issuer: baseUrl,
     authorization_endpoint: `${baseUrl}/api/mcp/oauth/authorize`,

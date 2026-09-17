@@ -117,7 +117,7 @@ export default function PrivacyPolicy() {
             <ul className="list-disc pl-6 space-y-2">
               <li>
                 <strong>Fornitori di servizi:</strong> Supabase (database e autenticazione),
-                Stripe (pagamenti), Groq/OpenAI (AI), Resend (email), che operano sotto le rispettive politiche di
+                Stripe (pagamenti), Groq (AI), Resend (email), che operano sotto le rispettive politiche di
                 privacy.
               </li>
               <li>

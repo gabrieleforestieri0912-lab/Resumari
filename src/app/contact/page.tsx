@@ -8,7 +8,7 @@ import Breadcrumb from "../../components/Breadcrumb";
 const Navbar = dynamic(() => import("../../components/Navbar"), { ssr: false });
 const Footer = dynamic(() => import("../../components/Footer"), { ssr: false });
 
-export default function Contattaci() {
+export default function ContactPage() {
   useEffect(() => {
     document.title = "Contattaci | Resumari";
   }, []);
@@ -21,7 +21,7 @@ export default function Contattaci() {
     setStato("sending");
 
     try {
-      const res = await fetch("/api/supporto", {
+      const res = await fetch("/api/support", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

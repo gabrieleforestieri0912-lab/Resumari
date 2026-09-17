@@ -2,7 +2,7 @@
 
 > Resumari è una piattaforma di intelligenza artificiale che riassume video YouTube, PDF e documenti in pochi secondi, con trascrizioni automatiche, riassunti intelligenti e una chat interattiva sui contenuti. Offre anche un'estensione Chrome, un server MCP e un'API pubblica per gli sviluppatori.
 
-Resumari aiuta professionisti, studenti e creator a risparmiare ore di visione estraendo i concetti chiave da video e documenti. Il sito è in lingua italiana (con alcune sezioni in inglese), il dominio di produzione è https://resumari.com.
+Resumari aiuta professionisti, studenti e creator a risparmiare ore di visione estraendo i concetti chiave da video e documenti. Il sito è in lingua italiana (con alcune sezioni in inglese), il dominio di produzione è https://resumari.vercel.app.
 
 ## Informazioni chiave
 
@@ -14,35 +14,35 @@ Resumari aiuta professionisti, studenti e creator a risparmiare ore di visione e
 
 ## Pagine principali
 
-- [Home](https://resumari.com/): panoramica del prodotto, funzionalità, demo interattiva e FAQ.
-- [Strumenti gratuiti](https://resumari.com/tools): raccolta di free tools per creator YouTube.
-- [MCP Server](https://resumari.com/mcp): istruzioni per collegare Resumari a ChatGPT, Claude.ai e altri client MCP tramite l'URL `https://resumari.com/api/mcp`.
-- [API](https://resumari.com/api-keys): documentazione e gestione delle chiavi API per la trascrizione video programmatica.
-- [Prezzi](https://resumari.com/#pricing): piani di abbonamento e crediti mensili.
-- [Supporto](https://resumari.com/supporto): canale di assistenza.
-- [Privacy Policy](https://resumari.com/privacy): informativa privacy.
-- [Termini di Servizio](https://resumari.com/terms): termini di servizio.
+- [Home](https://resumari.vercel.app/): panoramica del prodotto, funzionalità, demo interattiva e FAQ.
+- [Strumenti gratuiti](https://resumari.vercel.app/tools): raccolta di free tools per creator YouTube.
+- [MCP Server](https://resumari.vercel.app/mcp): istruzioni per collegare Resumari a ChatGPT, Claude.ai e altri client MCP tramite l'URL `https://resumari.vercel.app/api/mcp`.
+- [API](https://resumari.vercel.app/api-keys): documentazione e gestione delle chiavi API per la trascrizione video programmatica.
+- [Prezzi](https://resumari.vercel.app/#pricing): piani di abbonamento e crediti mensili.
+- [Supporto](https://resumari.vercel.app/support): canale di assistenza.
+- [Privacy Policy](https://resumari.vercel.app/privacy): informativa privacy.
+- [Termini di Servizio](https://resumari.vercel.app/terms): termini di servizio.
 
 ## Strumenti gratuiti
 
-- [YouTube Thumbnail Downloader](https://resumari.com/tools/thumbnail-downloader): scarica le thumbnail dei video YouTube in tutte le risoluzioni disponibili.
-- [Subtitle Format Converter](https://resumari.com/tools/subtitle-converter): converti sottotitoli tra i formati SRT, VTT e testo semplice.
-- [Video Script Timer](https://resumari.com/tools/script-timer): stima la durata di un copione video a diverse velocità di lettura.
-- [Transcript Cleaner](https://resumari.com/tools/transcript-cleaner): rimuovi timestamp, parole di riempimento ed etichette relatori da una trascrizione.
-- [YouTube Title & Description Counter](https://resumari.com/tools/title-counter): conteggio caratteri e parole in tempo reale per titoli e descrizioni.
-- [Subtitle Validator](https://resumari.com/tools/subtitle-validator): controlla i sottotitoli per timecode sovrapposti, velocità di lettura e didascalie vuote.
-- [YouTube Timestamp & Chapter Generator](https://resumari.com/tools/timestamp-generator): crea capitoli compatibili con YouTube da una trascrizione.
-- [YouTube Earnings Calculator](https://resumari.com/tools/earnings-calculator): stima i guadagni pubblicitari da visualizzazioni e CPM.
-- [YouTube Tag Generator](https://resumari.com/tools/tag-generator): genera tag YouTube ottimizzati dall'argomento del video.
-- [Podcast Show Notes Generator](https://resumari.com/tools/show-notes): crea note show professionali per podcast da una trascrizione.
+- [YouTube Thumbnail Downloader](https://resumari.vercel.app/tools/thumbnail-downloader): scarica le thumbnail dei video YouTube in tutte le risoluzioni disponibili.
+- [Subtitle Format Converter](https://resumari.vercel.app/tools/subtitle-converter): converti sottotitoli tra i formati SRT, VTT e testo semplice.
+- [Video Script Timer](https://resumari.vercel.app/tools/script-timer): stima la durata di un copione video a diverse velocità di lettura.
+- [Transcript Cleaner](https://resumari.vercel.app/tools/transcript-cleaner): rimuovi timestamp, parole di riempimento ed etichette relatori da una trascrizione.
+- [YouTube Title & Description Counter](https://resumari.vercel.app/tools/title-counter): conteggio caratteri e parole in tempo reale per titoli e descrizioni.
+- [Subtitle Validator](https://resumari.vercel.app/tools/subtitle-validator): controlla i sottotitoli per timecode sovrapposti, velocità di lettura e didascalie vuote.
+- [YouTube Timestamp & Chapter Generator](https://resumari.vercel.app/tools/timestamp-generator): crea capitoli compatibili con YouTube da una trascrizione.
+- [YouTube Earnings Calculator](https://resumari.vercel.app/tools/earnings-calculator): stima i guadagni pubblicitari da visualizzazioni e CPM.
+- [YouTube Tag Generator](https://resumari.vercel.app/tools/tag-generator): genera tag YouTube ottimizzati dall'argomento del video.
+- [Podcast Show Notes Generator](https://resumari.vercel.app/tools/show-notes): crea note show professionali per podcast da una trascrizione.
 
 ## API e MCP
 
 Resumari espone:
 
-- Un **server MCP** (Streamable HTTP) all'endpoint `https://resumari.com/api/mcp` per consentire ad agenti AI come ChatGPT e Claude di trascrivere e riassumere video.
-- Una **API REST** con autenticazione tramite chiave API (`X-API-Key`), endpoint `POST https://resumari.com/api/v1/transcript` per la trascrizione video.
+- Un **server MCP** (Streamable HTTP) all'endpoint `https://resumari.vercel.app/api/mcp` per consentire ad agenti AI come ChatGPT e Claude di trascrivere e riassumere video.
+- Una **API REST** con autenticazione tramite chiave API (`X-API-Key`), endpoint `POST https://resumari.vercel.app/api/v1/transcript` per la trascrizione video.
 
 ## Contatti
 
-Per informazioni commerciali o di supporto: https://resumari.com/supporto oppure https://resumari.com/contattaci.
+Per informazioni commerciali o di supporto: https://resumari.vercel.app/support oppure https://resumari.vercel.app/contact.

@@ -18,10 +18,10 @@ const structuredData = [
   {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "@id": "https://resumari.com/#organization",
+    "@id": "https://resumari.vercel.app/#organization",
     name: "Resumari",
-    url: "https://resumari.com",
-    logo: "https://resumari.com/resumari.png",
+    url: "https://resumari.vercel.app",
+    logo: "https://resumari.vercel.app/resumari.png",
     description:
       "Piattaforma AI che riassume video YouTube, PDF e documenti con trascrizioni automatiche, riassunti intelligenti e chat interattiva.",
     knowsAbout: [
@@ -35,20 +35,20 @@ const structuredData = [
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "@id": "https://resumari.com/#website",
-    url: "https://resumari.com",
+    "@id": "https://resumari.vercel.app/#website",
+    url: "https://resumari.vercel.app",
     name: "Resumari",
     description:
       "Riassumi video YouTube, PDF e documenti con l'intelligenza artificiale.",
     inLanguage: "it-IT",
-    publisher: { "@id": "https://resumari.com/#organization" },
+    publisher: { "@id": "https://resumari.vercel.app/#organization" },
   },
   {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "@id": "https://resumari.com/#app",
+    "@id": "https://resumari.vercel.app/#app",
     name: "Resumari",
-    url: "https://resumari.com",
+    url: "https://resumari.vercel.app",
     applicationCategory: "AIApplication",
     operatingSystem: "Web",
     description:
@@ -59,12 +59,12 @@ const structuredData = [
       priceCurrency: "EUR",
       description: "Piano gratuito con 10 crediti omaggio",
     },
-    publisher: { "@id": "https://resumari.com/#organization" },
+    publisher: { "@id": "https://resumari.vercel.app/#organization" },
   },
 ];
 
 export const metadata = {
-  metadataBase: new URL('https://resumari.com'),
+  metadataBase: new URL('https://resumari.vercel.app'),
   title: {
     default: "Resumari - AI Video & YouTube Summarizer | Trascrizione Video Automatica",
     template: "%s | Resumari",
@@ -93,7 +93,7 @@ export const metadata = {
     siteName: "Resumari",
     title: "Resumari - AI Video & YouTube Summarizer",
     description: "Trasforma video YouTube, PDF e documenti in riassunti intelligenti con l'IA.",
-    url: "https://resumari.com",
+    url: "https://resumari.vercel.app",
     images: [{
       url: "/resumari.png",
       width: 512,
@@ -108,9 +108,9 @@ export const metadata = {
     images: ["/resumari.png"],
   },
   alternates: {
-    canonical: "https://resumari.com",
+    canonical: "https://resumari.vercel.app",
     languages: {
-      "it-IT": "https://resumari.com",
+      "it-IT": "https://resumari.vercel.app",
     },
   },
 };

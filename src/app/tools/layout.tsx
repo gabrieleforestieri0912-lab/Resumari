@@ -8,10 +8,10 @@ export const metadata: Metadata = {
     title: "Free YouTube Tools - Strumenti Gratuiti per Creator",
     description:
       "Strumenti gratuiti per creator YouTube, 100% lato client, senza registrazione.",
-    url: "https://resumari.com/tools",
+    url: "https://resumari.vercel.app/tools",
     siteName: "Resumari",
   },
-  alternates: { canonical: "https://resumari.com/tools" },
+  alternates: { canonical: "https://resumari.vercel.app/tools" },
 };
 
 export default function ToolsLayout({

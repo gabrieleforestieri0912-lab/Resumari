@@ -26,9 +26,9 @@ const clients = [
     steps: [
       "Apri le impostazioni dei connettori del tuo workspace.",
       "Crea un connettore personalizzato chiamato Resumari.",
-      `Usa https://resumari.com/api/mcp come URL server Streamable HTTP.`,
+      `Usa https://resumari.vercel.app/api/mcp come URL server Streamable HTTP.`,
     ],
-    code: "https://resumari.com/api/mcp",
+    code: "https://resumari.vercel.app/api/mcp",
     codeLabel: "URL del Server",
   },
   {
@@ -37,9 +37,9 @@ const clients = [
     steps: [
       "Apri le impostazioni di Claude e vai su Connectors.",
       "Aggiungi un connettore personalizzato chiamato Resumari.",
-      `Usa https://resumari.com/api/mcp come URL server MCP remoto.`,
+      `Usa https://resumari.vercel.app/api/mcp come URL server MCP remoto.`,
     ],
-    code: "https://resumari.com/api/mcp",
+    code: "https://resumari.vercel.app/api/mcp",
     codeLabel: "URL del Server",
   },
   {
@@ -50,7 +50,7 @@ const clients = [
       "Apri Claude Code ed esegui /mcp.",
       "Scegli Resumari e completa il login nel browser.",
     ],
-    code: "claude mcp add --transport http transcribr https://resumari.com/api/mcp",
+    code: "claude mcp add --transport http transcribr https://resumari.vercel.app/api/mcp",
     codeLabel: "Terminale",
   },
   {
@@ -61,7 +61,7 @@ const clients = [
       "Approva il prompt OAuth nel browser che Codex apre durante la configurazione.",
       "L'auth dovrebbe mostrare OAuth invece di Unsupported.",
     ],
-    code: "codex mcp add transcribr --url https://resumari.com/api/mcp\ncodex mcp list",
+    code: "codex mcp add transcribr --url https://resumari.vercel.app/api/mcp\ncodex mcp list",
     codeLabel: "Terminale",
   },
   {
@@ -72,7 +72,7 @@ const clients = [
       "Aggiungi la voce del server transcibr qui sotto.",
       "Connettiti e approva la schermata di consenso OAuth di Resumari.",
     ],
-    code: JSON.stringify({ mcpServers: { transcribr: { url: "https://resumari.com/api/mcp" } } }, null, 2),
+    code: JSON.stringify({ mcpServers: { transcribr: { url: "https://resumari.vercel.app/api/mcp" } } }, null, 2),
     codeLabel: "JSON",
   },
   {
@@ -83,7 +83,7 @@ const clients = [
       "Aggiungi la voce del server transcibr qui sotto.",
       "Connettiti e completa il flusso di login OAuth di Resumari.",
     ],
-    code: JSON.stringify({ servers: { transcribr: { type: "http", url: "https://resumari.com/api/mcp" } } }, null, 2),
+    code: JSON.stringify({ servers: { transcribr: { type: "http", url: "https://resumari.vercel.app/api/mcp" } } }, null, 2),
     codeLabel: "JSON",
   },
 ];
@@ -150,10 +150,10 @@ export default function McpPage() {
           </div>
           <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm p-2 flex items-center gap-2">
             <code className="flex-1 text-sm font-mono text-gray-800 dark:text-gray-200 px-4 py-3 truncate">
-              https://resumari.com/api/mcp
+              https://resumari.vercel.app/api/mcp
             </code>
             <button
-              onClick={() => copy("https://resumari.com/api/mcp", "server-url")}
+              onClick={() => copy("https://resumari.vercel.app/api/mcp", "server-url")}
               className="p-3 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-xl transition-all"
             >
               {copied === "server-url" ? <Check size={18} className="text-green-600" /> : <Copy size={18} className="text-gray-400" />}
@@ -293,7 +293,7 @@ export default function McpPage() {
               <pre className="text-sm text-gray-300 font-mono whitespace-pre">{`{
   "name": "transcribr",
   "transport": "streamable-http",
-  "url": "https://resumari.com/api/mcp",
+  "url": "https://resumari.vercel.app/api/mcp",
   "auth": "oauth"
 }`}</pre>
             </div>
@@ -325,7 +325,7 @@ export default function McpPage() {
             </div>
             <div className="mt-4 bg-gray-50 dark:bg-zinc-800 rounded-xl p-4">
               <pre className="text-sm text-gray-600 dark:text-gray-300 font-mono whitespace-pre">{`codex mcp remove transcribr
-codex mcp add transcribr --url https://resumari.com/api/mcp
+codex mcp add transcribr --url https://resumari.vercel.app/api/mcp
 codex mcp list`}</pre>
             </div>
           </div>

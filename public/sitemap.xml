@@ -1,127 +1,133 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://resumari.com/</loc>
+    <loc>https://resumari.vercel.app/</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://resumari.com/welcome</loc>
+    <loc>https://resumari.vercel.app/welcome</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://resumari.com/mcp</loc>
+    <loc>https://resumari.vercel.app/mcp</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://resumari.com/tools</loc>
+    <loc>https://resumari.vercel.app/tools</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://resumari.com/tools/earnings-calculator</loc>
+    <loc>https://resumari.vercel.app/tools/earnings-calculator</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://resumari.com/tools/script-timer</loc>
+    <loc>https://resumari.vercel.app/tools/script-timer</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://resumari.com/tools/show-notes</loc>
+    <loc>https://resumari.vercel.app/tools/show-notes</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://resumari.com/tools/subtitle-converter</loc>
+    <loc>https://resumari.vercel.app/tools/subtitle-converter</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://resumari.com/tools/subtitle-validator</loc>
+    <loc>https://resumari.vercel.app/tools/subtitle-validator</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://resumari.com/tools/tag-generator</loc>
+    <loc>https://resumari.vercel.app/tools/tag-generator</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://resumari.com/tools/thumbnail-downloader</loc>
+    <loc>https://resumari.vercel.app/tools/thumbnail-downloader</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://resumari.com/tools/timestamp-generator</loc>
+    <loc>https://resumari.vercel.app/tools/timestamp-generator</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://resumari.com/tools/title-counter</loc>
+    <loc>https://resumari.vercel.app/tools/title-counter</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://resumari.com/tools/transcript-cleaner</loc>
+    <loc>https://resumari.vercel.app/tools/transcript-cleaner</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://resumari.com/login</loc>
+    <loc>https://resumari.vercel.app/login</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://resumari.com/signup</loc>
+    <loc>https://resumari.vercel.app/signup</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://resumari.com/resetpassword</loc>
+    <loc>https://resumari.vercel.app/resetpassword</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://resumari.com/contattaci</loc>
+    <loc>https://resumari.vercel.app/waitlist</loc>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://resumari.vercel.app/contact</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://resumari.com/supporto</loc>
+    <loc>https://resumari.vercel.app/support</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://resumari.com/privacy</loc>
+    <loc>https://resumari.vercel.app/privacy</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>
   </url>
   <url>
-    <loc>https://resumari.com/terms</loc>
+    <loc>https://resumari.vercel.app/terms</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>

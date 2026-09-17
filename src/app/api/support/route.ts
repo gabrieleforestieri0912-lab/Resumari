@@ -59,7 +59,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Supporto error:', error);
+    console.error('Support error:', error);
     return NextResponse.json(
       { message: 'Errore del server.' },
       { status: 500 }

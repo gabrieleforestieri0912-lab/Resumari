@@ -45,4 +45,5 @@ export const TABLES = {
   VERIFICATION_TOKENS: 'nextauth_verification_tokens',
   API_KEYS: 'api_keys',
   TRANSCRIPTS: 'transcripts',
+  WAITLIST: 'waitlist',
 } as const

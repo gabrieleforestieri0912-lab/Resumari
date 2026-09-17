@@ -116,7 +116,7 @@ export default function Faq() {
         >
           <p className="text-sm text-gray-700 dark:text-gray-200 font-medium mb-2">Hai altre domande?</p>
           <Link
-            href="/supporto"
+            href="/support"
             className="text-sm text-purple-700 font-bold hover:underline"
           >
             Contatta il nostro team di supporto &rarr;

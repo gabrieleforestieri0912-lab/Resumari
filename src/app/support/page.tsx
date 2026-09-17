@@ -8,7 +8,7 @@ import Breadcrumb from '../../components/Breadcrumb';
 const Navbar = dynamic(() => import('../../components/Navbar'), { ssr: false });
 const Footer = dynamic(() => import('../../components/Footer'), { ssr: false });
 
-export default function Supporto() {
+export default function SupportPage() {
   useEffect(() => {
     document.title = "Feedback | Resumari";
   }, []);
@@ -20,7 +20,7 @@ export default function Supporto() {
     e.preventDefault();
     setStato('sending');
     try {
-      const res = await fetch('/api/supporto', {
+      const res = await fetch('/api/support', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -25,7 +25,7 @@ Devono essere pertinenti al contenuto del video e aiutare l'utente a esplorare i
     const response = await generateChatCompletion([
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
-    ], "gpt-4o-mini");
+    ]);
 
     if (!response) {
       return NextResponse.json({ suggestions: getFallbackSuggestions(type) });

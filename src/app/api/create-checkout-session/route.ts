@@ -86,8 +86,8 @@ export async function POST(request: Request) {
         },
       ],
       mode: 'subscription',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/?canceled=true`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://resumari.vercel.app'}/?success=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://resumari.vercel.app'}/?canceled=true`,
       metadata: {
         userId: decoded.userId,
         plan,

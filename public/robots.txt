@@ -71,7 +71,7 @@ User-agent: YouBot
 Allow: /
 Disallow: /api/
 
-Sitemap: https://resumari.com/sitemap.xml
+Sitemap: https://resumari.vercel.app/sitemap.xml
 
 # Machine-readable site description for LLMs (GEO/AEO):
-# https://resumari.com/llms.txt
+# https://resumari.vercel.app/llms.txt

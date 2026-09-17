@@ -143,6 +143,14 @@ export default function Footer() {
                 MCP Server
               </Link>
             </li>
+            <li>
+              <Link
+                href="/waitlist"
+                className="transition-all hover:text-[#7b2ff7] hover:pl-1"
+              >
+                Lista d&apos;attesa
+              </Link>
+            </li>
           </ul>
         </div>
 
@@ -176,7 +184,7 @@ export default function Footer() {
           <ul className="space-y-3 text-gray-400 font-medium">
             <li>
               <Link
-                href="/supporto"
+                href="/support"
                 className="transition-all hover:text-[#7b2ff7] hover:pl-1"
               >
                 Supporto
@@ -184,7 +192,7 @@ export default function Footer() {
             </li>
             <li>
               <Link
-                href="/contattaci"
+                href="/contact"
                 className="transition-all hover:text-[#7b2ff7] hover:pl-1"
               >
                 Contattaci

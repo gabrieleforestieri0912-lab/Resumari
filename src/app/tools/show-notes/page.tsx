@@ -8,107 +8,139 @@ import { Mic, Copy, Check, FileText } from "lucide-react";
 
 type Template = "minimal" | "detailed" | "seo";
 
+const STOPWORDS = new Set(
+  (
+    "il lo la le li i gli un una uno uno di a da in con su per tra fra il come che " +
+    "che non è e di la un per con non una your this that with from are was were " +
+    "the and for you we they our his her their have has had will can di che la il " +
+    "un una ma poi anche più come quando perché quale chi cosa dove quale sono " +
+    "siamo state stato fatto fare detti detto tutto ogni loro noi voi loro " +
+    "questo questa quello quella esso essa ciò cui cui cui quale"
+  ).split(/\s+/)
+);
+
+function cleanLine(line: string): string {
+  return line
+    .replace(/^[\d:.,\s\-–—]+/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Detects a leading timestamp (0:00, 1:23, 1:23:45) and returns it plus the
+// remaining text. Used so real transcript timestamps survive into the output.
+function splitTimestamp(line: string): { ts: string | null; text: string } {
+  const m = line.match(/^\s*(\d{1,2}:\d{2}(?::\d{2})?)\s*[-–—:.\s]*(.*)$/);
+  if (m) return { ts: m[1], text: cleanLine(m[2]) };
+  return { ts: null, text: cleanLine(line) };
+}
+
+function getLines(transcript: string): string[] {
+  return transcript
+    .split(/\r?\n/)
+    .map((l) => cleanLine(l))
+    .filter((l) => l.length > 2);
+}
+
+function topKeywords(transcript: string, limit: number): string[] {
+  const freq = new Map<string, number>();
+  for (const word of transcript.toLowerCase().match(/[a-zà-øA-ZÀ-Þ]{3,}/g) || []) {
+    if (STOPWORDS.has(word)) continue;
+    freq.set(word, (freq.get(word) || 0) + 1);
+  }
+  return Array.from(freq.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([w]) => w);
+}
+
 function generateMinimal(transcript: string): string {
-  const lines = transcript.split("\n").filter(Boolean);
-  const topics = lines.slice(0, 5).map((l) => `- ${l.replace(/^[\d:.,\s-]+/, "").trim()}`).filter(Boolean);
+  const lines = getLines(transcript);
+  const title = lines[0] || "Titolo Episodio";
+  const topics = lines
+    .slice(1, 6)
+    .map((l) => `- ${l}`)
+    .join("\n");
 
   return `## Riepilogo Episodio
 
-Una panoramica rapida degli argomenti trattati in questo episodio.
+${title}
 
 ## Argomenti Principali
 
-${topics.length > 0 ? topics.join("\n") : "- Argomento principale discusso in questo episodio"}
+${topics || "- Nessun argomento rilevato nella trascrizione"}
 
-## Citazioni Rilevanti
+## Citazione in Evidenza
 
-> "${lines[0]?.replace(/^[\d:.,\s-]+/, "").trim() || "Citazione dall'episodio"}"
+> "${lines[0] || "Inserisci una trascrizione per estrarre una citazione."}"
 `;
 }
 
 function generateDetailed(transcript: string): string {
-  const lines = transcript.split("\n").filter(Boolean);
-  const segments = lines.slice(0, 8).map((l, i) => {
-    const clean = l.replace(/^[\d:.,\s-]+/, "").trim();
-    return clean ? `[${i + 1}:00] ${clean}` : null;
-  }).filter(Boolean);
+  const lines = getLines(transcript);
+  const title = lines[0] || "Titolo Episodio";
+  const highlights = lines
+    .slice(1, 9)
+    .map((l, i) => `${i + 1}. ${l}`)
+    .join("\n");
 
   return `## Panoramica Episodio
 
-Una ripartizione completa del contenuto di questo episodio e delle discussioni chiave.
+${title}
 
-## Momenti Salienti con Timestamp
+## Momenti Salienti
 
-${segments.join("\n")}
+${highlights || "1. Nessun momento rilevato nella trascrizione"}
 
 ## Punti Chiave
 
-- Approfondimento chiave dalla discussione
-- Punto importante sollevato dal conduttore
-- Consiglio pratico condiviso in questo episodio
+${lines
+  .slice(0, 5)
+  .map((l) => `- ${l}`)
+  .join("\n")}
 
-## Risorse Menzionate
+## Trascrizione Pulita
 
-- Risorse e link menzionati durante l'episodio
-
-## Informazioni Ospiti
-
-Informazioni sugli ospiti (se applicabile)
-
-## Connettiti
-
-- Segui il programma per altri episodi
-- Iscriviti e lascia una recensione
+${lines.map((l) => `- ${l}`).join("\n")}
 `;
 }
 
 function generateSEO(transcript: string): string {
-  const lines = transcript.split("\n").filter(Boolean);
-  const firstLine = lines[0]?.replace(/^[\d:.,\s-]+/, "").trim() || "";
-  const words = firstLine.split(/\s+/).filter(Boolean);
-  const title = words.slice(0, 8).join(" ") || "Titolo Episodio";
+  const lines = getLines(transcript);
+  const firstLine = lines[0] || "";
+  const title = firstLine.slice(0, 80) || "Titolo Episodio";
+  const keywords = topKeywords(transcript, 8);
+  const learn = lines.slice(1, 7).map((l) => `- ${l}`).join("\n");
 
-  const topics = lines.slice(0, 6).map((l) => {
-    const clean = l.replace(/^[\d:.,\s-]+/, "").trim();
-    return clean || null;
-  }).filter(Boolean);
+  // Keep real transcript timestamps when present, otherwise omit the section
+  // instead of fabricating fake ones.
+  const tsLines = getLines(transcript)
+    .map(splitTimestamp)
+    .filter((s) => s.ts);
+  const timestampsSection = tsLines.length
+    ? tsLines.map((s) => `- ${s.ts} ${s.text}`).join("\n")
+    : "- (nessun timestamp rilevato nella trascrizione)";
 
   return `# ${title}
 
-## Titolo Episodio
-${title}
-
 ## Note dello Show
 
-Unisciti a noi in questo episodio mentre esploriamo ${firstLine.toLowerCase() || "l'argomento in questione"}. Approfondiamo gli spunti chiave e condividiamo prospettive preziose che non vorrai perdere.
+${firstLine || "Incolla la trascrizione per generare le note."}
 
 ## Cosa Imparerai
 
-${topics.map((t) => `- ${t}`).join("\n")}
+${learn || "- Nessun punto rilevato"}
 
 ## Timestamp
 
-${lines.slice(0, 5).map((_, i) => `- [${i + 1}:00] - Argomento ${i + 1}`).join("\n")}
-
-## Link e Risorse
-
-- [Link alle risorse discusse]
-
-## Info sul Conduttore
-
-Scopri di più sul conduttore e sulla missione del programma.
-
-## Iscriviti e Recensisci
-
-Se ti è piaciuto questo episodio, iscriviti e lascia una recensione a 5 stelle!
+${timestampsSection}
 
 ## Parole Chiave
 
-${topics.slice(0, 8).join(", ")}
+${keywords.length ? keywords.join(", ") : "nessuna parola chiave rilevata"}
 
-## Trascrizione
+## Trascrizione Completa
 
-${transcript}
+${lines.map((l) => `- ${l}`).join("\n")}
 `;
 }
 
