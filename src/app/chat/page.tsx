@@ -164,6 +164,10 @@ export default function Chat() {
 
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
+  const [attachedImage, setAttachedImage] = useState<File | null>(null);
+  const [attachedImagePreview, setAttachedImagePreview] = useState<string | null>(null);
+  const [aiStatus, setAiStatus] = useState<"idle" | "processing" | "thinking" | "writing">("idle");
+  const [aiElapsedSeconds, setAiElapsedSeconds] = useState(0);
   const [currentFileContext, setCurrentFileContext] = useState("");
   const [currentVideoId, setCurrentVideoId] = useState<any>(null);
   const [currentVideoStartTime, setCurrentVideoStartTime] = useState(0);
@@ -185,10 +189,46 @@ export default function Chat() {
   const [messageQueue, setMessageQueue] = useState<any[]>([]);
   const [isProcessingQueue, setIsProcessingQueue] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const aiStartedAtRef = useRef<number | null>(null);
   const [likedMessages, setLikedMessages] = useState<Set<any>>(new Set());
   const [dislikedMessages, setDislikedMessages] = useState<Set<any>>(new Set());
   const [editingMessageId, setEditingMessageId] = useState<any>(null);
   const addToast: any = useToast();
+
+  useEffect(() => {
+    if (!isTyping) {
+      aiStartedAtRef.current = null;
+      setAiElapsedSeconds(0);
+      return;
+    }
+
+    aiStartedAtRef.current ||= Date.now();
+    const timer = window.setInterval(() => {
+      setAiElapsedSeconds(Math.floor((Date.now() - (aiStartedAtRef.current || Date.now())) / 1000));
+    }, 250);
+    return () => window.clearInterval(timer);
+  }, [isTyping]);
+
+  const setImageAttachment = (file: File | null) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      addToast?.("Puoi allegare solo immagini", "error");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      addToast?.("L'immagine non può superare 10 MB", "error");
+      return;
+    }
+    setAttachedImage(file);
+    setAttachedImagePreview(URL.createObjectURL(file));
+  };
+
+  const removeImageAttachment = () => {
+    if (attachedImagePreview) URL.revokeObjectURL(attachedImagePreview);
+    setAttachedImage(null);
+    setAttachedImagePreview(null);
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -693,7 +733,8 @@ export default function Chat() {
   const processAIResponse = async (item: any) => {
     setIsProcessingQueue(true);
     setIsTyping(true);
-    const { userMsgText, currentChatId, videoId, transcript, chatTitle, signal } = item;
+    setAiStatus("processing");
+    const { userMsgText, currentChatId, videoId, transcript, chatTitle, signal, image } = item;
 
     try {
       const token = localStorage.getItem("token");
@@ -701,24 +742,35 @@ export default function Chat() {
         ? `Video YouTube attivo (ID: ${currentVideoId}). L'utente sta lavorando su questo video.`
         : currentFileContext || "Nessun file o video caricato";
 
+      const requestBody = image ? new FormData() : null;
+      if (requestBody) {
+        requestBody.append("message", userMsgText);
+        requestBody.append("context", context);
+        requestBody.append("videoId", videoId || currentVideoId || "");
+        requestBody.append("documentContext", currentFileContext);
+        requestBody.append("transcript", transcript || "");
+        requestBody.append("image", image);
+      }
+
       const response = await fetch(`${API_BASE}/chat`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          ...(requestBody ? {} : { "Content-Type": "application/json" }),
           ...(token && { Authorization: `Bearer ${token}` }),
         },
-        body: JSON.stringify({
+        body: requestBody || JSON.stringify({
           message: userMsgText,
           context,
           videoId: videoId || currentVideoId,
           documentContext: currentFileContext,
-          transcript: transcript,
+          transcript,
         }),
         signal,
       });
 
       if (!response.ok) {
         setIsTyping(false);
+        setAiStatus("idle");
         setMessages((prev: any[]) => {
           const next = [...prev, { text: "Errore nella risposta dell'IA. Riprova.", sender: "system", time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }];
           updateChatMessagesMap(currentChatId, next);
@@ -730,6 +782,7 @@ export default function Chat() {
       }
 
       const data = await response.json();
+      setAiStatus("thinking");
 
       if (data.videoId && !currentVideoId) {
         setCurrentVideoId(data.videoId);
@@ -739,7 +792,8 @@ export default function Chat() {
       if (data.response) {
         const newMsgId = `ai-${Date.now()}`;
 
-        const fullText = data.response;
+        const fullText = String(data.response).replace(/[\\p{Extended_Pictographic}\\uFE0F\\u200D]/gu, "");
+        setAiStatus("writing");
 
         const aiMessage = {
           id: newMsgId,
@@ -760,11 +814,12 @@ export default function Chat() {
         setCurrentAIMessageIndex(newMsgId);
         setDisplayedText("");
 
+        const words = fullText.match(/\S+\s*/g) || [];
         let i = 0;
-        const speed = 5;
+        const speed = 60;
         const typeInterval = setInterval(() => {
-          if (i < fullText.length) {
-            const partialText = fullText.slice(0, i + 1);
+          if (i < words.length) {
+            const partialText = words.slice(0, i + 1).join("");
             setDisplayedText(partialText);
             setMessages((prev: any[]) =>
               prev.map((m: any) =>
@@ -785,12 +840,15 @@ export default function Chat() {
               syncToServer(currentChatId, chatTitle, finalMessages);
               return finalMessages;
             });
+            setIsTyping(false);
+            setAiStatus("idle");
             setIsProcessingQueue(false);
             setMessageQueue((prev) => prev.slice(1));
           }
         }, speed);
       } else if (data.message) {
         setIsTyping(false);
+        setAiStatus("idle");
         const sysMsg = { text: data.message, sender: "system", time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) };
         setMessages((prev: any[]) => {
           const next = [...prev, sysMsg];
@@ -801,6 +859,7 @@ export default function Chat() {
         setMessageQueue((prev) => prev.slice(1));
       } else {
         setIsTyping(false);
+        setAiStatus("idle");
         const sysMsg = { text: "Errore nella risposta dell'IA. Riprova.", sender: "system", time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) };
         setMessages((prev: any[]) => {
           const next = [...prev, sysMsg];
@@ -826,6 +885,7 @@ export default function Chat() {
         });
       }
       setIsTyping(false);
+      setAiStatus("idle");
       setIsProcessingQueue(false);
       setMessageQueue((prev) => prev.slice(1));
     }
@@ -841,6 +901,7 @@ export default function Chat() {
         ),
       );
       setIsTyping(false);
+      setAiStatus("idle");
       setIsProcessingQueue(false);
       setMessageQueue([]);
     }
@@ -1004,8 +1065,9 @@ export default function Chat() {
   };
 
   const handleSend = async () => {
-    if (!input.trim()) return;
-    const userMsgText = input;
+    if (!input.trim() && !attachedImage) return;
+    const imageForMessage = attachedImage;
+    const userMsgText = input.trim() || "Analizza questa immagine";
 
     if (editingMessageId) {
       setMessages((prev) => {
@@ -1079,6 +1141,7 @@ export default function Chat() {
       videoTitle: videoInfo?.title,
       videoChannel: videoInfo?.channelTitle,
       transcript: videoInfo?.transcript,
+      imageName: imageForMessage?.name,
       time: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -1093,6 +1156,7 @@ export default function Chat() {
     syncToServer(currentChatId, activeChat.title, newMessages);
 
     setInput("");
+    removeImageAttachment();
 
     if (videoInfo?.videoId) {
       setCurrentVideoId(videoInfo.videoId);
@@ -1112,6 +1176,7 @@ export default function Chat() {
           videoInfo?.transcript ||
           messages.find((m: any) => m.videoId === (videoId || currentVideoId))?.transcript,
         chatTitle: activeChat.title,
+        image: imageForMessage,
         signal: controller.signal,
       },
     ]);
@@ -1136,6 +1201,7 @@ export default function Chat() {
     if (!file) return;
 
     setIsTyping(true);
+    setAiStatus("processing");
     const formData = new FormData();
     formData.append("file", file);
 
@@ -1179,6 +1245,7 @@ export default function Chat() {
       );
     } finally {
       setIsTyping(false);
+      setAiStatus("idle");
     }
   };
 
@@ -1666,6 +1733,13 @@ export default function Chat() {
                                   </div>
                                 </div>
                               )}
+                              {msg.sender === "user" && (
+                                <div className="w-8 h-8 shrink-0">
+                                  <div className="w-full h-full rounded-full bg-linear-to-br from-gray-700 to-gray-900 flex items-center justify-center shadow-lg text-white font-bold text-xs">
+                                    {userInitial}
+                                  </div>
+                                </div>
+                              )}
                               <div
                                 className={`flex flex-col gap-1 ${msg.sender === "user" ? "items-end" : "items-start"}`}
                               >
@@ -1749,7 +1823,7 @@ export default function Chat() {
                                     <div
                                       className={`px-5 py-3.5 rounded-2xl text-sm leading-relaxed ${
                                         msg.sender === "user"
-                                          ? "bg-gray-900 dark:bg-zinc-800 dark:text-white rounded-br-sm"
+                                          ? "bg-gray-900 text-white dark:bg-zinc-800 dark:text-white rounded-br-sm"
                                           : "bg-purple-50 dark:bg-purple-950 dark:text-zinc-200 rounded-bl-sm border border-purple-100 dark:border-purple-900"
                                       }`}
                                     >
@@ -1830,13 +1904,24 @@ export default function Chat() {
                 <div className="flex gap-4 max-w-3xl mx-auto">
                   <div className="w-8 h-8 shrink-0">
                     <div className="w-full h-full rounded-full bg-linear-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                      <Sparkles size={14} className="text-white" />
+                      <Sparkles size={14} className="text-white animate-pulse" />
                     </div>
                   </div>
-                  <div className="bg-purple-50 dark:bg-purple-950 px-5 py-3.5 rounded-2xl rounded-bl-sm border border-purple-100 dark:border-purple-900 flex items-center gap-1.5">
-                    <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                    <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                    <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" />
+                  <div className="bg-purple-50 dark:bg-purple-950 px-5 py-3.5 rounded-2xl rounded-bl-sm border border-purple-100 dark:border-purple-900 min-w-56">
+                    <div className="flex items-center gap-2 text-sm font-bold text-purple-700 dark:text-purple-300">
+                      <span className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
+                      {aiStatus === "processing" && "Elaborazione in corso..."}
+                      {aiStatus === "thinking" && "L'AI sta pensando..."}
+                      {aiStatus === "writing" && "Sto preparando la risposta..."}
+                      <span className="ml-auto font-mono text-xs text-purple-500 dark:text-purple-400 tabular-nums">
+                        {aiElapsedSeconds}s
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                      <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                      <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" />
+                    </div>
                   </div>
                 </div>
               )}
@@ -1938,12 +2023,7 @@ export default function Chat() {
                   const files = Array.from(e.dataTransfer.files);
                   const imgFile = files.find(f => f.type.startsWith('image/'));
                   if (imgFile) {
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                      const dataUrl = ev.target?.result as string;
-                      setInput(prev => prev + `\n![image](${dataUrl})\n`);
-                    };
-                    reader.readAsDataURL(imgFile);
+                    setImageAttachment(imgFile);
                     addToast?.("Immagine aggiunta al messaggio", "success");
                   }
                 }}
@@ -1960,6 +2040,38 @@ export default function Chat() {
                     </button>
                   </div>
                 )}
+                {attachedImagePreview && (
+                  <div className="mb-2 flex items-center gap-3 rounded-xl border border-purple-100 dark:border-purple-900 bg-purple-50/70 dark:bg-purple-950/50 p-2">
+                    <img
+                      src={attachedImagePreview}
+                      alt="Anteprima allegato"
+                      className="h-14 w-14 rounded-lg object-cover border border-white/60 dark:border-zinc-700"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-purple-700 dark:text-purple-300 truncate">{attachedImage?.name}</p>
+                      <p className="text-[10px] text-gray-500 dark:text-zinc-400">Immagine pronta per l&apos;analisi AI</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={removeImageAttachment}
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-white dark:hover:bg-zinc-800 transition-colors"
+                      title="Rimuovi allegato"
+                    >
+                      <X size={15} />
+                    </button>
+                  </div>
+                )}
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) setImageAttachment(file);
+                    e.target.value = "";
+                  }}
+                />
                 <textarea
                   ref={textareaRef}
                   rows={1}
@@ -1981,24 +2093,29 @@ export default function Chat() {
                       e.preventDefault();
                       const file = imgItem.getAsFile();
                       if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (ev) => {
-                          const dataUrl = ev.target?.result as string;
-                          setInput(prev => prev + `\n![image](${dataUrl})\n`);
-                        };
-                        reader.readAsDataURL(file);
-                        addToast?.("Immagine incollata nel messaggio", "success");
+                        setImageAttachment(file);
+                      addToast?.("Immagine incollata nel messaggio", "success");
                       }
                     }
                   }}
                   placeholder="Chiedi a Resumari di analizzare qualcosa... (Shift+Invio per andare a capo)"
-                  className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-xl pl-4 pr-12 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/10 focus:border-purple-200 dark:focus:border-purple-700 transition-all resize-none overflow-hidden shadow-xl shadow-purple-500/5"
+                  className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-xl pl-12 pr-12 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/10 focus:border-purple-200 dark:focus:border-purple-700 transition-all resize-none overflow-hidden shadow-xl shadow-purple-500/5"
                 />
                 <button
+                  type="button"
+                  onClick={() => imageInputRef.current?.click()}
+                  disabled={isTyping}
+                  className="absolute left-1.5 bottom-1.5 w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950 transition-all disabled:opacity-40"
+                  title="Allega un'immagine"
+                >
+                  <Plus size={18} />
+                </button>
+                <button
+                  type="button"
                   onClick={isTyping ? handleCancel : handleSend}
-                  disabled={!input.trim()}
+                  disabled={!input.trim() && !attachedImage}
                   className={`absolute right-1.5 top-1.5 w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                    input.trim()
+                    (input.trim() || attachedImage)
                       ? isTyping
                         ? "bg-red-500 text-white shadow-lg animate-pulse"
                         : "bg-gray-900 dark:bg-zinc-100 dark:text-zinc-900 hover:scale-105 active:scale-95 shadow-lg"

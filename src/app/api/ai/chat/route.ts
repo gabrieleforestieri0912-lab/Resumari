@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServiceClient, TABLES } from '@/lib/supabase';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
-import { generateChatCompletion } from '@/lib/ai';
+import { generateChatCompletion, removeEmojis } from '@/lib/ai';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { hasEnoughCredits, deductCredits, CREDIT_COSTS } from '@/lib/credits';
 
@@ -99,7 +99,39 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { message, videoId: providedVideoId, documentContext } = await request.json();
+    let message = '';
+    let providedVideoId: string | undefined;
+    let documentContext = '';
+    let imageDataUrl: string | null = null;
+
+    if (request.headers.get('content-type')?.includes('multipart/form-data')) {
+      const formData = await request.formData();
+      message = String(formData.get('message') || '');
+      providedVideoId = String(formData.get('videoId') || '') || undefined;
+      documentContext = String(formData.get('documentContext') || '');
+      const image = formData.get('image');
+
+      if (image instanceof File) {
+        if (!image.type.startsWith('image/')) {
+          return NextResponse.json({ message: 'È possibile allegare solo immagini.' }, { status: 400 });
+        }
+        if (image.size > 10 * 1024 * 1024) {
+          return NextResponse.json({ message: 'L’immagine non può superare 10 MB.' }, { status: 400 });
+        }
+        const bytes = Buffer.from(await image.arrayBuffer()).toString('base64');
+        imageDataUrl = `data:${image.type};base64,${bytes}`;
+      }
+    } else {
+      const body = await request.json();
+      message = String(body.message || '');
+      providedVideoId = body.videoId;
+      documentContext = body.documentContext || '';
+    }
+
+    if (!message.trim() && !imageDataUrl) {
+      return NextResponse.json({ message: 'Inserisci un messaggio o allega un’immagine.' }, { status: 400 });
+    }
+
     const videoId = providedVideoId || getYouTubeVideoId(message);
 
     let systemPrompt = "Sei Resumari, un assistente AI esperto in riassunti video e analisi documenti. Rispondi in italiano.";
@@ -125,12 +157,25 @@ export async function POST(request: Request) {
       }
     }
 
+    const userText = contextData ? `${contextData}\n\nDOMANDA: ${message}` : (message || 'Descrivi e analizza questa immagine.');
     const messages = [
-      { role: 'system' as const, content: systemPrompt },
-      { role: 'user' as const, content: contextData ? `${contextData}\n\nDOMANDA: ${message}` : message }
+      { role: 'system' as const, content: systemPrompt + (imageDataUrl ? '\nAnalizza anche l’immagine allegata in dettaglio.' : '') },
+      {
+        role: 'user' as const,
+        content: imageDataUrl
+          ? [
+              { type: 'text', text: userText },
+              { type: 'image_url', image_url: { url: imageDataUrl } },
+            ]
+          : userText,
+      },
     ];
 
-    const aiResponse = await generateChatCompletion(messages);
+    const aiModel = imageDataUrl ? 'llama-3.2-11b-vision-preview' : undefined;
+
+    const aiResponse = removeEmojis(
+      (await generateChatCompletion(messages, aiModel)) || '',
+    );
 
     const client = getServiceClient();
     if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
