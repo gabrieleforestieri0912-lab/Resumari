@@ -5,8 +5,10 @@ import { generateChatCompletion, removeEmojis } from '@/lib/ai';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { hasEnoughCredits, deductCredits, CREDIT_COSTS } from '@/lib/credits';
 
+// Chiave API per l'accesso ai dati di YouTube
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || '';
 
+// Header per simulare un browser durante le richieste a YouTube (evita blocchi)
 const BROWSER_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
   'Accept': 'application/json, text/plain, */*',
@@ -15,6 +17,9 @@ const BROWSER_HEADERS = {
   'Origin': 'https://www.youtube.com',
 };
 
+/**
+ * Estrae l'ID di un video YouTube da un URL o da una stringa.
+ */
 function getYouTubeVideoId(url: string): string | null {
   if (!url) return null;
   const patterns = [
@@ -28,6 +33,9 @@ function getYouTubeVideoId(url: string): string | null {
   return null;
 }
 
+/**
+ * Recupera dettagli di un video (titolo, descrizione, ecc.) tramite l'API ufficiale di YouTube.
+ */
 async function getVideoDetails(videoId: string) {
   if (!YOUTUBE_API_KEY) return null;
   try {
@@ -49,6 +57,10 @@ async function getVideoDetails(videoId: string) {
   }
 }
 
+/**
+ * Tenta di recuperare la trascrizione di un video YouTube in italiano o inglese.
+ * Utilizza diverse fonti per massimizzare le probabilità di successo.
+ */
 async function getTranscript(videoId: string) {
   const languages = ['it', 'en'];
   for (const lang of languages) {
@@ -83,14 +95,21 @@ async function getTranscript(videoId: string) {
   return null;
 }
 
+/**
+ * Endpoint API per la chat AI.
+ * Gestisce l'input dell'utente, il contesto (video/documenti/immagini) e la generazione della risposta.
+ */
 export async function POST(request: Request) {
+  // 1. Controllo Rate Limit per prevenire abusi
   const ip = getClientIp(request.headers);
   const { success: rlSuccess } = rateLimit(ip);
   if (!rlSuccess) return NextResponse.json({ message: 'Troppe richieste' }, { status: 429 });
 
+  // 2. Autenticazione utente
   const user = await getAuthenticatedUser(request);
   if (!user) return NextResponse.json({ message: 'Non autorizzato' }, { status: 401 });
 
+  // 3. Verifica disponibilità crediti
   if (!hasEnoughCredits(user, CREDIT_COSTS.chat)) {
     return NextResponse.json(
       { message: 'Crediti insufficienti. I crediti si ricaricano ogni mese con un piano Pro o Business.' },
@@ -104,6 +123,7 @@ export async function POST(request: Request) {
     let documentContext = '';
     let imageDataUrl: string | null = null;
 
+    // Parsing del corpo della richiesta (supporta JSON e multipart/form-data per le immagini)
     if (request.headers.get('content-type')?.includes('multipart/form-data')) {
       const formData = await request.formData();
       message = String(formData.get('message') || '');
@@ -132,16 +152,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Inserisci un messaggio o allega un’immagine.' }, { status: 400 });
     }
 
+    // Identificazione del video (se presente nel messaggio o fornito esplicitamente)
     const videoId = providedVideoId || getYouTubeVideoId(message);
 
     let systemPrompt = "Sei Resumari, un assistente AI esperto in riassunti video e analisi documenti. Rispondi in italiano.";
     let contextData = "";
 
+    // Aggiunta del contesto da documenti
     if (documentContext) {
       contextData = `DOCUMENTO CONTESTO:\n${documentContext}\n\n`;
       systemPrompt += "\nAnalizza il testo del documento fornito come contesto per rispondere alla domanda.";
     }
 
+    // Aggiunta del contesto da video (trascrizione e dettagli)
     if (videoId) {
       const [transcript, details] = await Promise.all([
         getTranscript(videoId),
@@ -157,6 +180,7 @@ export async function POST(request: Request) {
       }
     }
 
+    // Costruzione del messaggio finale per l'AI
     const userText = contextData ? `${contextData}\n\nDOMANDA: ${message}` : (message || 'Descrivi e analizza questa immagine.');
     const messages = [
       { role: 'system' as const, content: systemPrompt + (imageDataUrl ? '\nAnalizza anche l’immagine allegata in dettaglio.' : '') },
@@ -164,15 +188,17 @@ export async function POST(request: Request) {
         role: 'user' as const,
         content: imageDataUrl
           ? [
-              { type: 'text', text: userText },
-              { type: 'image_url', image_url: { url: imageDataUrl } },
+              { type: 'text' as const, text: userText },
+              { type: 'image_url' as const, image_url: { url: imageDataUrl } },
             ]
           : userText,
       },
     ];
 
+    // Selezione del modello (Vision se è presente un'immagine)
     const aiModel = imageDataUrl ? 'llama-3.2-11b-vision-preview' : undefined;
 
+    // Generazione della risposta tramite Groq
     const aiResponse = removeEmojis(
       (await generateChatCompletion(messages, aiModel)) || '',
     );
@@ -180,7 +206,7 @@ export async function POST(request: Request) {
     const client = getServiceClient();
     if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
 
-    // Save chat history FIRST
+    // Salvataggio della cronologia della chat nel database Supabase
     const { error: saveError } = await client
       .from(TABLES.CHATS)
       .insert({
@@ -201,10 +227,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Errore nel salvataggio della chat' }, { status: 500 });
     }
 
-    // Atomic deduction — blocks every plan (pool model) and prevents overspending.
-    // Deducted AFTER the chat is saved so failed AI calls don't consume credits;
-    // in the rare race where the deduction fails here, the chat stays as history
-    // and the client can simply retry the message.
+    // Detrazione dei crediti dell'utente
     const remaining = await deductCredits(user.id, CREDIT_COSTS.chat);
     if (remaining === null) {
       return NextResponse.json({ message: 'Crediti insufficienti' }, { status: 403 });
