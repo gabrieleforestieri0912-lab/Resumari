@@ -6,7 +6,7 @@ const groq = process.env.GROQ_API_KEY
 
 type ChatMessage = {
   role: 'user' | 'assistant' | 'system';
-  content: string;
+  content: string | Array<{ type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string } }>;
 };
 
 /**
