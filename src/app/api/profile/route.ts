@@ -3,6 +3,14 @@ import { getServiceClient, TABLES } from '@/lib/supabase';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
 import { getAuthenticatedUser } from '@/lib/auth';
 
+/**
+ * Endpoint API per la gestione del profilo utente.
+ * Gestisce il recupero (GET), l'aggiornamento (PUT) e l'eliminazione (DELETE) dell'account.
+ */
+
+/**
+ * Recupera i dati del profilo dell'utente autenticato.
+ */
 export async function GET(request: Request) {
   const user = await getAuthenticatedUser(request);
   if (!user) {
@@ -10,6 +18,7 @@ export async function GET(request: Request) {
   }
 
   try {
+    // Rimuove la password dai dati restituiti per motivi di sicurezza
     const { password: _, ...userWithoutPassword } = user;
     return NextResponse.json({ ...userWithoutPassword, id: user.id });
   } catch (error) {
@@ -18,7 +27,12 @@ export async function GET(request: Request) {
   }
 }
 
+/**
+ * Aggiorna le informazioni del profilo utente.
+ * Supporta l'aggiornamento di nome, lingua preferita e immagine del profilo.
+ */
 export async function PUT(request: Request) {
+  // Controllo rate limit per prevenire l'abuso dell'endpoint di aggiornamento profilo
   const ip = getClientIp(request.headers);
   const { success } = rateLimit(ip);
 
@@ -36,8 +50,8 @@ export async function PUT(request: Request) {
     const updateData: Record<string, any> = { updated_at: new Date().toISOString() };
     if (name) updateData.name = name;
     if (locale) updateData.locale = locale;
-    // The avatar is stored as a data URL (or an OAuth image URL). Allow it to be
-    // cleared explicitly so users can remove a photo without deleting the row.
+    // L'avatar è salvato come data URL (o URL immagine OAuth).
+    // Permette di essere cancellato esplicitamente impostando picture a null.
     if (picture !== undefined) updateData.picture = picture || null;
 
     const client = getServiceClient();
@@ -61,6 +75,9 @@ export async function PUT(request: Request) {
   }
 }
 
+/**
+ * Elimina definitivamente l'account dell'utente autenticato.
+ */
 export async function DELETE(request: Request) {
   const user = await getAuthenticatedUser(request);
   if (!user) {

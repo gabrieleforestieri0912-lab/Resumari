@@ -6,7 +6,14 @@ import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
+/**
+ * Endpoint API per l'autenticazione dell'utente (Login).
+ * Verifica le credenziali fornite e genera un token JWT per l'accesso.
+ *
+ * Aspetta un JSON con i campi 'email' e 'password'.
+ */
 export async function POST(request: Request) {
+  // Controllo rate limit per prevenire attacchi brute-force sul login
   const ip = getClientIp(request.headers);
   const { success } = rateLimit(ip);
 
@@ -36,6 +43,8 @@ export async function POST(request: Request) {
 
     const client = getServiceClient();
     if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
+
+    // Recupero dell'utente tramite email (normalizzata in minuscolo)
     const { data: user } = await client
       .from(TABLES.USERS)
       .select()
@@ -49,6 +58,7 @@ export async function POST(request: Request) {
       );
     }
 
+    // Verifica della password utilizzando bcrypt per confrontare l'hash salvato
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return NextResponse.json(
@@ -57,12 +67,14 @@ export async function POST(request: Request) {
       );
     }
 
+    // Generazione del token JWT con validità di 7 giorni
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
 
+    // Rimuove la password dall'oggetto utente prima di restituirlo al client per sicurezza
     const { password: _, ...userWithoutPassword } = user;
 
     return NextResponse.json({

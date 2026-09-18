@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || "";
 
+/**
+ * Estrae l'identificatore del canale YouTube da un URL.
+ * Gestisce diversi formati: handle (@utente), ID canale (/channel/ID), /user/nome o /c/nome.
+ *
+ * @param url L'URL del canale YouTube.
+ * @returns Un oggetto contenente il tipo (handle o id) e il valore, oppure null se non valido.
+ */
 function getYouTubeChannelId(url: string) {
   const patterns = [
     /youtube\.com\/@([a-zA-Z0-9_-]+)/,
@@ -22,6 +29,12 @@ function getYouTubeChannelId(url: string) {
   return null;
 }
 
+/**
+ * Endpoint API per recuperare l'elenco dei video caricati da un canale YouTube.
+ * Supporta la ricerca tramite URL del canale e recupera fino a 50 video.
+ *
+ * Aspetta un JSON con il campo 'channelUrl'.
+ */
 export async function POST(request: Request) {
   try {
     const { channelUrl } = await request.json();
@@ -40,6 +53,7 @@ export async function POST(request: Request) {
       );
     }
 
+    // 1. Identificazione dell'ID canale dall'URL
     const channelInfo = getYouTubeChannelId(channelUrl);
     if (!channelInfo) {
       return NextResponse.json(
@@ -50,6 +64,7 @@ export async function POST(request: Request) {
 
     let channelId = channelInfo.value;
 
+    // Se l'URL era un handle (@nome), dobbiamo prima risolvere l'ID reale del canale tramite l'API di ricerca
     if (channelInfo.type === "handle") {
       const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(channelId)}&key=${YOUTUBE_API_KEY}&maxResults=1`;
       const searchResponse = await fetch(searchUrl);
@@ -65,6 +80,7 @@ export async function POST(request: Request) {
       channelId = searchData.items[0].id.channelId;
     }
 
+    // 2. Recupero dei dettagli del canale e della playlist degli upload
     const channelDetailsUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails&id=${channelId}&key=${YOUTUBE_API_KEY}`;
     const channelResponse = await fetch(channelDetailsUrl);
     const channelData = await channelResponse.json();
@@ -85,6 +101,7 @@ export async function POST(request: Request) {
     const uploadsPlaylistId =
       channelData.items[0].contentDetails.relatedPlaylists.uploads;
 
+    // 3. Recupero dei video dalla playlist 'uploads' con paginazione (max 5 pagine)
     const videos: Array<{ videoId: string; title: string; publishedAt: string }> = [];
     let nextPageToken = "";
     let pageCount = 0;

@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || '';
 
+/**
+ * Mappa di shortcut per canali YouTube popolari.
+ * Permette un recupero immediato dell'ID canale senza dover interrogare l'API di ricerca.
+ */
 const CHANNEL_SLUG_TO_ID: Record<string, string> = {
   "hubermanlab": "UC2D2CMWXMOVWx7giW1n3LIg",
   "hubermanlabclips": "UCkZjTZNvuxq1CYMS3cwZa1Q",
@@ -12,6 +16,10 @@ const CHANNEL_SLUG_TO_ID: Record<string, string> = {
   "danzakaria": "UCX3R4xuKXIhoaxj44HGmhlw"
 };
 
+/**
+ * Endpoint API per recuperare l'elenco dei video di un canale specifico.
+ * Accetta un parametro query 'channel' (nome del canale o slug).
+ */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const channelName = searchParams.get('channel');
@@ -25,8 +33,10 @@ export async function GET(request: Request) {
   }
 
   try {
+    // 1. Tentativo di recupero ID canale tramite la mappa locale di slug
     let channelId = CHANNEL_SLUG_TO_ID[channelName.toLowerCase().replace(/ /g, "")];
 
+    // 2. Se non trovato localmente, interroga l'API di ricerca di YouTube
     if (!channelId) {
       const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(channelName)}&type=channel&key=${YOUTUBE_API_KEY}`;
       const searchResponse = await fetch(searchUrl);
@@ -39,6 +49,7 @@ export async function GET(request: Request) {
       }
     }
 
+    // 3. Recupero dell'ID della playlist 'uploads' del canale
     const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${YOUTUBE_API_KEY}`;
     const channelResponse = await fetch(channelUrl);
     const channelData = await channelResponse.json();
@@ -49,6 +60,7 @@ export async function GET(request: Request) {
 
     const uploadsPlaylistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
 
+    // 4. Recupero dei primi 10 video caricati dal canale
     const videosUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=10&key=${YOUTUBE_API_KEY}`;
     const videosResponse = await fetch(videosUrl);
     const videosData = await videosResponse.json();

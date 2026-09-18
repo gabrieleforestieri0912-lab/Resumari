@@ -6,13 +6,20 @@ import bcrypt from 'bcryptjs';
 import { getServiceClient, TABLES } from '@/lib/supabase';
 import jwt from 'jsonwebtoken';
 
+/**
+ * Configurazione di NextAuth per la gestione dell'autenticazione.
+ * Supporta l'accesso tramite Google OAuth e credenziali classiche (Email/Password).
+ * Utilizza un adapter personalizzato per persistere i dati su Supabase.
+ */
 export const authOptions = {
   adapter: SupabaseAdapter(),
   providers: [
+    // Provider per l'autenticazione tramite account Google
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
+    // Provider per l'autenticazione tramite email e password
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
@@ -32,6 +39,7 @@ export const authOptions = {
 
         if (!user || !user.password) return null;
 
+        // Verifica la validità della password tramite bcrypt
         const isValid = await bcrypt.compare(credentials.password, user.password);
         if (!isValid) return null;
 
@@ -46,6 +54,10 @@ export const authOptions = {
     }),
   ],
   callbacks: {
+    /**
+     * Callback eseguita quando la sessione viene creata o aggiornata.
+     * Permette di aggiungere dati personalizzati (come crediti e piano) all'oggetto sessione.
+     */
     async session({ session, token }: any) {
       if (token) {
         session.user.id = token.id;
@@ -53,9 +65,9 @@ export const authOptions = {
         session.user.plan = token.plan;
         session.customToken = token.customToken;
       }
-      // Surface the latest avatar from the DB: the JWT only stores `picture`
-      // at sign-in, so an uploaded avatar (or an OAuth photo change) would
-      // otherwise stay stale until the next login.
+
+      // Recupera l'avatar più aggiornato dal database per evitare che l'immagine
+      // rimanga obsoleta fino al prossimo login (dato che il JWT è statico).
       try {
         const userId = session.user.id || token?.id;
         if (userId) {
@@ -71,12 +83,17 @@ export const authOptions = {
       }
       return session;
     },
+    /**
+     * Callback eseguita durante la creazione o l'aggiornamento del token JWT.
+     * Utilizzata per includere informazioni dell'utente nel token e generare un token personalizzato.
+     */
     async jwt({ token, user, trigger, session }: any) {
       if (user && process.env.JWT_SECRET) {
         token.id = user.id;
         token.credits = user.credits;
         token.plan = user.plan;
 
+        // Genera un token JWT separato per l'uso in API esterne
         token.customToken = jwt.sign(
           { userId: user.id, email: user.email },
           process.env.JWT_SECRET,
@@ -84,6 +101,7 @@ export const authOptions = {
         );
       }
 
+      // Permette l'aggiornamento dei crediti/piano nella sessione senza richiedere il login
       if (trigger === "update" && session?.credits !== undefined) {
         token.credits = session.credits;
         token.plan = session.plan;
@@ -98,13 +116,17 @@ export const authOptions = {
   },
   session: {
     strategy: 'jwt' as const,
-    maxAge: 30 * 24 * 60 * 60, // 30 giorni
+    maxAge: 30 * 24 * 60 * 60, // Sessione valida per 30 giorni
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);
 
+/**
+ * Wrapper per l'handler di NextAuth che cattura gli errori a livello globale
+ * per evitare crash del server durante l'autenticazione.
+ */
 async function safeHandler(req: Request, ...args: any[]) {
   try {
     return await handler(req, ...args);

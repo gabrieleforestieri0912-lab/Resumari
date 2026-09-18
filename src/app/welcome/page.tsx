@@ -34,7 +34,7 @@ export default function WelcomePage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl md:text-6xl font-black text-gray-900 dark:text-gray-100 mb-6"
           >
-            Resumari è pronta! 🚀
+            Resumari è pronta!
           </motion.h1>
 
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-12">

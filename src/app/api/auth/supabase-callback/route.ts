@@ -4,6 +4,13 @@ import { getServiceClient, TABLES } from '@/lib/supabase';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
+/**
+ * Endpoint di callback utilizzato per gestire l'autenticazione tramite Supabase/Google.
+ * Sincronizza l'utente autenticato esternamente con il database locale di Resumari,
+ * creando l'utente se non esiste o aggiornandone i dati.
+ *
+ * Aspetta un JSON con i dati dell'utente (email, name, picture, id).
+ */
 export async function POST(request: Request) {
   try {
     const { email, name, picture, id: supabaseId } = await request.json();
@@ -19,7 +26,7 @@ export async function POST(request: Request) {
     const client = getServiceClient();
     if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
 
-    // Find existing user by email
+    // Verifica se esiste già un utente con l'email fornita
     let { data: user } = await client
       .from(TABLES.USERS)
       .select()
@@ -27,7 +34,7 @@ export async function POST(request: Request) {
       .single();
 
     if (user) {
-      // Update existing user's Google info
+      // L'utente esiste già: aggiorna le informazioni provenienti dal provider (Google)
       await client
         .from(TABLES.USERS)
         .update({
@@ -38,7 +45,7 @@ export async function POST(request: Request) {
         })
         .eq('id', user.id);
     } else {
-      // Create new user
+      // L'utente non esiste: crea un nuovo profilo con i crediti e il piano di default
       const { data: newUser, error } = await client
         .from(TABLES.USERS)
         .insert({
@@ -61,12 +68,14 @@ export async function POST(request: Request) {
       user = newUser;
     }
 
+    // Genera un token JWT per mantenere l'utente autenticato nell'applicazione
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
 
+    // Rimuove la password (se presente) prima di restituire l'utente
     const { password: _, ...userWithoutPassword } = user;
 
     return NextResponse.json({

@@ -40,7 +40,7 @@ incorporate al momento della build):
   (e l'URI di callback di NextAuth) alle **Authorized redirect URIs**.
 - **Resend**: verifica il dominio `resumari.vercel.app` (record DNS SPF/DKIM) così le email da
   `noreply@resumari.com` non finiscono in spam.
-- **Supabase**: applica le migration (`supabase/migrations/migration-api-keys.sql`, `supabase/migrations/migration-transcripts.sql`, `supabase/migrations/migration-waitlist.sql`) e verifica le policy RLS.
+- **Supabase**: applica le migration (`supabase/migrations/migration-api-keys.sql`, `supabase/migrations/migration-transcripts.sql`) e verifica le policy RLS.
 - **SEO**: la sitemap è in `public/sitemap.xml` e referenziata dal `robots.txt`; registra
   il dominio nella **Google Search Console** e invia la sitemap.
 

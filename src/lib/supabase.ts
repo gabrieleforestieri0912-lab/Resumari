@@ -1,20 +1,29 @@
 import { createClient } from '@supabase/supabase-js'
 
+// URL di Supabase recuperata dalle variabili d'ambiente
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+// Chiave di servizio per operazioni amministrative (solo lato server)
 const supabaseServiceKey = typeof process !== 'undefined' ? process.env.SUPABASE_SERVICE_ROLE_KEY : ''
 
 if (!supabaseUrl) {
   console.warn('NEXT_PUBLIC_SUPABASE_URL non configurata')
 }
 
-// For client-side usage (browser)
+/**
+ * Restituisce un client Supabase per l'utilizzo lato client (browser).
+ * Utilizza la anon key per rispettare le policy RLS.
+ */
 export function getSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
   return createClient(url, anonKey)
 }
 
-// Lazy server-side client with service role for admin operations
+/**
+ * Client Supabase lato server con Service Role.
+ * Permette di bypassare le policy RLS per operazioni di amministrazione.
+ * Implementato con lazy loading per ottimizzare le prestazioni.
+ */
 let _supabase: any = null
 export function getServiceClient(): any {
   if (!_supabase && supabaseUrl && supabaseServiceKey) {
@@ -34,7 +43,10 @@ export function getServiceClient(): any {
   return _supabase
 }
 
-// Table name constants
+/**
+ * Costanti per i nomi delle tabelle del database Supabase.
+ * Centralizzare i nomi evita errori di battitura in tutto il progetto.
+ */
 export const TABLES = {
   USERS: 'users',
   CHATS: 'chats',
@@ -45,5 +57,4 @@ export const TABLES = {
   VERIFICATION_TOKENS: 'nextauth_verification_tokens',
   API_KEYS: 'api_keys',
   TRANSCRIPTS: 'transcripts',
-  WAITLIST: 'waitlist',
 } as const

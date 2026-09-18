@@ -143,14 +143,6 @@ export default function Footer() {
                 MCP Server
               </Link>
             </li>
-            <li>
-              <Link
-                href="/waitlist"
-                className="transition-all hover:text-[#7b2ff7] hover:pl-1"
-              >
-                Lista d&apos;attesa
-              </Link>
-            </li>
           </ul>
         </div>
 
@@ -218,7 +210,7 @@ export default function Footer() {
 
       {/* Bottom */}
       <div className="max-w-6xl mx-auto mt-16 pt-8 border-t border-white/5 text-sm text-gray-500">
-        © {year} Resumari. All rights reserved.
+        {year} Resumari. All rights reserved.
       </div>
     </footer>
   );

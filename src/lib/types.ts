@@ -1,5 +1,10 @@
-// Database types for Supabase
+/**
+ * Definizioni dei tipi di dato per l'integrazione con Supabase e l'intera applicazione.
+ */
 
+/**
+ * Rappresenta un utente registrato nel sistema.
+ */
 export type User = {
   id: string
   email: string
@@ -17,6 +22,9 @@ export type User = {
   updated_at: string
 }
 
+/**
+ * Rappresenta una sessione di chat tra l'utente e l'AI.
+ */
 export type Chat = {
   id: string
   user_id: string
@@ -28,12 +36,18 @@ export type Chat = {
   updated_at: string
 }
 
+/**
+ * Rappresenta un singolo messaggio all'interno di una chat.
+ */
 export type ChatMessage = {
   role: 'user' | 'assistant' | 'system'
   content: string
   videoId?: string
 }
 
+/**
+ * Rappresenta una chiave API generata dall'utente per l'accesso programmatico.
+ */
 export type ApiKey = {
   id: string
   user_id: string
@@ -45,6 +59,9 @@ export type ApiKey = {
   revoked: boolean
 }
 
+/**
+ * Rappresenta un segmento di trascrizione di un video (testo e timestamp).
+ */
 export type TranscriptSegment = {
   text: string
   time?: number
@@ -52,6 +69,9 @@ export type TranscriptSegment = {
   duration?: number
 }
 
+/**
+ * Rappresenta l'intera trascrizione di un video salvata nel database.
+ */
 export type Transcript = {
   id: string
   user_id: string
@@ -68,6 +88,9 @@ export type Transcript = {
   updated_at: string
 }
 
+/**
+ * Rappresenta un codice di verifica temporaneo (es. per l'email).
+ */
 export type VerificationCode = {
   id: string
   email: string
@@ -77,6 +100,9 @@ export type VerificationCode = {
   created_at: string
 }
 
+/**
+ * Rappresenta un messaggio inviato tramite il modulo di contatto.
+ */
 export type ContactMessage = {
   id: string
   nome: string
@@ -85,9 +111,9 @@ export type ContactMessage = {
   created_at: string
 }
 
-
-
-// Supabase table names
+/**
+ * Mappatura dei nomi delle tabelle di Supabase per evitare hard-coding in tutto il progetto.
+ */
 export const TABLES = {
   USERS: 'users',
   CHATS: 'chats',
@@ -100,7 +126,9 @@ export const TABLES = {
   TRANSCRIPTS: 'transcripts',
 } as const
 
-// For backward compatibility with existing MongoDB-based code
-// that expects _id and id fields
+/**
+ * Tipi di compatibilità per supportare il codice legacy basato su MongoDB
+ * che si aspetta i campi _id e id.
+ */
 export type UserWithMongoCompat = User & { _id: string; id: string }
 export type ChatWithMongoCompat = Chat & { _id: string }

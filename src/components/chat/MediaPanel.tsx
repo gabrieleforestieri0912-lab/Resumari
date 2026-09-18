@@ -122,7 +122,7 @@ export default function MediaPanel({
                     <div key={i} className="flex gap-2 text-xs">
                       <button
                         onClick={() => handleSeekTo(line.time)}
-                        className="shrink-0 text-purple-600 hover:text-purple-700 dark:hover:text-purple-400 font-mono font-bold"
+                        className="shrink-0 bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 px-1 rounded font-mono font-bold hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors"
                       >
                         {formatTimestamp(line.time)}
                       </button>

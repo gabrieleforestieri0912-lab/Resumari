@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
+// Inizializzazione del client Stripe utilizzando la chiave segreta dalle variabili d'ambiente
 let stripe: Stripe | null = null;
 if (process.env.STRIPE_SECRET_KEY) {
   stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -8,6 +9,12 @@ if (process.env.STRIPE_SECRET_KEY) {
   });
 }
 
+/**
+ * Endpoint API per verificare lo stato di un checkout di Stripe.
+ * Viene utilizzato dopo che l'utente è stato reindirizzato al sito dal portale di pagamento.
+ *
+ * Richiede il parametro query 'session_id'.
+ */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const sessionId = searchParams.get('session_id');
@@ -20,8 +27,10 @@ export async function GET(request: Request) {
   }
 
   try {
+    // Recupera i dettagli della sessione di checkout tramite l'API di Stripe
     const session = await stripe!.checkout.sessions.retrieve(sessionId);
 
+    // Restituisce lo stato del pagamento (es. 'paid', 'unpaid')
     return NextResponse.json({
       status: session.payment_status,
     });

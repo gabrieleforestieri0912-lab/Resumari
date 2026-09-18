@@ -113,6 +113,9 @@ export const metadata = {
       "it-IT": "https://resumari.vercel.app",
     },
   },
+  verification: {
+    google: "tf4uX6htas5DRNZmJlvoVl2LfQJODZTvRXawiq7BRS0",
+  },
 };
 
 export default function RootLayout({

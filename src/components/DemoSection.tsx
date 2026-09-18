@@ -242,7 +242,7 @@ export default function DemoSection() {
         raw = cleanResponse(raw);
         addMessage(raw, "system", { videoId: currentVideo });
       } else {
-        addMessage("❌ " + (data.message || "Errore durante l'elaborazione."), "system");
+        addMessage((data.message || "Errore durante l'elaborazione."), "system");
       }
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
@@ -252,7 +252,7 @@ export default function DemoSection() {
           ),
         );
       } else {
-        addMessage("❌ Errore di rete. Assicurati che il server sia in esecuzione.", "system");
+        addMessage("Errore di rete. Assicurati che il server sia in esecuzione.", "system");
       }
     } finally {
       setIsProcessingQueue(false);
@@ -399,10 +399,10 @@ export default function DemoSection() {
 
     const ch = channelData[channel.id];
     if (ch?.channelDescription) {
-      const intro = `👋 Ciao! Sono **${ch.channelTitle}**.${ch.channelDescription ? `\n\n${ch.channelDescription.slice(0, 800)}` : ""}\n\nFammi qualsiasi domanda sui miei contenuti, video o argomenti!`;
+      const intro = `Ciao! Sono **${ch.channelTitle}**.${ch.channelDescription ? `\n\n${ch.channelDescription.slice(0, 800)}` : ""}\n\nFammi qualsiasi domanda sui miei contenuti, video o argomenti!`;
       addMessage(cleanResponse(intro), "system");
     } else {
-      addMessage(cleanResponse(`👋 Ciao! Sono **${channel.name}**. Chiedimi tutto sui miei video e contenuti!`), "system");
+      addMessage(cleanResponse(`Ciao! Sono **${channel.name}**. Chiedimi tutto sui miei video e contenuti!`), "system");
     }
 
     fetchSuggestions(channel.name);

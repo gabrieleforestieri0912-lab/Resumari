@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      width: 200px;
+      padding: 15px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #fff;
+      color: #333;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+    .logo {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      background: linear-gradient(135deg, #9333ea 0%, #4f46e5 100%);
+    }
+    .title {
+      font-weight: 800;
+      font-size: 16px;
+      color: #111;
+    }
+    .content {
+      font-size: 13px;
+      line-height: 1.4;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .btn-open {
+      width: 100%;
+      text-align: center;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 8px;
+      border-radius: 6px;
+      background: #f3f4f6;
+      color: #4b5563;
+      transition: all 0.2s;
+    }
+    .btn-open:hover {
+      background: #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo"></div>
+    <span class="title">Resumari</span>
+  </div>
+  <div class="content">
+    Analizza i tuoi video YouTube preferiti con l'AI di Resumari.
+  </div>
+  <a href="https://resumari.vercel.app" target="_blank" class="btn-open">Apri Web App</a>
+  <script src="popup.js"></script>
+</body>
+</html>

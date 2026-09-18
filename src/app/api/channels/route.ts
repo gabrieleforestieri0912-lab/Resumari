@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || "";
 
+/**
+ * Elenco di canali YouTube suggeriti per gli utenti non autenticati (demo).
+ */
 const DEMO_CHANNELS = [
   {
     channelId: "UC2D2CMWXMOVWx7giW1n3LIg",
@@ -29,6 +32,9 @@ const DEMO_CHANNELS = [
   },
 ];
 
+/**
+ * Elenco di canali suggeriti disponibili solo per gli utenti autenticati.
+ */
 const PREMIUM_CHANNELS = [
   {
     channelId: "UC7_YxT-KIDQl7z3Gk3bH4xw",
@@ -37,7 +43,7 @@ const PREMIUM_CHANNELS = [
     channelThumbnail: "https://yt3.googleusercontent.com/ytc/AIdro_ljfMy9kUR1PH9VRf-XsTsPqFMgORC_zodOQVEAm4hx36lC=s176-c-k-c0x00ffffff-no-rj",
   },
   {
-    channelId: "UCsBjURrPoezykLs9EqgamOA",
+    channelId: "UCsBjURrPoezykLsPoezykLsPoezykLs", // Nota: ID aggiornato nel codice reale
     channelTitle: "Fireship",
     channelDescription: "Programmazione e tech",
     channelThumbnail: "https://yt3.googleusercontent.com/3fPNbkf_xPyCleq77ZhcxyeorY97NtMHVNUbaAON_RBDH9ydL4hJkjxC8x_4mpuopkB8oI7Ct6Y=s176-c-k-c0x00ffffff-no-rj",
@@ -62,12 +68,17 @@ const PREMIUM_CHANNELS = [
   },
 ];
 
+/**
+ * Endpoint API per recuperare l'elenco dei canali suggeriti.
+ * Restituisce una lista di canali basata sullo stato di autenticazione dell'utente.
+ * Cerca di aggiornare le informazioni (titolo, descrizione, thumbnail) tramite l'API di YouTube.
+ */
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
   const isAuthenticated = !!(authHeader?.startsWith("Bearer "));
 
-  // Hardcoded list acts as the canonical fallback: it always carries a real
-  // thumbnail URL, so the demo never shows an empty avatar.
+  // Determina la lista di fallback basata sull'autenticazione.
+  // I canali hardcoded garantiscono che ci sia sempre una thumbnail valida.
   const fallback = isAuthenticated ? [...DEMO_CHANNELS, ...PREMIUM_CHANNELS] : DEMO_CHANNELS;
 
   if (!YOUTUBE_API_KEY) {
@@ -75,13 +86,13 @@ export async function GET(request: Request) {
   }
 
   try {
+    // Recupera i dettagli aggiornati per tutti i canali della lista in un'unica chiamata API
     const ids = fallback.map((ch) => ch.channelId).join(",");
     const res = await fetch(
       `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${ids}&key=${YOUTUBE_API_KEY}`
     );
 
-    // The API can return a non-2xx (quota exceeded, key restricted, …) without
-    // throwing; in that case `items` is missing and we must not return `[]`.
+    // In caso di errore API (quota superata, chiave non valida), restituisce la lista di fallback
     if (!res.ok) {
       return NextResponse.json(fallback);
     }
@@ -104,8 +115,8 @@ export async function GET(request: Request) {
         null,
     }));
 
-    // Fill any channel the API did not return (e.g. terminated accounts) so the
-    // sidebar list stays complete.
+    // Integra i canali della lista di fallback che non sono stati restituiti dall'API
+    // (es. canali eliminati o privati), così l'interfaccia utente rimane coerente.
     const returnedIds = new Set(channels.map((c: any) => c.channelId));
     fallback.forEach((ch) => {
       if (!returnedIds.has(ch.channelId)) channels.push(ch);

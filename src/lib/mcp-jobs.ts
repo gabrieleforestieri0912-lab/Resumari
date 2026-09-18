@@ -1,5 +1,9 @@
 import crypto from 'crypto'
 
+/**
+ * Definizione di un job di trascrizione.
+ * Rappresenta lo stato di un'operazione di recupero sottotitoli da YouTube.
+ */
 export type TranscribeJob = {
   job_id: string
   video_id: string
@@ -15,8 +19,15 @@ export type TranscribeJob = {
   error?: string
 }
 
+/**
+ * Store in-memory per la gestione dei job.
+ * In produzione, questo dovrebbe essere sostituito da un database o Redis.
+ */
 const jobs = new Map<string, TranscribeJob>()
 
+/**
+ * Inizializza e salva un nuovo job di trascrizione.
+ */
 export function createJob(videoId: string): TranscribeJob {
   const job: TranscribeJob = {
     job_id: crypto.randomBytes(8).toString('hex'),
@@ -28,10 +39,16 @@ export function createJob(videoId: string): TranscribeJob {
   return job
 }
 
+/**
+ * Recupera lo stato corrente di un job tramite il suo ID.
+ */
 export function getJob(jobId: string): TranscribeJob | undefined {
   return jobs.get(jobId)
 }
 
+/**
+ * Segna un job come completato e salva i risultati della trascrizione.
+ */
 export function completeJob(jobId: string, result: TranscribeJob['result']) {
   const job = jobs.get(jobId)
   if (job) {
@@ -40,6 +57,9 @@ export function completeJob(jobId: string, result: TranscribeJob['result']) {
   }
 }
 
+/**
+ * Segna un job come fallito e registra l'errore riscontrato.
+ */
 export function failJob(jobId: string, error: string) {
   const job = jobs.get(jobId)
   if (job) {
@@ -50,6 +70,9 @@ export function failJob(jobId: string, error: string) {
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || ''
 
+/**
+ * Estrae l'ID di un video YouTube da un URL o da una stringa.
+ */
 function getYouTubeVideoId(input: string): string | null {
   if (!input) return null
   const patterns = [
@@ -63,6 +86,9 @@ function getYouTubeVideoId(input: string): string | null {
   return null
 }
 
+/**
+ * Recupera i dettagli di un video tramite l'API ufficiale di YouTube.
+ */
 async function getVideoDetails(videoId: string) {
   if (!YOUTUBE_API_KEY) return null
   try {
@@ -82,6 +108,9 @@ async function getVideoDetails(videoId: string) {
   }
 }
 
+/**
+ * Tenta di recuperare la trascrizione di un video YouTube in italiano o inglese.
+ */
 async function getTranscript(videoId: string): Promise<{ transcript: { text: string; start: number; duration: number }[]; language: string } | null> {
   const languages = ['it', 'en']
   for (const lang of languages) {
@@ -102,12 +131,16 @@ async function getTranscript(videoId: string): Promise<{ transcript: { text: str
         }
       }
     } catch {
-      // continue
+      // continua al prossimo linguaggio
     }
   }
   return null
 }
 
+/**
+ * Processo principale di elaborazione di un job di trascrizione.
+ * Recupera i dettagli del video e la trascrizione, aggiornando poi lo stato del job.
+ */
 export async function processJob(job: TranscribeJob) {
   try {
     const videoId = getYouTubeVideoId(job.video_id) || job.video_id

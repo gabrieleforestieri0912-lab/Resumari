@@ -1,8 +1,17 @@
 import type { Adapter, AdapterUser, AdapterAccount, AdapterSession, VerificationToken } from 'next-auth/adapters'
 import { getServiceClient, TABLES } from '@/lib/supabase'
 
+/**
+ * Implementazione di un Adapter NextAuth per Supabase.
+ * Questo adapter permette a NextAuth di gestire utenti, sessioni, account e token di verifica
+ * interagendo direttamente con le tabelle del database Supabase.
+ */
 export function SupabaseAdapter(): Adapter {
   return {
+    /**
+     * Crea un nuovo utente nel database.
+     * Assegna i crediti iniziali (10) e il piano 'free' per default.
+     */
     async createUser(user: any) {
       const { data, error } = await getServiceClient()
         .from(TABLES.USERS)
@@ -22,6 +31,9 @@ export function SupabaseAdapter(): Adapter {
       return mapUser(data)
     },
 
+    /**
+     * Recupera un utente tramite il suo ID unico.
+     */
     async getUser(id: string) {
       const { data } = await getServiceClient()
         .from(TABLES.USERS)
@@ -32,6 +44,9 @@ export function SupabaseAdapter(): Adapter {
       return data ? mapUser(data) : null
     },
 
+    /**
+     * Recupera un utente tramite il suo indirizzo email.
+     */
     async getUserByEmail(email: string) {
       const { data } = await getServiceClient()
         .from(TABLES.USERS)
@@ -42,6 +57,9 @@ export function SupabaseAdapter(): Adapter {
       return data ? mapUser(data) : null
     },
 
+    /**
+     * Recupera un utente collegato a un account di un provider esterno (es. Google).
+     */
     async getUserByAccount({ provider, providerAccountId }: { provider: string; providerAccountId: string }) {
       const { data: account } = await getServiceClient()
         .from(TABLES.ACCOUNTS)
@@ -61,6 +79,9 @@ export function SupabaseAdapter(): Adapter {
       return user ? mapUser(user) : null
     },
 
+    /**
+     * Aggiorna i dati di base di un utente.
+     */
     async updateUser(user: any) {
       const { data, error } = await getServiceClient()
         .from(TABLES.USERS)
@@ -78,10 +99,16 @@ export function SupabaseAdapter(): Adapter {
       return mapUser(data)
     },
 
+    /**
+     * Elimina un utente dal database.
+     */
     async deleteUser(userId: string) {
       await getServiceClient().from(TABLES.USERS).delete().eq('id', userId)
     },
 
+    /**
+     * Collega un account di un provider esterno a un utente esistente.
+     */
     async linkAccount(account: any) {
       const { data, error } = await getServiceClient()
         .from(TABLES.ACCOUNTS)
@@ -105,6 +132,9 @@ export function SupabaseAdapter(): Adapter {
       return mapAccount(data)
     },
 
+    /**
+     * Rimuove il collegamento tra un utente e un account provider.
+     */
     async unlinkAccount({ provider, providerAccountId }: { provider: string; providerAccountId: string }) {
       await getServiceClient()
         .from(TABLES.ACCOUNTS)
@@ -113,6 +143,9 @@ export function SupabaseAdapter(): Adapter {
         .eq('provider_account_id', providerAccountId)
     },
 
+    /**
+     * Crea una nuova sessione utente.
+     */
     async createSession({ sessionToken, userId, expires }: { sessionToken: string; userId: string; expires: Date }) {
       const { data, error } = await getServiceClient()
         .from(TABLES.SESSIONS)
@@ -128,6 +161,9 @@ export function SupabaseAdapter(): Adapter {
       return mapSession(data)
     },
 
+    /**
+     * Recupera una sessione e l'utente ad essa associato.
+     */
     async getSessionAndUser(sessionToken: string) {
       const { data: session } = await getServiceClient()
         .from(TABLES.SESSIONS)
@@ -151,6 +187,9 @@ export function SupabaseAdapter(): Adapter {
       }
     },
 
+    /**
+     * Aggiorna la data di scadenza di una sessione.
+     */
     async updateSession(session: any) {
       const { data, error } = await getServiceClient()
         .from(TABLES.SESSIONS)
@@ -165,10 +204,16 @@ export function SupabaseAdapter(): Adapter {
       return mapSession(data)
     },
 
+    /**
+     * Elimina una sessione (es. durante il logout).
+     */
     async deleteSession(sessionToken: string) {
       await getServiceClient().from(TABLES.SESSIONS).delete().eq('session_token', sessionToken)
     },
 
+    /**
+     * Crea un token di verifica (es. per il reset password).
+     */
     async createVerificationToken({ identifier, token, expires }: { identifier: string; token: string; expires: Date }) {
       const { data, error } = await getServiceClient()
         .from(TABLES.VERIFICATION_TOKENS)
@@ -184,6 +229,9 @@ export function SupabaseAdapter(): Adapter {
       return mapVerificationToken(data)
     },
 
+    /**
+     * Utilizza e rimuove un token di verifica.
+     */
     async useVerificationToken({ identifier, token }: { identifier: string; token: string }) {
       const { data, error } = await getServiceClient()
         .from(TABLES.VERIFICATION_TOKENS)
@@ -198,6 +246,9 @@ export function SupabaseAdapter(): Adapter {
   }
 }
 
+/**
+ * Funzioni di mapping per convertire i dati grezzi di Supabase nei tipi richiesti da NextAuth.
+ */
 function mapUser(data: any): AdapterUser {
   return {
     id: data.id,

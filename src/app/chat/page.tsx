@@ -4,7 +4,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/components/LanguageContext";
 import { useToast } from "@/components/ToastProvider";
@@ -174,6 +174,49 @@ export default function Chat() {
   const { locale, t } = useLanguage();
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  /**
+   * Gestisce l'avvio automatico della chat quando è presente il parametro 'video' nell'URL
+   * (utilizzato dall'estensione Chrome)
+   */
+  useEffect(() => {
+    const videoId = searchParams.get("video");
+    const action = searchParams.get("action");
+
+    if (videoId) {
+      const url = `https://www.youtube.com/watch?v=${videoId}`;
+      setVideoUrl(url);
+
+      const fetchAndStart = async () => {
+        setIsAnalyzing(true);
+        try {
+          const res = await fetch("/api/video", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ videoUrl: url }),
+          });
+
+          if (res.ok) {
+            const videoInfo = await res.json();
+            // Crea la chat e usa i dati completi per evitare una seconda chiamata API
+            const newId = await createNewChatWithVideo(videoInfo, url, videoInfo);
+
+            if (action === "transcript") {
+              await handleSendWithText("Trascrivi questo video", newId);
+            }
+          }
+        } catch (e) {
+          console.error("Error starting chat from URL:", e);
+        } finally {
+          setIsAnalyzing(false);
+        }
+      };
+
+      fetchAndStart();
+    }
+  }, [searchParams]);
+
   const [isMounted, setIsMounted] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [chats, setChats] = useState(DEFAULT_CHATS);
@@ -750,7 +793,8 @@ export default function Chat() {
   /**
    * Crea una nuova chat nel database e inizializza i messaggi con i dati del video
    */
-  const createNewChatWithVideo = async (videoInfo: any) => {
+  const createNewChatWithVideo = async (videoInfo: any, urlOverride?: string, fullVideoData?: any) => {
+    const url = urlOverride || videoUrl;
     const newId = Date.now();
     const newChat = {
       id: newId,
@@ -764,18 +808,20 @@ export default function Chat() {
     setActiveChatId(newId);
     setChatMessagesMap((prev) => ({ ...prev, [newId]: [] }));
 
-    let videoData = null;
-    try {
-      const res = await fetch("/api/video", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ videoUrl }),
-      });
-      if (res.ok) {
-        videoData = await res.json();
+    let videoData = fullVideoData;
+    if (!videoData) {
+      try {
+        const res = await fetch("/api/video", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ videoUrl: url }),
+        });
+        if (res.ok) {
+          videoData = await res.json();
+        }
+      } catch (e) {
+        console.error("Error fetching video data:", e);
       }
-    } catch (e) {
-      console.error("Error fetching video data:", e);
     }
 
     const initialMessage = {
@@ -814,6 +860,7 @@ export default function Chat() {
         console.error("Error syncing chat:", e);
       }
     }
+    return newId;
   };
 
   useEffect(() => {
@@ -1107,7 +1154,7 @@ export default function Chat() {
   /**
    * Invia un messaggio testuale gestendo la creazione di nuove chat e l'estrazione video
    */
-  const handleSendWithText = async (text: string) => {
+  const handleSendWithText = async (text: string, chatIdOverride?: any) => {
     const userMsgText = text;
     const videoId = getYouTubeVideoId(userMsgText);
 
@@ -1125,7 +1172,7 @@ export default function Chat() {
       } catch { /* ignore */ }
     }
 
-    let currentChatId = activeChatId;
+    let currentChatId = chatIdOverride || activeChatId;
     let currentChats = [...chats];
     let activeChat = currentChats.find((c: any) => c.id === currentChatId);
 

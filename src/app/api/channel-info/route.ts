@@ -2,11 +2,19 @@ import { NextResponse } from "next/server";
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || "";
 
+/**
+ * Endpoint API per recuperare informazioni su un canale YouTube.
+ * Restituisce i dettagli del canale (titolo, descrizione, thumbnail)
+ * e un elenco dei video più recenti caricati.
+ *
+ * Richiede il parametro query 'channelId'.
+ */
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const channelId = searchParams.get("channelId");
 
+    // Validazione parametri di input
     if (!channelId) {
       return NextResponse.json({ message: "channelId obbligatorio" }, { status: 400 });
     }
@@ -15,6 +23,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ message: "YouTube API non configurata" }, { status: 500 });
     }
 
+    // 1. Recupero informazioni generali del canale tramite API di YouTube
     const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails&id=${channelId}&key=${YOUTUBE_API_KEY}`;
     const channelRes = await fetch(channelUrl);
     const channelData = await channelRes.json();
@@ -24,8 +33,10 @@ export async function GET(request: Request) {
     }
 
     const snippet = channelData.items[0].snippet;
+    // L'ID della playlist "uploads" contiene tutti i video caricati dal canale
     const uploadsPlaylistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
 
+    // 2. Recupero dell'elenco dei video più recenti dalla playlist di upload
     const videos: Array<{ videoId: string; title: string; publishedAt: string; thumbnails: any }> = [];
     const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=12&key=${YOUTUBE_API_KEY}`;
     const playlistRes = await fetch(playlistUrl);
@@ -44,6 +55,7 @@ export async function GET(request: Request) {
       }
     }
 
+    // Risposta finale con i dati aggregati del canale e i video
     return NextResponse.json({
       channelId,
       channelTitle: snippet.title,

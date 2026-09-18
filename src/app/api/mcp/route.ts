@@ -3,17 +3,26 @@ import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/
 import { z } from 'zod'
 import { createJob, getJob, processJob } from '@/lib/mcp-jobs'
 
+/**
+ * Configura il server MCP (Model Context Protocol).
+ * L'MCP permette a modelli AI esterni di interagire con le funzionalità di Resumari tramite "tools" definiti.
+ */
 function createServer() {
   const server = new McpServer({
     name: 'Resumari',
     version: '1.0.0',
   })
 
+  /**
+   * Tool: youtube.transcribe
+   * Avvia un job asincrono per recuperare e pulire la trascrizione di un video YouTube.
+   * Restituisce un job_id che può essere utilizzato per monitorare lo stato dell'operazione.
+   */
   server.registerTool('youtube.transcribe', {
     title: 'youtube.transcribe',
-    description: 'Submit a single YouTube URL or video ID and start an async cleanup job. Returns a job_id to poll with youtube.get_transcript_job.',
+    description: 'Invia un URL di YouTube o un video ID per avviare un job di trascrizione asincrono. Restituisce un job_id per il monitoraggio tramite youtube.get_transcript_job.',
     inputSchema: z.object({
-      video_id: z.string().describe('YouTube video URL or video ID'),
+      video_id: z.string().describe('URL del video YouTube o video ID'),
     }),
   }, async (args) => {
     try {
@@ -36,11 +45,16 @@ function createServer() {
     }
   })
 
+  /**
+   * Tool: youtube.get_transcript_job
+   * Monitora lo stato di un job di trascrizione.
+   * Quando il job è completato, restituisce la trascrizione formattata in markdown.
+   */
   server.registerTool('youtube.get_transcript_job', {
     title: 'youtube.get_transcript_job',
-    description: 'Poll the job and receive the cleaned markdown transcript when it is ready.',
+    description: 'Monitora il job e ricevi la trascrizione markdown quando è pronta.',
     inputSchema: z.object({
-      job_id: z.string().describe('The job ID returned by youtube.transcribe'),
+      job_id: z.string().describe('L\'ID del job restituito da youtube.transcribe'),
     }),
   }, async (args) => {
     try {
@@ -66,6 +80,7 @@ function createServer() {
         }
       }
 
+      // Formattazione della trascrizione finale in Markdown per l'AI
       const markdown = `# ${job.result!.title}\n\nCanale: ${job.result!.channel}\nLingua: ${job.result!.language}\n\n${job.result!.text}`
 
       return {
@@ -88,9 +103,11 @@ function createServer() {
   return server
 }
 
-// The SDK's stateless transport (sessionIdGenerator: undefined) cannot be
-// reused across requests, and a Protocol instance cannot be reconnected.
-// Create a fresh server + transport per request instead.
+/**
+ * Gestisce le richieste HTTP in entranti convertendole in comunicazioni MCP.
+ * Poiché il trasporto stateless non può essere riutilizzato, viene creato
+ * un nuovo server e un nuovo trasporto per ogni singola richiesta.
+ */
 async function handleRequest(request: Request) {
   const server = createServer()
   const transport = new WebStandardStreamableHTTPServerTransport({

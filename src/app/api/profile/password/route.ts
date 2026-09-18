@@ -5,6 +5,12 @@ import { getServiceClient, TABLES } from '@/lib/supabase';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
+/**
+ * Estrae e verifica l'identità dell'utente dal token JWT contenuto nell'header di autorizzazione.
+ *
+ * @param request La richiesta HTTP entrante.
+ * @returns L'oggetto decodificato del token o null se non valido/presente.
+ */
 function getUserFromToken(request: Request) {
   const authHeader = request.headers.get('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -21,7 +27,14 @@ function getUserFromToken(request: Request) {
   }
 }
 
+/**
+ * Endpoint API per l'aggiornamento della password dell'utente dal proprio profilo.
+ * Verifica la password attuale prima di permettere il cambio.
+ *
+ * Aspetta un JSON con i campi 'currentPassword' e 'newPassword'.
+ */
 export async function PUT(request: Request) {
+  // Autenticazione tramite token
   const decoded = getUserFromToken(request);
   if (!decoded) {
     return NextResponse.json({ message: 'Non autorizzato' }, { status: 401 });
@@ -39,6 +52,8 @@ export async function PUT(request: Request) {
 
     const client = getServiceClient();
     if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
+
+    // Recupera l'utente dal database per verificare la password attuale
     const { data: user } = await client
       .from(TABLES.USERS)
       .select()
@@ -49,6 +64,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ message: 'Utente non trovato' }, { status: 404 });
     }
 
+    // Confronta la password fornita con l'hash salvato nel DB
     const isPasswordValid = await bcrypt.compare(currentPassword, user.password || '');
     if (!isPasswordValid) {
       return NextResponse.json(
@@ -57,6 +73,7 @@ export async function PUT(request: Request) {
       );
     }
 
+    // Cripta la nuova password e aggiorna il profilo utente
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await client
       .from(TABLES.USERS)
