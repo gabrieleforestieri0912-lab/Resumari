@@ -9,6 +9,13 @@ type ChatMessage = {
   content: string;
 };
 
+/**
+ * Rimuove le emoji da una stringa per pulire il testo.
+ */
+export function removeEmojis(text: string) {
+  return text.replace(/\p{Emoji_Presentation}/gu, '').replace(/\p{Emoji_Modifier_Base}/gu, '').replace(/\p{Emoji_Component}/gu, '');
+}
+
 export async function generateChatCompletion(
   messages: ChatMessage[],
   model = 'llama-3.3-70b-versatile',
