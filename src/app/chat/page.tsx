@@ -51,6 +51,9 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 
+/**
+ * Componente SVG per l'icona di YouTube
+ */
 const Youtube = ({ size = 24, className = "", ...props }: { size?: number; className?: string; [key: string]: any }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -70,18 +73,25 @@ const Youtube = ({ size = 24, className = "", ...props }: { size?: number; class
   </svg>
 );
 
+// Chiavi utilizzate per il salvataggio della sessione di chat nel LocalStorage
 const CHATS_STORAGE_KEY = "resumari_chats";
 const MESSAGES_STORAGE_KEY = "resumari_chat_messages";
 
+/**
+ * Formatta un numero di secondi in formato H:MM:SS o M:SS
+ */
 function formatTimestamp(seconds: number) {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
+  const s = Math.floor(seconds % 60);
   if (h > 0)
     return `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+/**
+ * Formatta una data in un formato leggibile (es: Oggi, Ieri, 3 giorni fa)
+ */
 function formatChatDate(timestamp: string | number) {
   if (timestamp == null || isNaN(new Date(timestamp).getTime())) return "—";
   const d = new Date(timestamp);
@@ -96,6 +106,9 @@ function formatChatDate(timestamp: string | number) {
 
 const DEFAULT_CHATS: any[] = [];
 
+/**
+ * Converte una stringa di tempo (es: "1:23" o "1:02:34") in secondi totali
+ */
 function parseTimeToSeconds(timeStr: string) {
   const parts = timeStr.split(":").map(Number);
   if (parts.length === 3) {
@@ -106,6 +119,9 @@ function parseTimeToSeconds(timeStr: string) {
   return 0;
 }
 
+/**
+ * Componente per rendere i timestamp all'interno del testo come link cliccabili
+ */
 function FormatTimestampLinks({ text, videoId }: { text: string; videoId?: string }) {
   if (!videoId || !text) return <>{text}</>;
 
@@ -136,6 +152,9 @@ function FormatTimestampLinks({ text, videoId }: { text: string; videoId?: strin
   );
 }
 
+/**
+ * Raggruppa le linee della trascrizione in intervalli di tempo (default 30s)
+ */
 function groupTranscriptByInterval(lines: any[], intervalSeconds = 30) {
   if (!lines || lines.length === 0) return [];
   const buckets: any[] = [];
@@ -151,6 +170,7 @@ function groupTranscriptByInterval(lines: any[], intervalSeconds = 30) {
 }
 
 export default function Chat() {
+  // --- Stato Applicazione e UI ---
   const { locale, t } = useLanguage();
   const pathname = usePathname();
   const router = useRouter();
@@ -162,6 +182,7 @@ export default function Chat() {
   const [copiedIdx, setCopiedIdx] = useState<any>(null);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
+  // --- Stato della Conversazione Attiva ---
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
   const [attachedImage, setAttachedImage] = useState<File | null>(null);
@@ -174,11 +195,14 @@ export default function Chat() {
   const [isTyping, setIsTyping] = useState(false);
   const [displayedText, setDisplayedText] = useState("");
   const [currentAIMessageIndex, setCurrentAIMessageIndex] = useState<any>(null);
+
+  // --- Stato Interfaccia Utente ---
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
   const [isHistoryPanelOpen, setIsHistoryPanelOpen] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [historySearch, setHistorySearch] = useState("");
 
+  // --- Stato Input Video ---
   const [videoUrl, setVideoUrl] = useState("");
   const [videoInputMode, setVideoInputMode] = useState("video");
   const [videoInputError, setVideoInputError] = useState("");
@@ -186,16 +210,23 @@ export default function Chat() {
   const [videoInputInfo, setVideoInputInfo] = useState<any>(null);
   const [hasStartedChat, setHasStartedChat] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  // --- Gestione Coda Messaggi AI ---
   const [messageQueue, setMessageQueue] = useState<any[]>([]);
   const [isProcessingQueue, setIsProcessingQueue] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const aiStartedAtRef = useRef<number | null>(null);
+
+  // --- Feedback e Interazione ---
   const [likedMessages, setLikedMessages] = useState<Set<any>>(new Set());
   const [dislikedMessages, setDislikedMessages] = useState<Set<any>>(new Set());
   const [editingMessageId, setEditingMessageId] = useState<any>(null);
   const addToast: any = useToast();
 
+  /**
+   * Timer per monitorare il tempo di risposta dell'AI durante l'effetto di digitazione
+   */
   useEffect(() => {
     if (!isTyping) {
       aiStartedAtRef.current = null;
@@ -210,6 +241,9 @@ export default function Chat() {
     return () => window.clearInterval(timer);
   }, [isTyping]);
 
+  /**
+   * Gestisce l'aggiunta di un'immagine come allegato
+   */
   const setImageAttachment = (file: File | null) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
@@ -224,12 +258,18 @@ export default function Chat() {
     setAttachedImagePreview(URL.createObjectURL(file));
   };
 
+  /**
+   * Rimuove l'immagine allegata e libera la memoria dell'URL preview
+   */
   const removeImageAttachment = () => {
     if (attachedImagePreview) URL.revokeObjectURL(attachedImagePreview);
     setAttachedImage(null);
     setAttachedImagePreview(null);
   };
 
+  /**
+   * Caricamento iniziale dell'utente e delle chat (da Server o LocalStorage)
+   */
   useEffect(() => {
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
@@ -255,7 +295,7 @@ export default function Chat() {
           return;
         }
         const serverChats: any[] = await res.json();
-        
+
         if (!Array.isArray(serverChats) || serverChats.length === 0) {
           loadFromLocalStorage();
           return;
@@ -336,6 +376,9 @@ export default function Chat() {
 
   const displayName = user?.name || user?.email?.split("@")[0] || "Utente";
 
+  /**
+   * Esegue il logout eliminando sessione e dati locali
+   */
   const handleLogout = () => {
     clearSession();
     localStorage.removeItem(CHATS_STORAGE_KEY);
@@ -343,6 +386,9 @@ export default function Chat() {
     router.push("/");
   };
 
+  /**
+   * Gestisce lo scroll automatico verso il basso quando arrivano nuovi messaggi
+   */
   const handleScroll = () => {
     if (!scrollContainerRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } =
@@ -361,6 +407,7 @@ export default function Chat() {
     scrollToBottom();
   }, [messages, isTyping, scrollToBottom]);
 
+  // Sincronizzazione LocalStorage per le chat e i messaggi
   useEffect(() => {
     if (!initialLoadComplete) return;
     localStorage.setItem(CHATS_STORAGE_KEY, JSON.stringify(chats));
@@ -371,6 +418,9 @@ export default function Chat() {
     localStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(chatMessagesMap));
   }, [chatMessagesMap, initialLoadComplete]);
 
+  /**
+   * Intercetta i click sui timestamp nei messaggi per spostare il video al tempo indicato
+   */
   useEffect(() => {
     const handleTimestampClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -386,6 +436,9 @@ export default function Chat() {
     return () => document.removeEventListener("click", handleTimestampClick);
   }, []);
 
+  /**
+   * Sincronizza periodicamente le chat con il server per evitare perdite di dati
+   */
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -415,6 +468,9 @@ export default function Chat() {
     return () => clearTimeout(timer);
   }, [chats, chatMessagesMap]);
 
+  /**
+   * Restituisce i messaggi di benvenuto predefiniti per una nuova chat
+   */
   const getDefaultMessagesForChat = () => {
     const now = new Date().toLocaleTimeString([], {
       hour: "2-digit",
@@ -422,8 +478,8 @@ export default function Chat() {
     });
     return [
       {
-        text: locale === 'it' 
-          ? "Benvenuto nella chat di riassunto video! Incolla un link YouTube o chiedimi qualcosa." 
+        text: locale === 'it'
+          ? "Benvenuto nella chat di riassunto video! Incolla un link YouTube o chiedimi qualcosa."
           : "Welcome to the video summary chat! Paste a YouTube link or ask me something.",
         sender: "system",
         time: now,
@@ -431,6 +487,9 @@ export default function Chat() {
     ];
   };
 
+  /**
+   * Carica i messaggi della chat attiva selezionata
+   */
   useEffect(() => {
     const loadMessages = () => {
       if (!activeChatId) {
@@ -445,6 +504,9 @@ export default function Chat() {
     loadMessages();
   }, [activeChatId, chatMessagesMap]);
 
+  /**
+   * Aggiorna la mappa dei messaggi globale per mantenere la persistenza
+   */
   const updateChatMessagesMap = (chatId: any, newMessages: any[]) => {
     if (!chatId || newMessages.length === 0) return;
     setChatMessagesMap((prev) => ({
@@ -453,6 +515,9 @@ export default function Chat() {
     }));
   };
 
+  /**
+   * Aggiunge un singolo messaggio alla conversazione attuale
+   */
   const addMessage = (messageData: any, sender = "system") => {
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], {
@@ -466,6 +531,9 @@ export default function Chat() {
     });
   };
 
+  /**
+   * Estrae l'ID di un video YouTube da vari formati di URL
+   */
   const getYouTubeVideoId = (url: string) => {
     const regExp =
       /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -476,12 +544,18 @@ export default function Chat() {
     return null;
   };
 
+  /**
+   * Verifica se l'URL fornito è un canale YouTube invece di un singolo video
+   */
   const isYouTubeChannel = (url: string) => {
     return (
       url.includes("/@") || url.includes("/channel/") || url.includes("/user/")
     );
   };
 
+  /**
+   * Formatta numeri grandi in formato K (migliaia) o M (milioni)
+   */
   const formatNumber = (num: number) => {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
     if (num >= 1000) return (num / 1000).toFixed(1) + "K";
@@ -490,6 +564,9 @@ export default function Chat() {
 
   const API_BASE = "/api/ai";
 
+  /**
+   * Sincronizza una specifica chat con il server Supabase
+   */
   const syncToServer = async (chatId: any, title: string, messages: any[]) => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -511,6 +588,9 @@ export default function Chat() {
     }
   };
 
+  /**
+   * Gestisce l'invio del modulo di input video (homepage chat)
+   */
   const handleVideoInputSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setVideoInputError("");
@@ -586,6 +666,9 @@ export default function Chat() {
     }
   };
 
+  /**
+   * Avvia l'interfaccia di chat basandosi su un video pre-analizzato
+   */
   const startChatWithVideo = () => {
     if (!videoInputInfo) return;
     setIsAnalyzing(true);
@@ -595,11 +678,17 @@ export default function Chat() {
     createNewChatWithVideo(videoInputInfo);
   };
 
+  /**
+   * Annulla l'analisi di un video in corso
+   */
   const cancelAnalysis = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsAnalyzing(false);
   };
 
+  /**
+   * Rileva automaticamente se l'utente ha incollato un link YouTube nell'input
+   */
   const handleAutoDetectVideo = async (url: string) => {
     const videoId = getYouTubeVideoId(url);
     const isChannel = isYouTubeChannel(url);
@@ -658,6 +747,9 @@ export default function Chat() {
     setVideoInputLoading(false);
   };
 
+  /**
+   * Crea una nuova chat nel database e inizializza i messaggi con i dati del video
+   */
   const createNewChatWithVideo = async (videoInfo: any) => {
     const newId = Date.now();
     const newChat = {
@@ -730,6 +822,9 @@ export default function Chat() {
     }
   }, [messageQueue, isProcessingQueue]);
 
+  /**
+   * Logica principale di comunicazione con l'AI: invio contesto e gestione risposta tipizzata
+   */
   const processAIResponse = async (item: any) => {
     setIsProcessingQueue(true);
     setIsTyping(true);
@@ -891,6 +986,9 @@ export default function Chat() {
     }
   };
 
+  /**
+   * Annulla la richiesta AI corrente interrompendo la chiamata fetch
+   */
   const handleCancel = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -907,12 +1005,18 @@ export default function Chat() {
     }
   };
 
+  /**
+   * Rimuove i tag HTML da una stringa per la copia in clipboard
+   */
   const stripHtml = (html: string) => {
     if (!html) return "";
     const doc = new DOMParser().parseFromString(html, "text/html");
     return doc.body.textContent || "";
   };
 
+  /**
+   * Copia il testo di un messaggio negli appunti
+   */
   const handleCopy = async (text: string) => {
     const clean = stripHtml(text);
     try {
@@ -923,6 +1027,9 @@ export default function Chat() {
     }
   };
 
+  /**
+   * Gestisce il "Like" di un messaggio AI
+   */
   const handleLike = (msgId: any) => {
     const wasLiked = likedMessages.has(msgId);
     setLikedMessages((prev) => {
@@ -939,6 +1046,9 @@ export default function Chat() {
     addToast?.(wasLiked ? "Mi piace rimosso" : "Mi piace", "success");
   };
 
+  /**
+   * Gestisce il "Dislike" di un messaggio AI
+   */
   const handleDislike = (msgId: any) => {
     const wasDisliked = dislikedMessages.has(msgId);
     setDislikedMessages((prev) => {
@@ -955,12 +1065,18 @@ export default function Chat() {
     addToast?.(wasDisliked ? "Non mi piace rimosso" : "Non mi piace", "error");
   };
 
+  /**
+   * Attiva la modalità di modifica per un messaggio dell'utente
+   */
   const handleEdit = (msg: any) => {
     setInput(msg.text);
     setEditingMessageId(msg.id);
     textareaRef.current?.focus();
   };
 
+  /**
+   * Rigenera la risposta dell'AI basandosi sull'ultimo messaggio dell'utente
+   */
   const handleRegenerate = (msg: any) => {
     const msgIdx = messages.findIndex((m: any) => m.id === msg.id);
     if (msgIdx <= 0) return;
@@ -974,6 +1090,9 @@ export default function Chat() {
     }
   };
 
+  /**
+   * Ripete l'ultimo messaggio dell'utente per una nuova risposta
+   */
   const handleRetry = (msg: any) => {
     const msgIdx = messages.findIndex((m: any) => m.id === msg.id);
     if (msgIdx <= 0) return;
@@ -985,6 +1104,9 @@ export default function Chat() {
     }
   };
 
+  /**
+   * Invia un messaggio testuale gestendo la creazione di nuove chat e l'estrazione video
+   */
   const handleSendWithText = async (text: string) => {
     const userMsgText = text;
     const videoId = getYouTubeVideoId(userMsgText);
@@ -1064,6 +1186,9 @@ export default function Chat() {
     ]);
   };
 
+  /**
+   * Gestore principale del pulsante "Invia": gestisce testo, immagini e modifica messaggi
+   */
   const handleSend = async () => {
     if (!input.trim() && !attachedImage) return;
     const imageForMessage = attachedImage;
@@ -1182,6 +1307,9 @@ export default function Chat() {
     ]);
   };
 
+  /**
+   * Crea una nuova chat vuota e resetta lo stato della sessione
+   */
   const createNewChat = () => {
     const newChat = {
       id: Date.now(),
@@ -1196,6 +1324,9 @@ export default function Chat() {
     setHasStartedChat(false);
   };
 
+  /**
+   * Gestisce il caricamento di un file documento, inviandolo al server per l'analisi
+   */
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -1219,7 +1350,7 @@ export default function Chat() {
       if (response.ok) {
         const data = await response.json();
         setCurrentFileContext(data.text);
-        
+
         addMessage(
           {
             text: `File **${data.fileName}** caricato e analizzato correttamente (${data.wordCount} parole). Ora puoi chiedermi qualsiasi cosa su questo documento!`,
@@ -1249,6 +1380,9 @@ export default function Chat() {
     }
   };
 
+  /**
+   * Cambia la chat attiva e aggiorna l'ID del video se presente
+   */
   const handleChatSelect = (chatId: any) => {
     setActiveChatId(chatId);
     setInput("");
@@ -1266,15 +1400,24 @@ export default function Chat() {
     }
   };
 
+  /**
+   * Sposta il video a un secondo specifico
+   */
   const handleSeekTo = (seconds: number) => {
     setCurrentVideoStartTime(seconds);
   };
 
+  /**
+   * Avvia la procedura di conferma eliminazione per una chat
+   */
   const handleDeleteChat = (e: React.MouseEvent, chatId: any) => {
     e.stopPropagation();
     setDeleteConfirmChatId(chatId);
   };
 
+  /**
+   * Elimina definitivamente una chat dal database e dal LocalStorage
+   */
   const confirmDeleteChat = async () => {
     const chatId = deleteConfirmChatId;
     if (!chatId) return;
@@ -1327,6 +1470,9 @@ export default function Chat() {
   const [deleteConfirmChatId, setDeleteConfirmChatId] = useState<any>(null);
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
 
+  /**
+   * Recupera suggerimenti di domande dall'AI basandosi sul contesto attuale
+   */
   const fetchSuggestions = useCallback(async (type: "chat" | "demo" = "chat", extra?: { videoTitle?: string; channelTitle?: string }) => {
     try {
       const res = await fetch("/api/ai/suggestions", {
@@ -1375,6 +1521,9 @@ export default function Chat() {
     meta.setAttribute('content', 'Chatta con l\'AI per analizzare video e documenti');
   }, []);
 
+  /**
+   * Formatta la data per i separatori temporali tra i messaggi
+   */
   const formatSeparatorDate = (date: Date) => {
     const now = new Date();
     const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
@@ -1383,6 +1532,9 @@ export default function Chat() {
     return date.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   };
 
+  /**
+   * Calcola la data di un messaggio per raggrupparli visivamente
+   */
   const getMessageDate = (msg: any) => {
     const d = new Date();
     if (msg.time) {
@@ -1392,6 +1544,9 @@ export default function Chat() {
     return d.toDateString();
   };
 
+  /**
+   * Esporta l'intera conversazione in un file .txt
+   */
   const handleExportConversation = () => {
     const chat = chats.find((c: any) => c.id === activeChatId);
     const title = chat?.title || "conversazione";
@@ -1410,6 +1565,9 @@ export default function Chat() {
     addToast?.("Conversazione esportata", "success");
   };
 
+  /**
+   * Componenti personalizzati per il rendering di ReactMarkdown
+   */
   const markdownComponents: Components = {
     code: ({ className, children, ...props }: any) => {
       const isInline = !className;
@@ -1436,6 +1594,9 @@ export default function Chat() {
     em: ({ children, ...props }: any) => <em className="italic" {...props}>{children}</em>,
   };
 
+  /**
+   * Imposta l'input della chat con una domanda suggerita
+   */
   const handleSuggestedQuestion = (q: string) => {
     setInput(q);
     setIsAskMenuOpen(false);
@@ -1443,7 +1604,8 @@ export default function Chat() {
 
   return (
     <div className="flex h-screen bg-white dark:bg-zinc-950 overflow-hidden">
-      <AnimatePresence mode="wait">
+      <div className="max-w-[1600px] mx-auto w-full h-screen flex">
+        <AnimatePresence mode="wait">
         {isLeftSidebarOpen && (
           <motion.div
             initial={{ width: 0, opacity: 0 }}
@@ -1483,7 +1645,7 @@ export default function Chat() {
       <main className="flex-1 flex flex-col relative min-w-0 bg-white dark:bg-zinc-950">
         {!hasStartedChat ? (
           <div className="flex-1 flex items-center justify-center p-4">
-            <div className="w-full max-w-xl scale-90 origin-center">
+            <div className="w-full max-w-xl md:scale-90 origin-center">
               <div className="bg-white dark:bg-zinc-900 rounded-[3rem] p-6 md:p-8 shadow-2xl shadow-purple-500/5 border border-gray-100 dark:border-zinc-800">
                 <div className="text-center mb-6">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-50 dark:bg-purple-950 border border-purple-100 dark:border-purple-900 text-purple-600 dark:text-purple-400 text-xs font-bold uppercase tracking-wider mb-3">
@@ -1666,7 +1828,7 @@ export default function Chat() {
           </div>
         ) : (
           <>
-            <div className="px-8 py-4 border-b border-gray-100 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-10">
+            <div className="px-4 md:px-8 py-4 border-b border-gray-100 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-10">
               <div className="max-w-4xl mx-auto flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-950 flex items-center justify-center text-purple-600 dark:text-purple-400">
@@ -1695,7 +1857,7 @@ export default function Chat() {
             <div
               ref={scrollContainerRef}
               onScroll={handleScroll}
-              className={`flex-1 ${messages.length === 0 ? "overflow-hidden" : "overflow-y-auto"} px-8 py-6 space-y-6 scroll-smooth custom-scrollbar relative`}
+              className={`flex-1 ${messages.length === 0 ? "overflow-hidden" : "overflow-y-auto"} px-4 md:px-8 py-6 space-y-6 scroll-smooth custom-scrollbar relative`}
             >
               <AnimatePresence>
                 {messages.length === 0 ? (
@@ -1791,7 +1953,7 @@ export default function Chat() {
                                                 setCurrentVideoStartTime(line.time)
                                               }
                                             >
-                                              <span className="shrink-0 text-purple-600 font-mono font-bold">
+                                              <span className="shrink-0 bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 px-1 rounded font-mono font-bold">
                                                 {formatTimestamp(line.time)}
                                               </span>
                                               <span className="text-gray-700 dark:text-zinc-300 leading-relaxed">
@@ -1929,7 +2091,7 @@ export default function Chat() {
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="pb-6 px-8 max-w-4xl w-full mx-auto">
+            <div className="pb-6 px-4 md:px-8 max-w-4xl w-full mx-auto">
               <div className="flex justify-between items-center gap-2 mb-3 relative">
                 <button
                   onClick={createNewChat}
@@ -2256,6 +2418,7 @@ export default function Chat() {
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
     </div>
   );
 }
