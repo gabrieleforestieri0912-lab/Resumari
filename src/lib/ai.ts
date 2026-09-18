@@ -1,10 +1,13 @@
-import { Groq, type ChatCompletionMessageParam } from 'groq-sdk';
+import { Groq } from 'groq-sdk';
 
 const groq = process.env.GROQ_API_KEY
   ? new Groq({ apiKey: process.env.GROQ_API_KEY })
   : null;
 
-type ChatMessage = ChatCompletionMessageParam;
+type ChatMessage = {
+  role: 'user' | 'assistant' | 'system';
+  content: any;
+};
 
 /**
  * Rimuove le emoji da una stringa per pulire il testo.
@@ -24,7 +27,7 @@ export async function generateChatCompletion(
   try {
     const response = await groq.chat.completions.create({
       model,
-      messages,
+      messages: messages as any,
       temperature: 0.7,
     });
     return response.choices[0].message.content;
