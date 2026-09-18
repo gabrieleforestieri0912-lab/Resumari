@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/immutability */
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Check, Star, Zap, Sparkles, Building2, Gem, LucideIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -11,8 +12,10 @@ const getToken = (): string | null => {
 
 interface Plan {
   name: string;
-  price: string;
-  period?: string;
+  priceMonthly: string;
+  priceAnnual: string;
+  periodMonthly: string;
+  periodAnnual: string;
   icon: LucideIcon;
   color: string;
   description: string;
@@ -27,10 +30,15 @@ interface Plan {
 export default function Pricing() {
   const router = useRouter();
   const addToast = useToast();
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
+
   const plans: Plan[] = [
     {
       name: "Starter",
-      price: "0",
+      priceMonthly: "0",
+      priceAnnual: "0",
+      periodMonthly: "/mese",
+      periodAnnual: "/anno",
       icon: Sparkles,
       color: "purple",
       description: "Perfetto per provare la potenza di Resumari senza impegno.",
@@ -46,8 +54,10 @@ export default function Pricing() {
     },
     {
       name: "Standard",
-      price: "7.99",
-      period: "/mese",
+      priceMonthly: "4.99",
+      priceAnnual: "49.90",
+      periodMonthly: "/mese",
+      periodAnnual: "/anno",
       icon: Gem,
       color: "purple",
       description:
@@ -66,8 +76,10 @@ export default function Pricing() {
     },
     {
       name: "Pro Pack",
-      price: "19.99",
-      period: "/mese",
+      priceMonthly: "7.99",
+      priceAnnual: "79.90",
+      periodMonthly: "/mese",
+      periodAnnual: "/anno",
       icon: Zap,
       color: "purple",
       description:
@@ -88,8 +100,10 @@ export default function Pricing() {
     },
     {
       name: "Business",
-      price: "39.99",
-      period: "/mese",
+      priceMonthly: "9.99",
+      priceAnnual: "99.90",
+      periodMonthly: "/mese",
+      periodAnnual: "/anno",
       icon: Building2,
       color: "purple",
       description:
@@ -127,7 +141,10 @@ export default function Pricing() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ plan: planType }),
+        body: JSON.stringify({
+          plan: planType,
+          billingCycle: billingCycle
+        }),
       });
 
       const data = await response.json();
@@ -176,11 +193,29 @@ export default function Pricing() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
-          className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto font-medium"
+          className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto font-medium mb-10"
         >
           Investi nel tuo tempo. Piani flessibili progettati per adattarsi alla
           tua crescita.
         </motion.p>
+
+        <div className="flex items-center justify-center gap-4 mb-12">
+          <span className={`text-sm font-bold transition-colors ${billingCycle === "monthly" ? "text-gray-900 dark:text-white" : "text-gray-400 dark:text-zinc-500"}`}>
+            Mensile
+          </span>
+          <button
+            onClick={() => setBillingCycle(prev => prev === "monthly" ? "annual" : "monthly")}
+            className="relative w-14 h-7 rounded-full bg-gray-200 dark:bg-zinc-800 transition-colors focus:outline-none"
+          >
+            <motion.div
+              animate={{ x: billingCycle === "monthly" ? 2 : 28 }}
+              className="absolute top-1 left-0 w-5 h-5 bg-white dark:bg-zinc-100 rounded-full shadow-sm"
+            />
+          </button>
+          <span className={`text-sm font-bold transition-colors ${billingCycle === "annual" ? "text-gray-900 dark:text-white" : "text-gray-400 dark:text-zinc-500"}`}>
+            Annuale <span className="text-green-500 ml-1">-17%</span>
+          </span>
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4 max-w-7xl mx-auto items-center">
@@ -223,13 +258,13 @@ export default function Pricing() {
                 </h3>
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-4xl font-black text-gray-900 dark:text-gray-100 tracking-tighter">
-                    {plan.price === "0" ? "Gratis" : `€${plan.price}`}
+                    {billingCycle === "monthly"
+                      ? (plan.priceMonthly === "0" ? "Gratis" : `€${plan.priceMonthly}`)
+                      : (plan.priceAnnual === "0" ? "Gratis" : `€${plan.priceAnnual}`)}
                   </span>
-                  {plan.period && (
-                    <span className="text-gray-400 font-bold text-xs uppercase tracking-widest">
-                      {plan.period}
-                    </span>
-                  )}
+                  <span className="text-gray-400 font-bold text-xs uppercase tracking-widest">
+                    {billingCycle === "monthly" ? plan.periodMonthly : plan.periodAnnual}
+                  </span>
                 </div>
               </div>
 
