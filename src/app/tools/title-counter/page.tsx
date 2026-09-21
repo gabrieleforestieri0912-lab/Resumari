@@ -76,7 +76,7 @@ export default function TitleCounterPage() {
             </h1>
             <p className="text-gray-500 dark:text-zinc-400">
               Conteggio caratteri e parole in tempo reale con limiti colorati e
-              un'anteprima SERP live.
+              un&apos;anteprima SERP live.
             </p>
           </div>
 

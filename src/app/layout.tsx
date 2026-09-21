@@ -130,7 +130,8 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        <link rel="preload" href="/resumari.png" as="image" />
+        {/* Il preload del logo è gestito da next/image (prop priority): un preload manuale
+            punterebbe al PNG originale, scaricandolo inutilmente accanto alla versione ottimizzata. */}
         <link rel="icon" href="/resumari.png" type="image/png" />
         <link rel="apple-touch-icon" href="/resumari.png" />
       </head>

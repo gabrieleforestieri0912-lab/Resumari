@@ -2,10 +2,11 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { signIn } from "next-auth/react";
-import { saveSession } from "@/lib/session";
+import { saveSession, saveUser } from "@/lib/session";
 import { useLanguage } from "@/components/LanguageContext";
 import {
   Mail,
@@ -161,12 +162,13 @@ function LoginForm({ locale, onSwitch }: { locale: string; onSwitch: (delta: num
         if (sessionData?.user) {
           const sessionUser = {
             id: sessionData.user.id, email: sessionData.user.email, name: sessionData.user.name,
+            picture: sessionData.user.image ?? undefined,
             credits: sessionData.user.credits ?? 10, plan: sessionData.user.plan || 'free',
           };
           if (sessionData?.customToken) {
             saveSession(sessionData.customToken, sessionUser);
           } else {
-            localStorage.setItem("user", JSON.stringify(sessionUser));
+            saveUser(sessionUser);
           }
         }
       }
@@ -419,7 +421,7 @@ function AuthPageContent() {
         href="/"
         className="absolute top-6 left-6 z-20 flex items-center gap-2 font-black text-xl text-purple-600 hover:scale-105 transition-transform"
       >
-        <img src="/resumari.png" alt="Logo" className="w-8 h-8" />
+        <Image src="/resumari.png" alt="Logo" width={32} height={32} className="w-8 h-8" priority />
         <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-red-600">
           Resumari
         </span>

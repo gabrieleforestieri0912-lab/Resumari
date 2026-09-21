@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { generateChatCompletion } from '@/lib/ai';
+import { aiErrorMessage, generateChatCompletion, removeEmojis } from '@/lib/ai';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 /**
@@ -33,21 +33,24 @@ export async function POST(request: Request) {
     // Configura il prompt di sistema utilizzando il contesto fornito o un default
     let systemPrompt = context || 'Fornisci una risposta chiara e concisa in italiano.';
 
+    // Il renderer della demo interpreta solo paragrafi, elenchi e grassetto:
+    // tabelle e titoli con # verrebbero mostrati come testo grezzo.
+    systemPrompt +=
+      '\nFormatta la risposta in markdown semplice (paragrafi, elenchi puntati, grassetto). Non usare tabelle né titoli con #.';
+
     const messages = [
       { role: 'system' as const, content: systemPrompt },
       { role: 'user' as const, content: message },
     ];
 
-    // Generazione della risposta tramite Groq
-    const aiResponse = await generateChatCompletion(messages);
+    // Generazione della risposta tramite Groq (emoji rimosse come nella chat autenticata)
+    const aiResponse = removeEmojis((await generateChatCompletion(messages)) || '');
 
     return NextResponse.json({ response: aiResponse });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Demo AI Error:', error);
-    // Gestione specifica per l'errore di quota/rate-limit dell'API Groq
-    const errorMessage = error.message?.includes('429') || error.message?.includes('quota')
-      ? 'Limite di utilizzo AI superato. Riprova più tardi.'
-      : 'Errore durante l\'elaborazione';
-    return NextResponse.json({ message: errorMessage }, { status: 500 });
+    // Distingue chiave/modello/quota: senza questo tutte le cause diventavano
+    // il generico "Errore durante l'elaborazione".
+    return NextResponse.json({ message: aiErrorMessage(error) }, { status: 500 });
   }
 }

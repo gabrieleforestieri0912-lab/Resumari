@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSessionRestored } from "@/lib/session";
 import {
   Key,
   Copy,
@@ -130,7 +132,13 @@ export default function ApiKeysPage() {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [credits, setCredits] = useState(0);
 
+  // Attende il ripristino della sessione (LocalStorage o cookie NextAuth) prima di
+  // decidere se l'utente debba essere rimandato al login.
+  const sessionRestored = useSessionRestored();
+
   useEffect(() => {
+    if (!sessionRestored) return;
+
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
     if (!storedUser || !token) {
@@ -141,7 +149,7 @@ export default function ApiKeysPage() {
     setUser(parsed);
     setCredits(parsed.credits || 0);
     fetchKeys();
-  }, []);
+  }, [sessionRestored, router]);
 
   async function fetchKeys() {
     const token = localStorage.getItem("token");
@@ -211,7 +219,7 @@ export default function ApiKeysPage() {
           </p>
           <p className="text-gray-400 dark:text-gray-500 max-w-2xl mx-auto mb-10">
             Molte API di trascrizione richiedono abbonamenti o sono limitate a un video singolo.
-            L'API di Resumari estrae dozzine di trascrizioni in una singola chiamata,
+            L&apos;API di Resumari estrae dozzine di trascrizioni in una singola chiamata,
             con crediti pay-as-you-go che non scadono mai.
           </p>
 
@@ -332,7 +340,7 @@ export default function ApiKeysPage() {
             <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100">Autenticazione</h2>
           </div>
           <p className="text-gray-500 dark:text-gray-400 mb-6">
-            Includi la tua chiave API nell'intestazione <code className="bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded text-sm font-mono">X-API-Key</code> in ogni richiesta.
+            Includi la tua chiave API nell&apos;intestazione <code className="bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded text-sm font-mono">X-API-Key</code> in ogni richiesta.
           </p>
           <div className="bg-gray-900 dark:bg-black rounded-2xl p-6 overflow-x-auto">
             <pre className="text-sm text-gray-300 font-mono whitespace-pre">X-API-Key: rsm_live_YOUR_KEY_HERE</pre>
@@ -476,7 +484,7 @@ data: {"stats":{"total":21,"succeeded":20,"failed":1}}`}</pre>
           <div className="mt-10 bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-gray-100 dark:border-zinc-800 shadow-sm">
             <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-3">Documentazione API importabile</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-              Usa l'API per video che hanno già sottotitoli YouTube. Resumari restituisce JSON strutturato per video singoli
+              Usa l&apos;API per video che hanno già sottotitoli YouTube. Resumari restituisce JSON strutturato per video singoli
               e Server-Sent Events per job bulk su canali o playlist.
             </p>
             <div className="flex flex-wrap gap-3">
@@ -571,7 +579,7 @@ data: {"stats":{"total":21,"succeeded":20,"failed":1}}`}</pre>
       <section className="py-16 px-4 bg-gray-50 dark:bg-zinc-900">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">FAQ</h2>
-          <p className="text-gray-500 dark:text-gray-400 text-center mb-10">Domande frequenti sull'API</p>
+          <p className="text-gray-500 dark:text-gray-400 text-center mb-10">Domande frequenti sull&apos;API</p>
           <div className="space-y-3">
             {faqs.map((faq, i) => (
               <div key={i} className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm overflow-hidden">
@@ -597,7 +605,7 @@ data: {"stats":{"total":21,"succeeded":20,"failed":1}}`}</pre>
       <section className="py-20 px-4">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-gray-100 mb-4">
-            L'unica API di trascrizione senza abbonamento mensile
+            L&apos;unica API di trascrizione senza abbonamento mensile
           </h2>
           <p className="text-gray-500 dark:text-gray-400 mb-8">
             Pay As You Go, nessun abbonamento di default. I crediti non scadono mai.
@@ -609,15 +617,15 @@ data: {"stats":{"total":21,"succeeded":20,"failed":1}}`}</pre>
             >
               25 crediti gratis. Nessuna carta di credito.
             </button>
-            <a
+            <Link
               href="/#pricing"
               className="px-8 py-4 bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-gray-100 font-bold rounded-2xl hover:bg-gray-200 dark:hover:bg-zinc-700 transition-all"
             >
               Vedi i prezzi
-            </a>
+            </Link>
           </div>
           <p className="text-sm text-gray-400 dark:text-gray-500 mt-6">
-            Ti serve un volume elevato? <a href="/contact" className="text-purple-600 dark:text-purple-400 hover:underline font-semibold">Contattaci</a> per un piano personalizzato.
+            Ti serve un volume elevato? <Link href="/contact" className="text-purple-600 dark:text-purple-400 hover:underline font-semibold">Contattaci</Link> per un piano personalizzato.
           </p>
         </div>
       </section>

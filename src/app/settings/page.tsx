@@ -1,12 +1,11 @@
 'use client'
  
-/* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/components/LanguageContext";
-import { clearSession } from "@/lib/session";
+import { clearSession, useSessionRestored } from "@/lib/session";
 import {
   ArrowLeft,
   Home,
@@ -55,6 +54,10 @@ export default function Settings() {
 
   const router = useRouter();
 
+  // Attende il ripristino della sessione (LocalStorage o cookie NextAuth) prima di
+  // decidere se l'utente debba essere rimandato al login.
+  const sessionRestored = useSessionRestored();
+
   const handleLocaleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     changeLanguage(e.target.value as 'it' | 'en');
   };
@@ -102,6 +105,8 @@ export default function Settings() {
   };
 
   useEffect(() => {
+    if (!sessionRestored) return;
+
     const stored = localStorage.getItem("user");
     if (stored) setUser(JSON.parse(stored));
 
@@ -137,7 +142,7 @@ export default function Settings() {
         if (typeof n.marketing === "boolean") setNotifyMarketing(n.marketing);
       } catch {}
     }
-  }, []);
+  }, [sessionRestored, router]);
 
   useEffect(() => {
     document.title = "Impostazioni | Resumari";

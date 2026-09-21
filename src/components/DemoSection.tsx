@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "./ToastProvider";
+import { AUTH_STATE_EVENT_NAME, type AuthStateDetail } from "@/lib/auth-sync";
 import {
   Send,
   Sparkles,
@@ -140,7 +142,7 @@ export default function DemoSection() {
   const [currentVideo, setCurrentVideo] = useState<string | null>(null);
   const [videoStartTime, setVideoStartTime] = useState<number | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const [messageQueue, setMessageQueue] = useState<{ text: string; context: string }[]>([]);
@@ -172,8 +174,12 @@ export default function DemoSection() {
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    // Scorre solo la lista dei messaggi: usare scrollIntoView farebbe scorrere
+    // anche la pagina, spostando la view sulla sezione demo ad ogni messaggio.
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+  }, [messages, loading]);
 
   const fetchChannels = useCallback((token: string | null) => {
     setIsLoggedIn(!!token);
@@ -198,24 +204,26 @@ export default function DemoSection() {
   }, [fetchChannels]);
 
   useEffect(() => {
-    function handleAuthChange(e: CustomEvent) {
-      if (e.detail) {
-        fetchChannels(e.detail.token);
+    function handleAuthChange(e: Event) {
+      const detail = (e as CustomEvent<AuthStateDetail | null>).detail;
+      if (detail) {
+        fetchChannels(detail.token ?? localStorage.getItem("token"));
       } else {
         fetchChannels(null);
       }
     }
-    window.addEventListener("resumari-auth-changed", handleAuthChange as EventListener);
-    return () => window.removeEventListener("resumari-auth-changed", handleAuthChange as EventListener);
+    window.addEventListener(AUTH_STATE_EVENT_NAME, handleAuthChange);
+    return () => window.removeEventListener(AUTH_STATE_EVENT_NAME, handleAuthChange);
   }, [fetchChannels]);
 
-  useEffect(() => {
-    if (messageQueue.length > 0 && !isProcessingQueue) {
-      processQueueItem(messageQueue[0]);
-    }
-  }, [messageQueue, isProcessingQueue]);
+  const addMessage = useCallback((text: string, sender: "user" | "system", extra: Partial<Message> = {}) => {
+    setMessages((prev) => [
+      ...prev,
+      { id: Date.now() + Math.random(), text, sender, time: new Date().toISOString(), ...extra },
+    ]);
+  }, []);
 
-  const processQueueItem = async (item: { text: string; context: string }) => {
+  const processQueueItem = useCallback(async (item: { text: string; context: string }) => {
     setIsProcessingQueue(true);
     setLoading(true);
 
@@ -260,7 +268,13 @@ export default function DemoSection() {
       abortControllerRef.current = null;
       setMessageQueue((prev) => prev.slice(1));
     }
-  };
+  }, [currentVideo, addMessage]);
+
+  useEffect(() => {
+    if (messageQueue.length > 0 && !isProcessingQueue) {
+      processQueueItem(messageQueue[0]);
+    }
+  }, [messageQueue, isProcessingQueue, processQueueItem]);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -288,13 +302,6 @@ export default function DemoSection() {
   }, []);
 
   const userMsgCount = messages.filter((m) => m.sender === "user").length;
-
-  const addMessage = (text: string, sender: "user" | "system", extra: Partial<Message> = {}) => {
-    setMessages((prev) => [
-      ...prev,
-      { id: Date.now() + Math.random(), text, sender, time: new Date().toISOString(), ...extra },
-    ]);
-  };
 
   const handleSend = () => {
     const text = input.trim();
@@ -406,12 +413,12 @@ export default function DemoSection() {
     }
 
     fetchSuggestions(channel.name);
-    inputRef.current?.focus();
+    inputRef.current?.focus({ preventScroll: true });
   };
 
   const handleSuggestionClick = (suggestion: string) => {
     setInput(suggestion);
-    inputRef.current?.focus();
+    inputRef.current?.focus({ preventScroll: true });
   };
 
   return (
@@ -475,9 +482,12 @@ export default function DemoSection() {
                               }`}
                             >
                               {cd?.channelThumbnail ? (
-                                <img
+                                <Image
                                   src={cd.channelThumbnail}
                                   alt={ch.name}
+                                  width={40}
+                                  height={40}
+                                  unoptimized
                                   className="w-10 h-10 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
                                 />
                               ) : (
@@ -517,9 +527,12 @@ export default function DemoSection() {
                                   }`}
                                 >
                                   {cd?.channelThumbnail ? (
-                                    <img
+                                    <Image
                                       src={cd.channelThumbnail}
                                       alt={ch.name}
+                                      width={40}
+                                      height={40}
+                                      unoptimized
                                       className="w-10 h-10 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
                                     />
                                   ) : (
@@ -600,9 +613,12 @@ export default function DemoSection() {
                     <div className="flex-1 flex flex-col overflow-hidden relative">
                       {selectedChannel && channelData[selectedChannel.id]?.channelThumbnail && (
                         <div className="px-4 py-2.5 border-b border-gray-100 dark:border-zinc-800 bg-gray-50/30 dark:bg-zinc-950/60 flex items-center gap-3 shrink-0">
-                          <img
-                            src={channelData[selectedChannel.id].channelThumbnail}
+                          <Image
+                            src={channelData[selectedChannel.id].channelThumbnail!}
                             alt=""
+                            width={36}
+                            height={36}
+                            unoptimized
                             className="w-9 h-9 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
                           />
                           <div className="min-w-0 flex-1">
@@ -621,7 +637,7 @@ export default function DemoSection() {
                         </div>
                       )}
 
-                      <div className="flex-1 overflow-y-auto p-4 space-y-3 relative">
+                      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3 relative">
                         {messages.map((msg) => (
                           <motion.div
                             key={msg.id}
@@ -713,8 +729,6 @@ export default function DemoSection() {
                             </div>
                           </div>
                         )}
-
-                        <div ref={messagesEndRef} />
                       </div>
                     </div>
                   )}

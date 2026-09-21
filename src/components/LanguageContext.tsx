@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable react-hooks/set-state-in-effect */
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { getTranslations } from '@/lib/translations';
 
@@ -17,6 +19,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [locale, setLocale] = useState<Locale>('it');
   const [translations, setTranslations] = useState<Record<string, string>>(getTranslations('it'));
 
+  // La lingua salvata può essere letta solo nel browser (localStorage), quindi va
+  // applicata dopo il mount per non generare un hydration mismatch.
   useEffect(() => {
     const savedLocale = localStorage.getItem('resumari_locale') as Locale | null;
     if (savedLocale && (savedLocale === 'it' || savedLocale === 'en')) {

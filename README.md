@@ -59,6 +59,9 @@ Tutte le variabili sono documentate in [`.env.example`](.env.example). Le essenz
 - `JWT_SECRET` / `NEXTAUTH_SECRET` / `NEXTAUTH_URL`
 - `YOUTUBE_API_KEY`
 - `GROQ_API_KEY`
+- `GROQ_MODEL` (opzionale) — modello Groq per chat, demo e suggerimenti; default `openai/gpt-oss-120b`
+- `GROQ_VISION_MODEL` (opzionale) — modello per l'analisi immagini; se assente l'analisi immagini è disabilitata
+- `GROQ_TRANSCRIPTION_MODEL` (opzionale) — default `whisper-large-v3-turbo`
 - `RESEND_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `GOOGLE_CLIENT_ID/SECRET`
 
 ## Script

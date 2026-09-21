@@ -272,7 +272,7 @@ export default function McpPage() {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Docker e Registri</h2>
           <p className="text-gray-500 dark:text-gray-400 text-center mb-10 max-w-xl mx-auto">
-            Usa l'URL del server remoto in Docker Desktop, Smithery-style o altre voci di registro MCP.
+            Usa l&apos;URL del server remoto in Docker Desktop, Smithery-style o altre voci di registro MCP.
           </p>
           <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm p-6">
             <ol className="space-y-3 mb-5">
@@ -286,7 +286,7 @@ export default function McpPage() {
               </li>
               <li className="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300">
                 <span className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">3</span>
-                <span>Usa OAuth per l'autorizzazione dell'account.</span>
+                <span>Usa OAuth per l&apos;autorizzazione dell&apos;account.</span>
               </li>
             </ol>
             <div className="bg-gray-900 rounded-xl p-5 overflow-x-auto">
@@ -304,9 +304,9 @@ export default function McpPage() {
       {/* ── Auth Troubleshooting ── */}
       <section className="py-16 px-4 bg-gray-50 dark:bg-zinc-900">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Vedi "Auth: Unsupported"?</h2>
+          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Vedi &quot;Auth: Unsupported&quot;?</h2>
           <p className="text-gray-500 dark:text-gray-400 text-center mb-8">
-            Verifica che i metadati della risorsa protetta usino l'URL HTTPS canonico, che OAuth Server e Dynamic Client Registration siano abilitati,
+            Verifica che i metadati della risorsa protetta usino l&apos;URL HTTPS canonico, che OAuth Server e Dynamic Client Registration siano abilitati,
             poi rimuovi e riaggiungi il server MCP dopo il deploy.
           </p>
           <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm p-6">
@@ -356,7 +356,7 @@ codex mcp list`}</pre>
       {/* ── What the agent receives ── */}
       <section className="py-16 px-4 bg-gray-50 dark:bg-zinc-900">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Cosa riceve l'agente</h2>
+          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">Cosa riceve l&apos;agente</h2>
           <p className="text-gray-500 dark:text-gray-400 text-center mb-10 max-w-xl mx-auto">
             Resumari estrae il transcript nativo, addebita crediti, esegue la pulizia in modo asincrono e restituisce markdown pronto per il contesto AI.
           </p>

@@ -31,7 +31,7 @@ export default function TermsOfService() {
               1. Accettazione dei Termini
             </h2>
             <p>
-              Accedendo e utilizzando Resumari ("Piattaforma"), accetti di essere
+              Accedendo e utilizzando Resumari (&quot;Piattaforma&quot;), accetti di essere
               vincolato dai presenti Termini di Servizio. Se non accetti questi
               termini, non utilizzare la Piattaforma.
             </p>
@@ -45,7 +45,7 @@ export default function TermsOfService() {
               Resumari è una piattaforma basata su intelligenza artificiale che
               permette agli utenti di analizzare, trascrivere e riassumere contenuti
               multimediali come video YouTube, documenti PDF e altri file. Il servizio
-              include un'interfaccia web e un'estensione per browser Chrome.
+              include un&apos;interfaccia web e un&apos;estensione per browser Chrome.
             </p>
           </section>
 
@@ -122,9 +122,9 @@ export default function TermsOfService() {
             </h2>
             <p>
               Tutti i diritti sulla Piattaforma, incluso il design, il codice, il
-              marchio "Resumari" e i contenuti originali, appartengono a Resumari. I
-              contenuti generati dall'IA sono forniti come output del servizio e
-              l'utente è responsabile del loro utilizzo.
+              marchio &quot;Resumari&quot; e i contenuti originali, appartengono a Resumari. I
+              contenuti generati dall&apos;IA sono forniti come output del servizio e
+              l&apos;utente è responsabile del loro utilizzo.
             </p>
           </section>
 
@@ -133,10 +133,10 @@ export default function TermsOfService() {
               7. Limitazione di Responsabilità
             </h2>
             <p>
-              La Piattaforma viene fornita "così com'è" senza garanzie di alcun tipo.
-              Resumari non garantisce l'accuratezza, la completezza o l'affidabilità
-              dei risultati generati dall'IA. Non siamo responsabili per danni
-              diretti, indiretti, incidentali o consequenziali derivanti dall'uso
+              La Piattaforma viene fornita &quot;così com&apos;è&quot; senza garanzie di alcun tipo.
+              Resumari non garantisce l&apos;accuratezza, la completezza o l&apos;affidabilità
+              dei risultati generati dall&apos;IA. Non siamo responsabili per danni
+              diretti, indiretti, incidentali o consequenziali derivanti dall&apos;uso
               della Piattaforma.
             </p>
           </section>
@@ -160,7 +160,7 @@ export default function TermsOfService() {
             <p>
               Possiamo aggiornare questi Termini di Servizio in qualsiasi momento. Le
               modifiche sostanziali verranno comunicate via email o tramite avviso
-              sulla Piattaforma. L'uso continuato del servizio dopo le modifiche
+              sulla Piattaforma. L&apos;uso continuato del servizio dopo le modifiche
               costituisce accettazione dei nuovi termini.
             </p>
           </section>
@@ -178,7 +178,7 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">11. Contatti</h2>
             <p>
-              Per domande sui Termini di Servizio, contattaci all'indirizzo:{" "}
+              Per domande sui Termini di Servizio, contattaci all&apos;indirizzo:{" "}
               <a
                 href="mailto:support@resumari.com"
                 className="text-purple-600 font-semibold hover:underline"

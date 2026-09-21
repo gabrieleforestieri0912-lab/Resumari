@@ -1,4 +1,5 @@
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import {
   MessageSquare,
@@ -186,7 +187,14 @@ export default function ChatSidebar({
             className="w-full flex items-center gap-3 px-3 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 hover:border-purple-200 dark:hover:border-purple-800 hover:bg-purple-50/30 dark:hover:bg-purple-950/30 transition-all group"
           >
             {user?.picture ? (
-              <img src={user.picture} alt="" className="w-9 h-9 rounded-full object-cover shadow-sm shrink-0" />
+              <Image
+                src={user.picture}
+                alt=""
+                width={36}
+                height={36}
+                unoptimized
+                className="w-9 h-9 rounded-full object-cover shadow-sm shrink-0"
+              />
             ) : (
               <div className="w-9 h-9 rounded-full bg-linear-to-br from-purple-600 to-red-500 text-white flex items-center justify-center font-black text-xs shadow-sm shrink-0">
                 {userInitial}

@@ -25,6 +25,8 @@ incorporate al momento della build):
 | `SUPABASE_SERVICE_ROLE_KEY` | service role key di produzione (mai esposta al client) |
 | `YOUTUBE_API_KEY` | chiave Google Cloud |
 | `GROQ_API_KEY` | chiave API Groq |
+| `GROQ_MODEL` | *(opzionale)* modello Groq per chat/demo/suggerimenti — default `openai/gpt-oss-120b`; da aggiornare quando Groq ritira un modello |
+| `GROQ_VISION_MODEL` | *(opzionale)* modello per l'analisi immagini — se assente la funzione è disabilitata (Groq non espone più modelli vision) |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | OAuth di produzione |
 | `STRIPE_SECRET_KEY` | chiave **live** (sk_live_...) |
 | `STRIPE_WEBHOOK_SECRET` | whsec_ dell'endpoint webhook di produzione |

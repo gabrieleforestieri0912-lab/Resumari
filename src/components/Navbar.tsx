@@ -1,8 +1,8 @@
-/* eslint-disable @next/next/no-img-element */
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,13 +18,13 @@ import {
   Server,
 } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
-import { clearSession } from "@/lib/session";
-
-interface UserData {
-  name?: string;
-  email?: string;
-  picture?: string;
-}
+import {
+  clearSession,
+  readStoredUser,
+  USER_KEY,
+  type StoredUser,
+} from "@/lib/session";
+import { AUTH_STATE_EVENT_NAME, type AuthStateDetail } from "@/lib/auth-sync";
 
 interface NavLink {
   href: string;
@@ -39,27 +39,34 @@ interface UserMenuItem {
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState<UserData | null>(null);
+  const [user, setUser] = useState<StoredUser | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    setUser(storedUser ? JSON.parse(storedUser) : null);
-  }, []);
+    // Lo stato iniziale arriva dal localStorage, poi resta allineato agli eventi di
+    // login/logout (stessa scheda) e alle modifiche fatte in altre schede.
+    setUser(readStoredUser());
 
-  useEffect(() => {
-    function handleAuthChange(e: CustomEvent) {
-      if (e.detail) {
-        setUser(e.detail.user);
-      } else {
-        setUser(null);
+    function handleAuthChange(e: Event) {
+      const detail = (e as CustomEvent<AuthStateDetail | null>).detail;
+      setUser(detail ? (detail.user as StoredUser) : null);
+    }
+
+    function handleStorage(e: StorageEvent) {
+      if (e.key === null || e.key === USER_KEY) {
+        setUser(readStoredUser());
       }
     }
-    window.addEventListener("resumari-auth-changed", handleAuthChange as EventListener);
-    return () => window.removeEventListener("resumari-auth-changed", handleAuthChange as EventListener);
+
+    window.addEventListener(AUTH_STATE_EVENT_NAME, handleAuthChange);
+    window.addEventListener("storage", handleStorage);
+    return () => {
+      window.removeEventListener(AUTH_STATE_EVENT_NAME, handleAuthChange);
+      window.removeEventListener("storage", handleStorage);
+    };
   }, []);
 
   useEffect(() => {
@@ -114,9 +121,12 @@ export default function Navbar() {
     <nav className="fixed top-3 left-3 right-3 md:top-4 md:left-6 md:right-6 h-16 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl z-50 flex items-center justify-between px-5 md:px-8 rounded-2xl border border-white/20 dark:border-white/10 shadow-lg shadow-black/5">
       <div className="flex items-center gap-8">
         <Link href="/" className="flex items-center gap-2 cursor-pointer group">
-          <img
+          <Image
             src="/resumari.png"
             alt="Resumari"
+            width={40}
+            height={40}
+            priority
             className="w-10 h-10 rounded-xl group-hover:scale-105 transition-transform"
           />
         </Link>
@@ -153,9 +163,12 @@ export default function Navbar() {
                 className="flex items-center gap-2 p-1.5 rounded-full hover:bg-purple-50 dark:hover:bg-white/10 transition-colors"
               >
                 {user?.picture ? (
-                  <img
+                  <Image
                     src={user.picture}
                     alt="Profilo"
+                    width={36}
+                    height={36}
+                    unoptimized
                     className="w-9 h-9 rounded-full object-cover ring-2 ring-purple-100"
                   />
                 ) : (

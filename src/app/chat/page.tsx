@@ -1,14 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @next/next/no-html-link-for-pages */
 
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/components/LanguageContext";
 import { useToast } from "@/components/ToastProvider";
-import { clearSession } from "@/lib/session";
+import { clearSession, useSessionRestored } from "@/lib/session";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import MediaPanel from "@/components/chat/MediaPanel";
@@ -176,6 +176,10 @@ export default function Chat() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // La sessione viene ripristinata dal LocalStorage o dal cookie NextAuth: finché
+  // non è pronta non si può decidere se l'utente debba tornare al login.
+  const sessionRestored = useSessionRestored();
+
   /**
    * Gestisce l'avvio automatico della chat quando è presente il parametro 'video' nell'URL
    * (utilizzato dall'estensione Chrome)
@@ -314,6 +318,8 @@ export default function Chat() {
    * Caricamento iniziale dell'utente e delle chat (da Server o LocalStorage)
    */
   useEffect(() => {
+    if (!sessionRestored) return;
+
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
 
@@ -401,14 +407,13 @@ export default function Chat() {
     };
 
     loadFromServer();
-  }, []);
+  }, [sessionRestored]);
 
   const navigate =
     typeof window !== "undefined" ? window.location.pathname : "";
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
@@ -441,9 +446,12 @@ export default function Chat() {
   };
 
   const scrollToBottom = () => {
-    if (shouldAutoScroll) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
+    if (!shouldAutoScroll) return;
+    // Scorre solo il contenitore dei messaggi: scrollIntoView farebbe scorrere
+    // anche gli antenati (la pagina), spostando la view fuori dalla chat.
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -1118,7 +1126,7 @@ export default function Chat() {
   const handleEdit = (msg: any) => {
     setInput(msg.text);
     setEditingMessageId(msg.id);
-    textareaRef.current?.focus();
+    textareaRef.current?.focus({ preventScroll: true });
   };
 
   /**
@@ -1777,10 +1785,12 @@ export default function Chat() {
                     <div className="mt-3 p-3 bg-gray-50 dark:bg-zinc-900 rounded-xl border border-gray-100 dark:border-zinc-800">
                       <div className="flex gap-3">
                         <div className="w-56 shrink-0 aspect-video rounded-lg overflow-hidden bg-gray-200 dark:bg-zinc-800 relative group">
-                          <img
+                          <Image
                             src={videoInputInfo.thumbnail}
                             alt={videoInputInfo.title}
-                            className="w-full h-full object-cover"
+                            fill
+                            unoptimized
+                            className="object-cover"
                             onError={(e: any) => {
                               e.target.src = `https://img.youtube.com/vi/${videoInputInfo.videoId}/hqdefault.jpg`;
                             }}
@@ -2135,7 +2145,6 @@ export default function Chat() {
                 </div>
               )}
 
-              <div ref={messagesEndRef} />
             </div>
 
             <div className="pb-6 px-4 md:px-8 max-w-4xl w-full mx-auto">
@@ -2251,9 +2260,13 @@ export default function Chat() {
                 )}
                 {attachedImagePreview && (
                   <div className="mb-2 flex items-center gap-3 rounded-xl border border-purple-100 dark:border-purple-900 bg-purple-50/70 dark:bg-purple-950/50 p-2">
-                    <img
+                    {/* Anteprima da URL blob: serve unoptimized, altrimenti next/image la rifiuta. */}
+                    <Image
                       src={attachedImagePreview}
                       alt="Anteprima allegato"
+                      width={56}
+                      height={56}
+                      unoptimized
                       className="h-14 w-14 rounded-lg object-cover border border-white/60 dark:border-zinc-700"
                     />
                     <div className="min-w-0 flex-1">

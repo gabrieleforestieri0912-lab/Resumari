@@ -6,6 +6,16 @@ import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
 import { Eraser, Copy, Check, RotateCcw } from "lucide-react";
 
+// Elenco dei riempitivi da rimuovere: costante a livello di modulo, così l'identità
+// resta stabile tra i render e il useCallback qui sotto può essere memorizzato davvero.
+const fillerWords = [
+  "um", "uh", "ah", "er", "like", "you know", "actually", "basically",
+  "literally", "honestly", "i mean", "sort of", "kind of", "you see",
+  "well", "so", "anyway", "right",
+  "tipo", "cioè", "praticamente", "fondamentalmente", "diciamo",
+  "ecco", "allora", "insomma", "beh", "dunque", "mmh",
+];
+
 export default function TranscriptCleanerPage() {
   const [input, setInput] = useState("");
   const [removeTimestamps, setRemoveTimestamps] = useState(true);
@@ -13,14 +23,6 @@ export default function TranscriptCleanerPage() {
   const [removeSpeakers, setRemoveSpeakers] = useState(false);
   const [fixFormatting, setFixFormatting] = useState(true);
   const [copied, setCopied] = useState(false);
-
-  const fillerWords = [
-    "um", "uh", "ah", "er", "like", "you know", "actually", "basically",
-    "literally", "honestly", "i mean", "sort of", "kind of", "you see",
-    "well", "so", "anyway", "right",
-    "tipo", "cioè", "praticamente", "fondamentalmente", "diciamo",
-    "ecco", "allora", "insomma", "beh", "dunque", "mmh",
-  ];
 
   const clean = useCallback((text: string) => {
     let result = text;

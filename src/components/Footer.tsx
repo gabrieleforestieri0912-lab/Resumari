@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+import Image from "next/image";
 import Link from "next/link";
 import React, { SVGProps } from "react";
 
@@ -82,7 +82,13 @@ export default function Footer() {
         {/* Brand */}
         <div>
           <Link href="/" className="inline-block mb-5">
-            <img src="/resumari.png" alt="Resumari" className="w-11 h-11" />
+            <Image
+              src="/resumari.png"
+              alt="Resumari"
+              width={44}
+              height={44}
+              className="w-11 h-11"
+            />
           </Link>
 
           <p className="text-gray-400 leading-relaxed">

@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { clearSession } from "@/lib/session";
+import { clearSession, useSessionRestored } from "@/lib/session";
 import {
   MessageSquare,
   Sparkles,
@@ -28,7 +28,13 @@ export default function Videos() {
   const [selectedVideo, setSelectedVideo] = useState<any>(null);
   const serverFetchedRef = useRef(false);
 
+  // Attende il ripristino della sessione (LocalStorage o cookie NextAuth) prima di
+  // decidere se l'utente debba essere rimandato al login.
+  const sessionRestored = useSessionRestored();
+
   useEffect(() => {
+    if (!sessionRestored) return;
+
     console.log("Videos page useEffect running");
 
     // Handoff from the extension's "Trascrivi canale" button on YouTube: the
@@ -295,7 +301,7 @@ export default function Videos() {
           });
       }
     }
-  }, [loading, selectedVideo, videos.length]);
+  }, [loading, selectedVideo, videos.length, sessionRestored, router]);
 
   useEffect(() => {
     document.title = "Trascrizioni | Resumari";

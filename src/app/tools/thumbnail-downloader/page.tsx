@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
-import { Image, Download, LinkIcon, AlertCircle } from "lucide-react";
+import { Download, LinkIcon, AlertCircle } from "lucide-react";
 
 const resolutions = [
   { label: "Default (120x90)", quality: "default" },
@@ -118,10 +119,14 @@ export default function ThumbnailDownloaderPage() {
                   className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 overflow-hidden group"
                 >
                   <div className="aspect-video bg-gray-100 dark:bg-zinc-800 relative">
-                    <img
+                    {/* Le miniature arrivano da URL esterni diversi e il fallback è un data URL:
+                        serve unoptimized per non passare dall'Image Optimization API. */}
+                    <Image
                       src={t.url}
                       alt={t.label}
-                      className="w-full h-full object-cover"
+                      fill
+                      unoptimized
+                      className="object-cover"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src =
                           "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='180'><rect fill='%23f3f4f6' width='320' height='180'/><text x='50%' y='50%' fill='%239ca3af' font-size='14' text-anchor='middle' dominant-baseline='middle'>Not available</text></svg>";

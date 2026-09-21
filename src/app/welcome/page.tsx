@@ -38,7 +38,7 @@ export default function WelcomePage() {
           </motion.h1>
 
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-12">
-            L'estensione è stata installata correttamente. Ecco come iniziare a risparmiare ore di tempo.
+            L&apos;estensione è stata installata correttamente. Ecco come iniziare a risparmiare ore di tempo.
           </p>
 
           <div className="grid md:grid-cols-3 gap-8 mb-16">

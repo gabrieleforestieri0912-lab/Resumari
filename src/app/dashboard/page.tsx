@@ -1,11 +1,12 @@
-/* eslint-disable @next/next/no-img-element */
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { clearSession } from "@/lib/session";
+import { clearSession, useSessionRestored } from "@/lib/session";
 import {
   MessageSquare,
   Sparkles,
@@ -107,7 +108,13 @@ export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const [data, setData] = useState<any>(null);
 
+  // Attende il ripristino della sessione (LocalStorage o cookie NextAuth) prima
+  // di leggere utente e token, per non mostrare dati parziali al primo render.
+  const sessionRestored = useSessionRestored();
+
   useEffect(() => {
+    if (!sessionRestored) return;
+
     let cancelled = false;
 
     const storedUser = localStorage.getItem("user");
@@ -186,7 +193,7 @@ export default function Dashboard() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [sessionRestored]);
 
   useEffect(() => {
     document.title = "Dashboard | Resumari";
@@ -300,9 +307,12 @@ export default function Dashboard() {
             <div className="mt-auto p-4 border-t border-gray-100 dark:border-zinc-800">
               <div className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 hover:border-purple-200 dark:hover:border-purple-800 hover:bg-purple-50/30 dark:hover:bg-purple-950/30 transition-all group">
                 {user?.picture ? (
-                  <img
+                  <Image
                     src={user.picture}
                     alt=""
+                    width={36}
+                    height={36}
+                    unoptimized
                     className="w-9 h-9 rounded-full object-cover shrink-0"
                   />
                 ) : (

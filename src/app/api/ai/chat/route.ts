@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 import { getServiceClient, TABLES } from '@/lib/supabase';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
-import { generateChatCompletion, removeEmojis } from '@/lib/ai';
+import {
+  DEFAULT_AI_MODEL,
+  VISION_AI_MODEL,
+  aiErrorMessage,
+  generateChatCompletion,
+  removeEmojis,
+} from '@/lib/ai';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { hasEnoughCredits, deductCredits, CREDIT_COSTS } from '@/lib/credits';
 
@@ -138,6 +144,14 @@ export async function POST(request: Request) {
         if (image.size > 10 * 1024 * 1024) {
           return NextResponse.json({ message: 'L’immagine non può superare 10 MB.' }, { status: 400 });
         }
+        // Groq non espone più modelli vision (llama-3.2-11b-vision-preview è stato
+        // ritirato): senza GROQ_VISION_MODEL l'analisi immagini non è disponibile.
+        if (!VISION_AI_MODEL) {
+          return NextResponse.json(
+            { message: "L'analisi delle immagini non è disponibile in questo momento: invia la domanda come testo." },
+            { status: 400 },
+          );
+        }
         const bytes = Buffer.from(await image.arrayBuffer()).toString('base64');
         imageDataUrl = `data:${image.type};base64,${bytes}`;
       }
@@ -195,8 +209,8 @@ export async function POST(request: Request) {
       },
     ];
 
-    // Selezione del modello (Vision se è presente un'immagine)
-    const aiModel = imageDataUrl ? 'llama-3.2-11b-vision-preview' : undefined;
+    // Selezione del modello (Vision se è presente un'immagine e se configurato)
+    const aiModel = imageDataUrl && VISION_AI_MODEL ? VISION_AI_MODEL : DEFAULT_AI_MODEL;
 
     // Generazione della risposta tramite Groq
     const aiResponse = removeEmojis(
@@ -234,11 +248,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ response: aiResponse, credits: remaining });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Chat API Error:', error);
-    const message = error.message?.includes('429') || error.message?.includes('quota')
-      ? 'Limite di utilizzo AI superato. Riprova più tardi o contatta il supporto.'
-      : 'Errore durante l\'elaborazione';
-    return NextResponse.json({ message }, { status: 500 });
+    return NextResponse.json({ message: aiErrorMessage(error) }, { status: 500 });
   }
 }

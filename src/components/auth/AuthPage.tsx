@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/components/LanguageContext";
 import FormPanel from "@/components/auth/FormPanel";
@@ -65,7 +66,7 @@ export default function AuthPage() {
         href="/"
         className="absolute top-6 left-6 z-20 flex items-center gap-2 font-black text-xl text-purple-600 hover:scale-105 transition-transform"
       >
-        <img src="/resumari.png" alt="Logo" className="w-8 h-8" />
+        <Image src="/resumari.png" alt="Logo" width={32} height={32} className="w-8 h-8" priority />
         <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-red-600">
           Resumari
         </span>

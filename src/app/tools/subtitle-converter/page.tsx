@@ -128,7 +128,7 @@ export default function SubtitleConverterPage() {
               Subtitle Format Converter
             </h1>
             <p className="text-gray-500 dark:text-zinc-400">
-              Converti tra formati SRT, VTT e testo semplice all'istante.
+              Converti tra formati SRT, VTT e testo semplice all&apos;istante.
               Incolla, converti, copia.
             </p>
           </div>

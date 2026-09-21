@@ -1,12 +1,12 @@
 'use client'
 
-/* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/components/LanguageContext";
-import { clearSession } from "@/lib/session";
+import { clearSession, useSessionRestored } from "@/lib/session";
 import {
   User,
   Mail,
@@ -49,7 +49,13 @@ export default function Profile() {
   const [isSavingPassword, setIsSavingPassword] = useState(false);
   const router = useRouter();
 
+  // Attende il ripristino della sessione (LocalStorage o cookie NextAuth) prima di
+  // decidere se l'utente debba essere rimandato al login.
+  const sessionRestored = useSessionRestored();
+
   useEffect(() => {
+    if (!sessionRestored) return;
+
     const stored = localStorage.getItem("user");
     if (stored) {
       const parsed = JSON.parse(stored);
@@ -82,7 +88,7 @@ export default function Profile() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [sessionRestored, router]);
 
   useEffect(() => {
     document.title = "Profilo | Resumari";
@@ -98,6 +104,8 @@ export default function Profile() {
   const [chatCount, setChatCount] = useState(0);
 
   useEffect(() => {
+    if (!sessionRestored) return;
+
     const token = localStorage.getItem("token");
     if (!token) return;
     fetch("/api/chats", {
@@ -108,7 +116,7 @@ export default function Profile() {
         if (Array.isArray(data)) setChatCount(data.length);
       })
       .catch(() => {});
-  }, []);
+  }, [sessionRestored]);
 
   const userInitial = user?.name
     ? user.name.charAt(0).toUpperCase()
@@ -278,7 +286,14 @@ export default function Profile() {
         >
           <div className="relative">
             {user?.picture ? (
-              <img src={user.picture} alt="Profilo" className="w-20 h-20 rounded-2xl object-cover shadow-lg" />
+              <Image
+                src={user.picture}
+                alt="Profilo"
+                width={80}
+                height={80}
+                unoptimized
+                className="w-20 h-20 rounded-2xl object-cover shadow-lg"
+              />
             ) : (
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600 to-red-500 text-white flex items-center justify-center font-black text-2xl shadow-lg">
                 {userInitial}
