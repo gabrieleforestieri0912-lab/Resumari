@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import Stripe from 'stripe';
+import { getPlanName, getPlanLimit, getPlanPrice, type BillingCycle } from '@/lib/plans';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 let stripe: Stripe | null = null;
@@ -10,10 +11,13 @@ if (process.env.STRIPE_SECRET_KEY) {
   });
 }
 
-const PLAN_DATA: Record<string, { name: string; price: number; description: string }> = {
-  standard: { name: 'Standard', price: 7.99, description: 'Piano Standard mensile' },
-  pro: { name: 'Pro Pack', price: 19.99, description: 'Piano Pro mensile' },
-  business: { name: 'Business', price: 39.99, description: 'Piano Business mensile' },
+// Prezzi e crediti dei piani vivono in `@/lib/plans` (fonte unica condivisa con
+// la landing e con l'account), così l'importo addebitato coincide sempre con
+// quello pubblicizzato.
+const PLAN_DATA: Record<string, { name: string; description: string }> = {
+  standard: { name: getPlanName('standard'), description: 'Piano Standard mensile' },
+  pro: { name: getPlanName('pro'), description: 'Piano Pro mensile' },
+  business: { name: getPlanName('business'), description: 'Piano Business mensile' },
 };
 
 function getUserFromToken(request: Request) {
@@ -49,7 +53,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { plan } = await request.json();
+    const { plan, billingCycle } = await request.json();
 
     if (!plan || !PLAN_DATA[plan]) {
       return NextResponse.json(
@@ -58,7 +62,10 @@ export async function POST(request: Request) {
       );
     }
 
+    const cycle: BillingCycle = billingCycle === 'annual' ? 'annual' : 'monthly';
     const planInfo = PLAN_DATA[plan];
+    const price = getPlanPrice(plan, cycle);
+    const monthlyLimit = getPlanLimit(plan);
 
     if (!stripe) {
       return NextResponse.json(
@@ -75,11 +82,11 @@ export async function POST(request: Request) {
             currency: 'eur',
             product_data: {
               name: planInfo.name,
-              description: planInfo.description,
+              description: `${planInfo.description} — ${monthlyLimit} crediti al mese`,
             },
-            unit_amount: Math.round(planInfo.price * 100),
+            unit_amount: Math.round(price * 100),
             recurring: {
-              interval: 'month',
+              interval: cycle === 'annual' ? 'year' : 'month',
             },
           },
           quantity: 1,
@@ -91,6 +98,7 @@ export async function POST(request: Request) {
       metadata: {
         userId: decoded.userId,
         plan,
+        billingCycle: cycle,
       },
       // The subscription (and its invoices) inherit this metadata, so the
       // webhook can attribute renewals and reset the monthly credit pool.
@@ -98,6 +106,7 @@ export async function POST(request: Request) {
         metadata: {
           userId: decoded.userId,
           plan,
+          billingCycle: cycle,
         },
       },
     });

@@ -8,6 +8,7 @@ import {
   notifyAuthStateChange,
   notifyAuthStateLogout,
 } from "./auth-sync";
+import { getPlanLimit } from "./plans";
 
 /**
  * Helper centralizzati per la gestione della sessione utente.
@@ -122,7 +123,7 @@ async function fetchSessionFromServer(): Promise<RestoredSession> {
     email: session.user.email,
     name: session.user.name ?? undefined,
     picture: session.user.image ?? undefined,
-    credits: session.user.credits ?? 10,
+    credits: session.user.credits ?? getPlanLimit("free"),
     plan: session.user.plan ?? "free",
   };
 

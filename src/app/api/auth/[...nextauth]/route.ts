@@ -4,6 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { SupabaseAdapter } from '@/lib/nextauth-adapter';
 import bcrypt from 'bcryptjs';
 import { getServiceClient, TABLES } from '@/lib/supabase';
+import { getPlanLimit } from '@/lib/credits';
 import jwt from 'jsonwebtoken';
 
 /**
@@ -47,7 +48,7 @@ export const authOptions = {
           id: user.id,
           email: user.email,
           name: user.name,
-          credits: user.credits ?? 10,
+          credits: user.credits ?? getPlanLimit('free'),
           plan: user.plan || 'free',
         };
       },

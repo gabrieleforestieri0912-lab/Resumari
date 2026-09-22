@@ -118,7 +118,12 @@ export default function Videos() {
           .then((res) => res.json())
           .then((data) => {
             console.log("API response:", data);
-            if (data.videoId) {
+            if (data.error === "insufficient_credits") {
+              // Pool mensile del piano esaurito: la trascrizione non parte e
+              // l'utente vede il limite reale del suo piano.
+              localStorage.removeItem("resumari_pending_video");
+              setLoadingText(data.message || "Crediti esauriti. Passa a un piano superiore.");
+            } else if (data.videoId) {
               console.log("Transcript available:", data.transcript?.length);
 
               const hasTranscript =
@@ -174,6 +179,12 @@ export default function Videos() {
         })
           .then((res) => res.json())
           .then(async (data) => {
+            if (data.error === "insufficient_credits") {
+              // Limite del piano raggiunto prima di iniziare la raccolta.
+              localStorage.removeItem("resumari_pending_channel");
+              setLoadingText(data.message || "Crediti esauriti. Passa a un piano superiore.");
+              return;
+            }
             if (data.videos && data.videos.length > 0) {
               const channelVideos: any[] = [];
 
@@ -192,6 +203,16 @@ export default function Videos() {
                     }),
                   });
                   const videoData = await res.json();
+
+                  if (videoData.error === "insufficient_credits") {
+                    // Crediti finiti a metà raccolta: si ferma il ciclo sul video
+                    // che ha sbattuto contro il limite del piano.
+                    localStorage.removeItem("resumari_pending_channel");
+                    setLoadingText(
+                      videoData.message || "Crediti esauriti. Passa a un piano superiore.",
+                    );
+                    break;
+                  }
 
                   if (videoData.transcript && videoData.transcript.length > 0) {
                     channelVideos.push({

@@ -1,5 +1,6 @@
 import type { Adapter, AdapterUser, AdapterAccount, AdapterSession, VerificationToken } from 'next-auth/adapters'
 import { getServiceClient, TABLES } from '@/lib/supabase'
+import { getPlanLimit } from '@/lib/plans'
 
 /**
  * Implementazione di un Adapter NextAuth per Supabase.
@@ -10,7 +11,7 @@ export function SupabaseAdapter(): Adapter {
   return {
     /**
      * Crea un nuovo utente nel database.
-     * Assegna i crediti iniziali (10) e il piano 'free' per default.
+     * Assegna i crediti iniziali del piano free e il piano 'free' per default.
      */
     async createUser(user: any) {
       const { data, error } = await getServiceClient()
@@ -19,7 +20,7 @@ export function SupabaseAdapter(): Adapter {
           email: user.email,
           name: user.name,
           picture: user.image,
-          credits: 10,
+          credits: getPlanLimit('free'),
           plan: 'free',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),

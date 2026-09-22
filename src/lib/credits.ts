@@ -1,14 +1,13 @@
 import { getServiceClient, TABLES } from '@/lib/supabase'
+import { getPlanLimit } from '@/lib/plans'
 
-// Monthly credit pool per plan. Credits are consumed by transcriptions and AI
-// chat, and are reset to the full pool at every subscription renewal (see the
-// `invoice.paid` handler in /api/webhooks/stripe).
-export const PLAN_LIMITS: Record<string, number> = {
-  free: 10,
-  standard: 1000,
-  pro: 2500,
-  business: 6000,
-}
+// Catalogo dei piani (limiti, nomi, utilizzo) in `@/lib/plans`, così anche i
+// componenti client mostrano gli stessi limiti applicati qui lato server.
+export { PLAN_LIMITS, PLAN_NAMES, getPlanLimit, getPlanName, isPaidPlan, getCreditsUsage, creditsExhaustedMessage } from '@/lib/plans'
+
+// Credits are consumed by transcriptions and AI chat, and are reset to the full
+// pool at every subscription renewal (see the `invoice.paid` handler in
+// /api/webhooks/stripe).
 
 // Credits charged per operation type.
 export const CREDIT_COSTS = {
@@ -17,11 +16,6 @@ export const CREDIT_COSTS = {
   chat: 1, // /api/ai/chat
 } as const
 
-export function getPlanLimit(plan?: string | null): number {
-  return PLAN_LIMITS[plan || 'free'] ?? PLAN_LIMITS.free
-}
-
-/** Every plan (free included) works on the same pool: enough credits or not. */
 export function hasEnoughCredits(
   user: { credits?: number; plan?: string } | null | undefined,
   cost: number,

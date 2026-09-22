@@ -7,6 +7,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/components/LanguageContext";
 import { clearSession, useSessionRestored } from "@/lib/session";
+import { getCreditsUsage, isPaidPlan } from "@/lib/plans";
 import {
   User,
   Mail,
@@ -52,6 +53,9 @@ export default function Profile() {
   // Attende il ripristino della sessione (LocalStorage o cookie NextAuth) prima di
   // decidere se l'utente debba essere rimandato al login.
   const sessionRestored = useSessionRestored();
+
+  // Limiti del piano applicati dal server: pool mensile, crediti usati e stato di blocco.
+  const planUsage = getCreditsUsage(user);
 
   useEffect(() => {
     if (!sessionRestored) return;
@@ -323,23 +327,25 @@ export default function Profile() {
               <CreditCard size={20} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-gray-900 dark:text-zinc-100 text-sm capitalize">
-                {user?.plan === "pro"
-                  ? "Piano Pro"
-                  : user?.plan === "premium"
-                    ? "Piano Premium"
-                    : user?.plan === "standard"
-                      ? "Piano Standard"
-                      : "Piano Free"}
+              <p className="font-bold text-gray-900 dark:text-zinc-100 text-sm">
+                Piano {planUsage.planName}
               </p>
               <p className="text-xs text-gray-500 dark:text-zinc-500">
-                {user?.plan === "pro" || user?.plan === "premium" || user?.plan === "standard"
-                  ? (locale === 'it' ? 'Crediti mensili inclusi' : 'Monthly credits included')
-                  : (locale === 'it' ? `${user?.credits ?? 10} riassunti disponibili` : `${user?.credits ?? 10} summaries available`)}
+                {locale === 'it'
+                  ? `${planUsage.remaining} crediti rimasti su ${planUsage.limit} al mese`
+                  : `${planUsage.remaining} credits left out of ${planUsage.limit} per month`}
               </p>
             </div>
           </div>
-          {user?.plan !== "pro" && user?.plan !== "premium" && user?.plan !== "standard" && (
+          {planUsage.exhausted && (
+            <p className="flex items-center gap-1.5 text-[11px] font-bold text-red-600 dark:text-red-400 mb-3">
+              <AlertCircle size={12} />
+              {locale === 'it'
+                ? 'Crediti esauriti: chat e trascrizioni sono bloccate fino al rinnovo.'
+                : 'Credits exhausted: chat and transcriptions are blocked until renewal.'}
+            </p>
+          )}
+          {!isPaidPlan(planUsage.plan) && (
             <Link
               href="/#pricing"
               className="block w-full py-2.5 bg-purple-600 text-white text-xs font-black rounded-xl hover:bg-purple-700 transition-all text-center"

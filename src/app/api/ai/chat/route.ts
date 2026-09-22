@@ -9,7 +9,7 @@ import {
   removeEmojis,
 } from '@/lib/ai';
 import { getAuthenticatedUser } from '@/lib/auth';
-import { hasEnoughCredits, deductCredits, CREDIT_COSTS } from '@/lib/credits';
+import { hasEnoughCredits, deductCredits, CREDIT_COSTS, creditsExhaustedMessage } from '@/lib/credits';
 
 // Chiave API per l'accesso ai dati di YouTube
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || '';
@@ -115,10 +115,15 @@ export async function POST(request: Request) {
   const user = await getAuthenticatedUser(request);
   if (!user) return NextResponse.json({ message: 'Non autorizzato' }, { status: 401 });
 
-  // 3. Verifica disponibilità crediti
+  // 3. Verifica disponibilità crediti (pool mensile del piano dell'utente)
   if (!hasEnoughCredits(user, CREDIT_COSTS.chat)) {
     return NextResponse.json(
-      { message: 'Crediti insufficienti. I crediti si ricaricano ogni mese con un piano Pro o Business.' },
+      {
+        error: 'insufficient_credits',
+        message: creditsExhaustedMessage(user.plan),
+        plan: user.plan || 'free',
+        credits: Number(user.credits) || 0,
+      },
       { status: 403 }
     );
   }

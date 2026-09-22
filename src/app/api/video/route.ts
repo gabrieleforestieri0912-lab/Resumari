@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
-import { hasEnoughCredits, deductCredits, CREDIT_COSTS } from '@/lib/credits';
+import { hasEnoughCredits, deductCredits, CREDIT_COSTS, creditsExhaustedMessage } from '@/lib/credits';
 import { fetchTranscriptForVideo } from '@/lib/youtube';
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || '';
@@ -54,7 +54,12 @@ export async function POST(request: Request) {
 
     if (!hasEnoughCredits(user, CREDIT_COSTS.transcription)) {
       return NextResponse.json(
-        { message: 'Crediti insufficienti. I crediti si ricaricano ogni mese con un piano Pro o Business.' },
+        {
+          error: 'insufficient_credits',
+          message: creditsExhaustedMessage(user.plan),
+          plan: user.plan || 'free',
+          credits: Number(user.credits) || 0,
+        },
         { status: 403 }
       );
     }

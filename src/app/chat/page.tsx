@@ -4,6 +4,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/components/LanguageContext";
@@ -49,6 +50,7 @@ import {
   RotateCw,
   Download,
   Image as ImageIcon,
+  Lock,
 } from "lucide-react";
 
 /**
@@ -261,6 +263,9 @@ export default function Chat() {
   // --- Gestione Coda Messaggi AI ---
   const [messageQueue, setMessageQueue] = useState<any[]>([]);
   const [isProcessingQueue, setIsProcessingQueue] = useState(false);
+  // Messaggio mostrato quando il pool crediti del piano è esaurito: blocca
+  // l'invio e propone l'upgrade finché l'utente non ricarica/rinnova.
+  const [creditsBlocked, setCreditsBlocked] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const aiStartedAtRef = useRef<number | null>(null);
@@ -878,6 +883,24 @@ export default function Chat() {
   }, [messageQueue, isProcessingQueue]);
 
   /**
+   * Riconosce la risposta 403 delle API quando il pool crediti del piano è
+   * esaurito e restituisce il messaggio inviato dal server (contiene piano e
+   * limite mensile). `null` per qualunque altro errore.
+   */
+    const readCreditsBlock = async (res: Response): Promise<string | null> => {
+    if (res.status !== 403) return null;
+    try {
+      const data = await res.clone().json();
+      if (data?.error === 'insufficient_credits' || /credit/i.test(data?.message || '')) {
+        return data.message || "Crediti esauriti. Passa a un piano superiore.";
+      }
+    } catch {
+      /* risposta non JSON: nessun blocco crediti riconosciuto */
+    }
+    return null;
+  };
+
+  /**
    * Logica principale di comunicazione con l'AI: invio contesto e gestione risposta tipizzata
    */
   const processAIResponse = async (item: any) => {
@@ -919,20 +942,35 @@ export default function Chat() {
       });
 
       if (!response.ok) {
+        const creditsMsg = await readCreditsBlock(response);
         setIsTyping(false);
         setAiStatus("idle");
+        if (creditsMsg) {
+          setCreditsBlocked(creditsMsg);
+          addToast?.(creditsMsg, "error");
+        }
         setMessages((prev: any[]) => {
-          const next = [...prev, { text: "Errore nella risposta dell'IA. Riprova.", sender: "system", time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }];
+          const next = [...prev, { text: creditsMsg || "Errore nella risposta dell'IA. Riprova.", sender: "system", time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }];
           updateChatMessagesMap(currentChatId, next);
           return next;
         });
         setIsProcessingQueue(false);
-        setMessageQueue((prev) => prev.slice(1));
+        // Pool esaurito: la coda non ha senso, gli altri messaggi fallirebbero tutti.
+        setMessageQueue((prev) => (creditsMsg ? [] : prev.slice(1)));
         return;
       }
 
       const data = await response.json();
       setAiStatus("thinking");
+
+      // Sync remaining credits back to the user profile (reflected in navbar/settings).
+      if (typeof data.credits === "number") {
+        setUser((prev: any) => {
+          const updated = { ...prev, credits: data.credits };
+          localStorage.setItem("user", JSON.stringify(updated));
+          return updated;
+        });
+      }
 
       if (data.videoId && !currentVideoId) {
         setCurrentVideoId(data.videoId);
@@ -994,6 +1032,9 @@ export default function Chat() {
             setAiStatus("idle");
             setIsProcessingQueue(false);
             setMessageQueue((prev) => prev.slice(1));
+            // La risposta è andata a buon fine: se i crediti erano finiti (rinnovo
+            // mensile o upgrade) l'avviso di blocco non ha più motivo di restare.
+            if (creditsBlocked) setCreditsBlocked(null);
           }
         }, speed);
       } else if (data.message) {
@@ -1174,6 +1215,13 @@ export default function Chat() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ videoUrl: userMsgText }),
         });
+        // Trascrizione bloccata dal piano: niente messaggio in chat, solo avviso.
+        const creditsMsg = await readCreditsBlock(videoRes);
+        if (creditsMsg) {
+          setCreditsBlocked(creditsMsg);
+          addToast?.(creditsMsg, "error");
+          return;
+        }
         if (videoRes.ok) {
           videoInfo = await videoRes.json();
         }
@@ -1246,6 +1294,11 @@ export default function Chat() {
    */
   const handleSend = async () => {
     if (!input.trim() && !attachedImage) return;
+    // Pool crediti esaurito: l'invio è bloccato finché l'utente non fa upgrade.
+    if (creditsBlocked) {
+      addToast?.(creditsBlocked, "error");
+      return;
+    }
     const imageForMessage = attachedImage;
     const userMsgText = input.trim() || "Analizza questa immagine";
 
@@ -1273,6 +1326,12 @@ export default function Chat() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ videoUrl: userMsgText }),
         });
+        const creditsMsg = await readCreditsBlock(videoRes);
+        if (creditsMsg) {
+          setCreditsBlocked(creditsMsg);
+          addToast?.(creditsMsg, "error");
+          return;
+        }
         if (videoRes.ok) {
           videoInfo = await videoRes.json();
         }
@@ -2250,6 +2309,36 @@ export default function Chat() {
                 </div>
               </div>
 
+              {creditsBlocked && (
+                <div className="mb-3 flex items-start gap-3 rounded-2xl border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/40 p-4">
+                  <div className="w-9 h-9 shrink-0 rounded-xl bg-white dark:bg-zinc-900 flex items-center justify-center text-amber-600 dark:text-amber-400 ring-1 ring-amber-100 dark:ring-amber-900">
+                    <Lock size={18} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
+                      Limite del piano raggiunto
+                    </p>
+                    <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">{creditsBlocked}</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Link
+                      href="/#pricing"
+                      className="px-3 py-2 bg-purple-600 text-white text-xs font-black rounded-xl hover:bg-purple-700 transition-all whitespace-nowrap"
+                    >
+                      Aggiorna piano
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setCreditsBlocked(null)}
+                      className="p-1.5 rounded-lg text-amber-600 dark:text-amber-400 hover:bg-white dark:hover:bg-zinc-900 transition-colors"
+                      title="Chiudi avviso"
+                    >
+                      <X size={15} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div
                 className="relative group"
                 onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }}
@@ -2354,14 +2443,15 @@ export default function Chat() {
                 <button
                   type="button"
                   onClick={isTyping ? handleCancel : handleSend}
-                  disabled={!input.trim() && !attachedImage}
+                  disabled={(!input.trim() && !attachedImage) || !!creditsBlocked}
                   className={`absolute right-1.5 top-1.5 w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                    (input.trim() || attachedImage)
+                    (input.trim() || attachedImage) && !creditsBlocked
                       ? isTyping
                         ? "bg-red-500 text-white shadow-lg animate-pulse"
                         : "bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:scale-105 active:scale-95 shadow-lg"
                       : "bg-gray-200 text-gray-400 dark:bg-zinc-800 dark:text-zinc-500"
                   }`}
+                  title={creditsBlocked ? "Limite del piano raggiunto" : undefined}
                 >
                   {isTyping ? <Square size={14} className="fill-current" /> : <Send size={16} />}
                 </button>

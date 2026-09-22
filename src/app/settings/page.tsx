@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/components/LanguageContext";
 import { clearSession, useSessionRestored } from "@/lib/session";
+import { getCreditsUsage, isPaidPlan } from "@/lib/plans";
 import {
   ArrowLeft,
   Home,
@@ -49,14 +50,14 @@ export default function Settings() {
   const [notifySummary, setNotifySummary] = useState(true);
   const [notifyMarketing, setNotifyMarketing] = useState(false);
 
-  // Usage stats
-  const [chatCount, setChatCount] = useState(0);
-
   const router = useRouter();
 
   // Attende il ripristino della sessione (LocalStorage o cookie NextAuth) prima di
   // decidere se l'utente debba essere rimandato al login.
   const sessionRestored = useSessionRestored();
+
+  // Limiti del piano applicati dal server: pool mensile, crediti usati e stato di blocco.
+  const planUsage = getCreditsUsage(user);
 
   const handleLocaleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     changeLanguage(e.target.value as 'it' | 'en');
@@ -121,15 +122,6 @@ export default function Settings() {
       .then((res) => res.json())
       .then((data) => {
         if (data?.email) setUser(data);
-      })
-      .catch(() => {});
-
-    fetch("/api/chats", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) setChatCount(data.length);
       })
       .catch(() => {});
 
@@ -445,22 +437,16 @@ export default function Settings() {
                 <CreditCard size={20} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-gray-900 dark:text-zinc-100 text-sm capitalize">
-                  {user?.plan === "pro"
-                    ? "Piano Pro"
-                    : user?.plan === "premium"
-                      ? "Piano Premium"
-                      : user?.plan === "standard"
-                        ? "Piano Standard"
-                        : "Piano Free"}
+                <p className="font-bold text-gray-900 dark:text-zinc-100 text-sm">
+                  Piano {planUsage.planName}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-zinc-400">
-                  {user?.plan === "pro" || user?.plan === "premium" || user?.plan === "standard"
-                    ? (locale === 'it' ? 'Crediti mensili inclusi' : 'Monthly credits included')
-                    : (locale === 'it' ? `${user?.credits ?? 10} riassunti disponibili` : `${user?.credits ?? 10} summaries available`)}
+                  {locale === 'it'
+                    ? `${planUsage.remaining} crediti rimasti su ${planUsage.limit} al mese`
+                    : `${planUsage.remaining} credits left out of ${planUsage.limit} per month`}
                 </p>
               </div>
-              {user?.plan !== "pro" && user?.plan !== "premium" && user?.plan !== "standard" && (
+              {!isPaidPlan(planUsage.plan) && (
                 <Link
                   href="/#pricing"
                   className="px-4 py-2 bg-purple-600 text-white text-xs font-black rounded-xl hover:bg-purple-700 transition-all flex items-center gap-1.5"
@@ -471,15 +457,23 @@ export default function Settings() {
             </div>
             <div className="bg-gray-50 dark:bg-zinc-800 rounded-xl p-4">
               <div className="flex justify-between text-xs font-bold text-gray-500 dark:text-zinc-400 mb-2">
-                <span>{locale === 'it' ? 'Riassunti utilizzati' : 'Summaries used'}</span>
-                <span>{chatCount} / {user?.credits ?? 10}</span>
+                <span>{locale === 'it' ? 'Crediti utilizzati questo mese' : 'Credits used this month'}</span>
+                <span>{planUsage.used} / {planUsage.limit}</span>
               </div>
               <div className="w-full bg-gray-200 dark:bg-zinc-700 rounded-full h-2">
                 <div
-                  className="bg-purple-600 h-2 rounded-full transition-all"
-                  style={{ width: `${Math.min(100, (chatCount / (user?.credits ?? 10)) * 100)}%` }}
+                  className={`h-2 rounded-full transition-all ${planUsage.exhausted ? "bg-red-500" : "bg-purple-600"}`}
+                  style={{ width: `${Math.min(100, (planUsage.used / planUsage.limit) * 100)}%` }}
                 />
               </div>
+              {planUsage.exhausted && (
+                <p className="flex items-center gap-1.5 text-[11px] font-bold text-red-600 dark:text-red-400 mt-2">
+                  <AlertCircle size={12} />
+                  {locale === 'it'
+                    ? 'Crediti esauriti: chat e trascrizioni sono bloccate fino al rinnovo.'
+                    : 'Credits exhausted: chat and transcriptions are blocked until renewal.'}
+                </p>
+              )}
             </div>
           </div>
         </motion.div>

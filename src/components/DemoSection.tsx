@@ -746,19 +746,6 @@ export default function DemoSection() {
                   )}
 
                   <div className="p-4 pt-3 border-t border-gray-100 dark:border-zinc-800">
-                    {userMsgCount > 0 && userMsgCount < DEMO_MESSAGE_LIMIT && messages.length > 0 && (
-                      <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none">
-                        {(aiSuggestions.length > 0 ? aiSuggestions : FALLBACK_SUGGESTIONS).map((s) => (
-                          <button
-                            key={s}
-                            onClick={() => handleSuggestionClick(s)}
-                            className="shrink-0 px-2.5 py-1.5 bg-gray-50 dark:bg-zinc-800 hover:bg-purple-50 dark:hover:bg-purple-950/40 hover:text-purple-700 dark:hover:text-purple-400 border border-gray-100 dark:border-zinc-700 hover:border-purple-200 dark:hover:border-purple-700 rounded-xl text-[11px] font-semibold text-gray-600 dark:text-gray-300 transition-all whitespace-nowrap"
-                          >
-                            {s}
-                          </button>
-                        ))}
-                      </div>
-                    )}
                     <div className="relative group">
                       <input
                         ref={inputRef}

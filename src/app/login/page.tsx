@@ -7,6 +7,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { signIn } from "next-auth/react";
 import { saveSession, saveUser } from "@/lib/session";
+import { getPlanLimit } from "@/lib/plans";
 import { useLanguage } from "@/components/LanguageContext";
 import {
   Mail,
@@ -163,7 +164,7 @@ function LoginForm({ locale, onSwitch }: { locale: string; onSwitch: (delta: num
           const sessionUser = {
             id: sessionData.user.id, email: sessionData.user.email, name: sessionData.user.name,
             picture: sessionData.user.image ?? undefined,
-            credits: sessionData.user.credits ?? 10, plan: sessionData.user.plan || 'free',
+            credits: sessionData.user.credits ?? getPlanLimit('free'), plan: sessionData.user.plan || 'free',
           };
           if (sessionData?.customToken) {
             saveSession(sessionData.customToken, sessionUser);

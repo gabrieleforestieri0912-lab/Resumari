@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
+import { getPlanLimit } from '@/lib/credits';
 import { getServiceClient, TABLES } from '@/lib/supabase';
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
           picture,
           password: null,
           provider: 'google',
-          credits: 10,
+          credits: getPlanLimit('free'),
           plan: 'free',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
