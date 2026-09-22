@@ -60,11 +60,28 @@ const Linkedin = ({ size = 24, className = "", ...props }: SVGProps<SVGSVGElemen
   </svg>
 );
 
+const TikTok = ({ size = 24, className = "", ...props }: SVGProps<SVGSVGElement> & { size?: number }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+    {...props}
+  >
+    <path d="M18.33 10.32c-.46-.02-1.02-.05-1.74-.05-3.31 0-6 2.69-6 6v4.5c0 1.86-1.51 3.36-3.36 3.36-1.86 0-3.36-1.51-3.36-3.36V11.5C3.87 9.43 5.55 7.5 7.83 7.34c.03.93.05 1.84.05 2.74 0 4.68-1.03 8.48-2.63 11.32A6.01 6.01 0 0 0 7.83 21c3.59 0 6.73-2.88 6.73-6.44v-2.3c1.57.82 3.2 1.27 4.89 1.27 4.41 0 8-3.59 8-8s-3.59-8-8-8c-.24 0-.48.01-2 .01" />
+    <path d="M9.5 18.81a4.19 4.19 0 0 1 0-8.38 4.19 4.19 0 0 1 4.19 4.19 4.19 4.19 0 0 1-4.19 4.19z" />
+  </svg>
+);
+
 interface SocialLink {
   name: string;
   icon: React.ReactNode;
   href: string;
 }
+
+// Handles social (TikTok + Instagram) e email di contatto.
+const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "gabriele.forestieri0912@gmail.com";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -72,8 +89,9 @@ export default function Footer() {
   const socialLinks: SocialLink[] = [
     { name: "Facebook", icon: <Facebook size={20} />, href: "#" },
     { name: "Twitter", icon: <Twitter size={20} />, href: "#" },
-    { name: "Instagram", icon: <Instagram size={20} />, href: "#" },
-    { name: "Linkedin", icon: <Linkedin size={20} />, href: "#" },
+    { name: "Instagram", icon: <Instagram size={20} />, href: "https://instagram.com/resumari" },
+    { name: "TikTok", icon: <TikTok size={20} />, href: "https://tiktok.com/@resumari" },
+    { name: "Linkedin", icon: <Linkedin size={20} />, href: "https://linkedin.com/company/resumari" },
   ];
 
   return (

@@ -422,9 +422,12 @@ export default function DemoSection() {
   };
 
   return (
-    <section className="w-full px-4 md:px-6 py-12 md:py-16 bg-gradient-to-b from-white via-purple-50/20 to-white dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-950 relative overflow-hidden" id="demo">
-      <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-red-500/10 rounded-full blur-[120px] pointer-events-none" />
+        <section className="w-full px-4 md:px-6 py-12 md:py-16 bg-gradient-to-b from-white via-purple-50/20 to-white dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-950 relative overflow-hidden" id="demo">
+      {/* Two soft corner orbs */}
+      <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/8 rounded-full blur-[110px] pointer-events-none" />
+      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-red-500/8 rounded-full blur-[110px] pointer-events-none" />
+      {/* Aureola gradient che incornicia il componente demo (centrata sulla card) */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-gradient-to-br from-purple-500/25 via-red-500/12 to-transparent rounded-full blur-[110px] pointer-events-none" />
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-6">
           <div className="w-16 h-1 bg-gradient-to-r from-purple-600 to-red-500 rounded-full mb-4 mx-auto" />

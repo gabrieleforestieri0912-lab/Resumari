@@ -180,10 +180,10 @@ export default function TermsOfService() {
             <p>
               Per domande sui Termini di Servizio, contattaci all&apos;indirizzo:{" "}
               <a
-                href="mailto:support@resumari.com"
+                                href="mailto:gabriele.forestieri0912@gmail.com"
                 className="text-purple-600 font-semibold hover:underline"
               >
-                support@resumari.com
+                gabriele.forestieri0912@gmail.com
               </a>
             </p>
           </section>
