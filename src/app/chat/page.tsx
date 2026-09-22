@@ -1946,10 +1946,14 @@ export default function Chat() {
                               className={`flex gap-4 max-w-3xl mx-auto ${msg.sender === "user" ? "flex-row-reverse" : "flex-row"}`}
                             >
                               {msg.sender === "system" && !msg.cancelled && (
-                                <div className="w-8 h-8 shrink-0">
-                                  <div className="w-full h-full rounded-full bg-linear-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                                    <Sparkles size={14} className="text-white" />
-                                  </div>
+                                <div className="w-8 h-8 shrink-0 rounded-full overflow-hidden bg-white shadow-lg shadow-purple-500/30 ring-1 ring-purple-100 dark:ring-purple-900">
+                                  <Image
+                                    src="/resumari.png"
+                                    alt="Resumari AI"
+                                    width={32}
+                                    height={32}
+                                    className="w-full h-full object-cover"
+                                  />
                                 </div>
                               )}
                               {msg.sender === "user" && (
@@ -2043,7 +2047,7 @@ export default function Chat() {
                                       className={`px-5 py-3.5 rounded-2xl text-sm leading-relaxed ${
                                         msg.sender === "user"
                                           ? "bg-gray-900 text-white dark:bg-zinc-800 dark:text-white rounded-br-sm"
-                                          : "bg-purple-50 dark:bg-purple-950 dark:text-zinc-200 rounded-bl-sm border border-purple-100 dark:border-purple-900"
+                                          : "bg-purple-50 dark:bg-purple-950 text-gray-800 dark:text-zinc-200 rounded-bl-sm border border-purple-100 dark:border-purple-900"
                                       }`}
                                     >
                                       {msg.sender === "system" && msg.videoId ? (
@@ -2121,10 +2125,14 @@ export default function Chat() {
 
               {isTyping && (
                 <div className="flex gap-4 max-w-3xl mx-auto">
-                  <div className="w-8 h-8 shrink-0">
-                    <div className="w-full h-full rounded-full bg-linear-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                      <Sparkles size={14} className="text-white animate-pulse" />
-                    </div>
+                  <div className="w-8 h-8 shrink-0 rounded-full overflow-hidden bg-white shadow-lg shadow-purple-500/30 ring-1 ring-purple-100 dark:ring-purple-900">
+                    <Image
+                      src="/resumari.png"
+                      alt="Resumari AI"
+                      width={32}
+                      height={32}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div className="bg-purple-50 dark:bg-purple-950 px-5 py-3.5 rounded-2xl rounded-bl-sm border border-purple-100 dark:border-purple-900 min-w-56">
                     <div className="flex items-center gap-2 text-sm font-bold text-purple-700 dark:text-purple-300">
@@ -2340,8 +2348,8 @@ export default function Chat() {
                     (input.trim() || attachedImage)
                       ? isTyping
                         ? "bg-red-500 text-white shadow-lg animate-pulse"
-                        : "bg-gray-900 dark:bg-zinc-100 dark:text-zinc-900 hover:scale-105 active:scale-95 shadow-lg"
-                      : "bg-gray-200 dark:bg-zinc-800 dark:text-zinc-500"
+                        : "bg-gray-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:scale-105 active:scale-95 shadow-lg"
+                      : "bg-gray-200 text-gray-400 dark:bg-zinc-800 dark:text-zinc-500"
                   }`}
                 >
                   {isTyping ? <Square size={14} className="fill-current" /> : <Send size={16} />}
