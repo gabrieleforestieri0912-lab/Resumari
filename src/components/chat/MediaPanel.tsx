@@ -1,5 +1,5 @@
-import { Upload } from "lucide-react";
-import { RefObject, SVGProps } from "react";
+import { Upload, Scissors } from "lucide-react";
+import { RefObject, SVGProps, useMemo, useState } from "react";
 
 const Youtube = ({ size = 24, className = "", ...props }: SVGProps<SVGSVGElement> & { size?: number }) => (
   <svg
@@ -50,6 +50,35 @@ export default function MediaPanel({
   handleSeekTo,
   formatTimestamp
 }: MediaPanelProps) {
+  // Dimensione dei segmenti di trascrizione (3s – 30s), scelta con lo slider.
+  const [segmentSeconds, setSegmentSeconds] = useState(10);
+
+  const fullTranscript: TranscriptLine[] | undefined = useMemo(
+    () => messages.find((m) => m.transcript)?.transcript as TranscriptLine[] | undefined,
+    [messages],
+  );
+
+  // Raggruppa le righe fini della trascrizione in segmenti della durata scelta.
+  const groupedTranscript: TranscriptLine[] | undefined = useMemo(() => {
+    if (!fullTranscript || fullTranscript.length === 0) return fullTranscript;
+    const buckets: { time: number; text: string }[] = [];
+    for (const line of fullTranscript) {
+      const t = line.time || 0;
+      const idx = Math.floor(t / segmentSeconds);
+      if (!buckets[idx]) buckets[idx] = { time: idx * segmentSeconds, text: "" };
+      buckets[idx].text += (buckets[idx].text ? " " : "") + line.text;
+    }
+    return buckets
+      .filter(Boolean)
+      .map((b) => ({ time: b.time, text: b.text, isKeyPoint: false }));
+  }, [fullTranscript, segmentSeconds]);
+
+  function formatSegmentLabel(totalSeconds: number) {
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    return m > 0 ? `${m}:${s.toString().padStart(2, "0")}` : `0:${s.toString().padStart(2, "0")}`;
+  }
+
   return (
     <aside className="hidden lg:flex w-96 border-l border-gray-100 dark:border-zinc-800 flex-col bg-gray-50/50 dark:bg-zinc-900/50 overflow-y-auto shrink-0 h-full">
       <div className="p-6">
@@ -57,10 +86,10 @@ export default function MediaPanel({
           <div className="aspect-video w-full rounded-xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 overflow-hidden shadow-xl shadow-gray-200/50 dark:shadow-none group relative">
             {currentVideoId ? (
               <iframe
-                key={`${currentVideoId}-${currentVideoStartTime}`}
+                key={currentVideoId}
                 width="100%"
                 height="100%"
-                src={`https://www.youtube.com/embed/${currentVideoId}?start=${currentVideoStartTime}&autoplay=1`}
+                src={`https://www.youtube.com/embed/${currentVideoId}?${currentVideoStartTime ? `start=${Math.floor(currentVideoStartTime)}&` : ""}autoplay=1&enablejsapi=1&rel=0`}
                 title="YouTube video player"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -108,17 +137,42 @@ export default function MediaPanel({
             </button>
           )}
 
-          {currentVideoId && messages.some((m) => m.transcript) && (
+          {currentVideoId && fullTranscript && fullTranscript.length > 0 && (
             <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden shadow-lg">
               <div className="p-4 border-b border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/60">
                 <p className="text-xs font-black text-purple-600 uppercase tracking-widest">
                   Trascrizione
                 </p>
+                {/* Slider dimensione segmenti: 3s – 30s */}
+                <div className="mt-3">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+                      <Scissors size={12} className="text-purple-500" />
+                      Segmenti
+                    </span>
+                    <span className="text-[10px] font-black font-mono text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950 px-2 py-0.5 rounded-md">
+                      {formatSegmentLabel(segmentSeconds)}/seg
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={3}
+                    max={30}
+                    step={1}
+                    value={segmentSeconds}
+                    onChange={(e) => setSegmentSeconds(Number(e.target.value))}
+                    aria-label="Durata dei segmenti di trascrizione in secondi"
+                    title={`Dividi la trascrizione in segmenti da ${segmentSeconds} secondi (3s – 30s)`}
+                    className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-gray-200 dark:bg-zinc-700 accent-purple-600"
+                  />
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[9px] font-mono text-gray-400 dark:text-zinc-500">0:03</span>
+                    <span className="text-[9px] font-mono text-gray-400 dark:text-zinc-500">0:30</span>
+                  </div>
+                </div>
               </div>
               <div className="p-4 space-y-2 max-h-100 overflow-y-auto">
-                {messages
-                  .find((m) => m.transcript)
-                  ?.transcript?.map((line, i) => (
+                {groupedTranscript?.map((line, i) => (
                     <div key={i} className="flex gap-2 text-xs">
                       <button
                         onClick={() => handleSeekTo(line.time)}

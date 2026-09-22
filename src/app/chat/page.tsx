@@ -1460,6 +1460,17 @@ export default function Chat() {
    */
   const handleSeekTo = (seconds: number) => {
     setCurrentVideoStartTime(seconds);
+    // Salta davvero al secondaggio via API JS del player (postMessage seekTo):
+    // il video non ricarica, si sposta. Se il player non risponde, resta il
+    // fallback del ricaricamento iframe con ?start=.
+    const secs = Math.floor(seconds);
+    const frame = document.querySelector(
+      'aside iframe[src*="youtube.com/embed/"]',
+    ) as HTMLIFrameElement | null;
+    frame?.contentWindow?.postMessage(
+      JSON.stringify({ event: "command", func: "seekTo", args: [secs, true] }),
+      "*",
+    );
   };
 
   /**
