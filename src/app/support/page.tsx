@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { MessageSquare, Send, CheckCircle, Loader2 } from 'lucide-react';
 import Breadcrumb from '../../components/Breadcrumb';
 
@@ -47,9 +48,13 @@ export default function SupportPage() {
         <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Supporto' }]} className="mb-6" />
 
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-linear-to-br from-purple-600 to-red-500 text-white mb-6">
-            <MessageSquare size={32} />
-          </div>
+          <Image
+            src="/resumari.png"
+            alt="Resumari"
+            width={64}
+            height={64}
+            className="w-16 h-16 rounded-2xl object-cover mx-auto mb-6 shadow-lg shadow-purple-500/20"
+          />
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight mb-4">
             Scrivici un{' '}
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-red-600">

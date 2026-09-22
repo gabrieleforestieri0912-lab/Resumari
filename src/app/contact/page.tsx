@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { Mail, MessageSquare, Send, CheckCircle, Loader2 } from "lucide-react";
 import Breadcrumb from "../../components/Breadcrumb";
 
@@ -44,9 +45,13 @@ export default function ContactPage() {
       <main className="max-w-4xl mx-auto px-6 pt-28 pb-20">
         <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Contattaci" }]} className="mb-6" />
         <div className="text-center mb-16">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-linear-to-br from-purple-600 to-red-500 text-white mb-6">
-            <MessageSquare size={32} />
-          </div>
+          <Image
+            src="/resumari.png"
+            alt="Resumari"
+            width={64}
+            height={64}
+            className="w-16 h-16 rounded-2xl object-cover mx-auto mb-6 shadow-lg shadow-purple-500/20"
+          />
           <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
             Contattaci
           </h1>

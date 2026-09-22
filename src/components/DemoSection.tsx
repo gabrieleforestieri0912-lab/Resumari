@@ -588,9 +588,13 @@ export default function DemoSection() {
 
                   {messages.length === 0 && !selectedChannel ? (
                     <div className="flex-1 flex flex-col items-center justify-center p-6 text-center overflow-y-auto">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600 to-red-500 flex items-center justify-center mb-3 shadow-lg shadow-purple-500/20">
-                        <Sparkles size={24} className="text-white" />
-                      </div>
+                      <Image
+                        src="/resumari.png"
+                        alt="Resumari"
+                        width={56}
+                        height={56}
+                        className="w-14 h-14 rounded-2xl object-cover mb-3 shadow-lg shadow-purple-500/20"
+                      />
                       <h3 className="text-base font-black text-gray-900 dark:text-gray-100 mb-1">
                         Scegli un canale
                       </h3>
@@ -646,9 +650,13 @@ export default function DemoSection() {
                             className={`flex gap-2.5 max-w-3xl ${msg.sender === "user" ? "flex-row-reverse ml-auto" : "flex-row"}`}
                           >
                             {msg.sender === "system" && !msg.cancelled && (
-                              <div className="w-6 h-6 shrink-0 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-md mt-0.5">
-                                <Sparkles size={10} className="text-white" />
-                              </div>
+                              <Image
+                                src="/resumari.png"
+                                alt="Resumari"
+                                width={24}
+                                height={24}
+                                className="w-6 h-6 shrink-0 rounded-full object-cover shadow-md mt-0.5"
+                              />
                             )}
                             <div className="flex flex-col gap-1 max-w-[88%]">
                               <div
@@ -719,9 +727,13 @@ export default function DemoSection() {
 
                         {loading && (
                           <div className="flex gap-2.5 max-w-3xl">
-                            <div className="w-6 h-6 shrink-0 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-md">
-                              <Sparkles size={10} className="text-white" />
-                            </div>
+                            <Image
+                              src="/resumari.png"
+                              alt="Resumari"
+                              width={24}
+                              height={24}
+                              className="w-6 h-6 shrink-0 rounded-full object-cover shadow-md"
+                            />
                             <div className="bg-purple-50 dark:bg-purple-950/50 px-3.5 py-2.5 rounded-2xl rounded-bl-sm border border-purple-100 dark:border-purple-900 flex items-center gap-1">
                               <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
                               <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
@@ -853,9 +865,13 @@ export default function DemoSection() {
               className="bg-white dark:bg-zinc-900 rounded-3xl p-8 w-full max-w-sm shadow-2xl text-center"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600 to-red-500 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-purple-500/20">
-                <Sparkles size={26} className="text-white" />
-              </div>
+              <Image
+                src="/resumari.png"
+                alt="Resumari"
+                width={56}
+                height={56}
+                className="w-14 h-14 rounded-2xl object-cover mx-auto mb-5 shadow-lg shadow-purple-500/20"
+              />
               <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-2">
                 Limite di prova raggiunto
               </h3>
