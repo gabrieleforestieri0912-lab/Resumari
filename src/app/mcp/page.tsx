@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Server,
   Globe,
@@ -236,8 +237,16 @@ export default function McpPage() {
                   </div>
                   {expandedClient === i ? <ChevronUp size={18} className="text-gray-400 shrink-0" /> : <ChevronDown size={18} className="text-gray-400 shrink-0" />}
                 </button>
-                {expandedClient === i && (
-                  <div className="px-5 pb-6 border-t border-gray-100 dark:border-zinc-800">
+                <AnimatePresence initial={false}>
+                  {expandedClient === i && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-5 pb-6 border-t border-gray-100 dark:border-zinc-800">
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-4 mb-4">{client.desc}</p>
                     <ol className="space-y-3 mb-5">
                       {client.steps.map((step, j) => (
@@ -259,8 +268,10 @@ export default function McpPage() {
                         {copied === `client-${i}` ? <Check size={14} className="text-green-600" /> : <Copy size={14} className="text-gray-400" />}
                       </button>
                     </div>
-                  </div>
-                )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ))}
           </div>

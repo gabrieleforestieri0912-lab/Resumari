@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSessionRestored } from "@/lib/session";
@@ -369,10 +370,18 @@ export default function ApiKeysPage() {
                 </div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Estrai la trascrizione da un singolo video YouTube. Costa 2 crediti.</p>
               </div>
-              {expandedEndpoint === "single" ? <ChevronUp size={20} className="text-gray-400 dark:text-gray-500" /> : <ChevronDown size={20} className="text-gray-400 dark:text-gray-500" />}
+              {expandedEndpoint === "single" ? <ChevronUp size={20} className="text-gray-400 dark:text-gray-500 shrink-0" /> : <ChevronDown size={20} className="text-gray-400 dark:text-gray-500 shrink-0" />}
             </button>
-            {expandedEndpoint === "single" && (
-              <div className="px-6 pb-6">
+            <AnimatePresence initial={false}>
+              {expandedEndpoint === "single" && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="overflow-hidden"
+                >
+                  <div className="px-6 pb-6">
                 {/* Lang tabs */}
                 <div className="flex gap-1 mb-4 bg-gray-100 dark:bg-zinc-800 rounded-lg p-1 w-fit">
                   {(["curl", "python", "node"] as const).map(lang => (
@@ -388,8 +397,10 @@ export default function ApiKeysPage() {
                 <div className="bg-gray-900 dark:bg-black rounded-xl p-5 overflow-x-auto">
                   <pre className="text-sm text-gray-300 font-mono whitespace-pre">{codeExamples[expandedCodeLang]}</pre>
                 </div>
-              </div>
-            )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Bulk */}
@@ -405,10 +416,18 @@ export default function ApiKeysPage() {
                 </div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Estrazione bulk da un canale o playlist. Stream di risultati via SSE. 2 crediti per video (fallimenti rimborsati).</p>
               </div>
-              {expandedEndpoint === "bulk" ? <ChevronUp size={20} className="text-gray-400 dark:text-gray-500" /> : <ChevronDown size={20} className="text-gray-400 dark:text-gray-500" />}
+              {expandedEndpoint === "bulk" ? <ChevronUp size={20} className="text-gray-400 dark:text-gray-500 shrink-0" /> : <ChevronDown size={20} className="text-gray-400 dark:text-gray-500 shrink-0" />}
             </button>
-            {expandedEndpoint === "bulk" && (
-              <div className="px-6 pb-6">
+            <AnimatePresence initial={false}>
+              {expandedEndpoint === "bulk" && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="overflow-hidden"
+                >
+                  <div className="px-6 pb-6">
                 <div className="flex gap-1 mb-4 bg-gray-100 dark:bg-zinc-800 rounded-lg p-1 w-fit">
                   {(["curl", "python", "node"] as const).map(lang => (
                     <button
@@ -434,8 +453,10 @@ data: {"batchIndex":0,"videos":[...],"stats":{"processed":21,...}}
 event: done
 data: {"stats":{"total":21,"succeeded":20,"failed":1}}`}</pre>
                 </div>
-              </div>
-            )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </section>
@@ -590,11 +611,21 @@ data: {"stats":{"total":21,"succeeded":20,"failed":1}}`}</pre>
                   <span className="font-bold text-gray-900 dark:text-gray-100 pr-4">{faq.q}</span>
                   {expandedFaq === i ? <ChevronUp size={18} className="text-gray-400 dark:text-gray-500 shrink-0" /> : <ChevronDown size={18} className="text-gray-400 dark:text-gray-500 shrink-0" />}
                 </button>
-                {expandedFaq === i && (
-                  <div className="px-5 pb-5">
-                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{faq.a}</p>
-                  </div>
-                )}
+                <AnimatePresence initial={false}>
+                  {expandedFaq === i && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-5 pb-5">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{faq.a}</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ))}
           </div>
