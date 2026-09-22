@@ -16,8 +16,8 @@ export default function AddToChromeButton({
 }: AddToChromeButtonProps) {
   const sizes =
     variant === "hero"
-      ? "px-6 py-3 text-base"
-      : "px-8 py-4 text-base";
+      ? "text-base"
+      : "text-base";
 
   return (
     <a
@@ -25,11 +25,11 @@ export default function AddToChromeButton({
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Aggiungi l'estensione Resumari a Chrome"
-      className={`group inline-flex items-center justify-center gap-2.5 font-semibold text-white bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 rounded-full border border-white/15 hover:border-white/30 shadow-sm hover:shadow-lg hover:shadow-black/20 transition-all duration-200 transform hover:-translate-y-0.5 active:scale-95 ${sizes} ${className}`}
+      className={`group flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl font-black text-base bg-white dark:bg-zinc-900 text-gray-900 dark:text-white border-2 border-gray-200 dark:border-zinc-700 hover:border-gray-900 dark:hover:border-white transition-all transform hover:-translate-y-1 hover:shadow-2xl active:scale-95 shadow-xl shadow-gray-200 dark:shadow-none ${sizes} ${className}`}
     >
       <ChromeIcon
         size={variant === "hero" ? 20 : 22}
-        className="text-white shrink-0 transition-transform duration-200 group-hover:scale-110"
+        className="shrink-0 transition-transform duration-200 group-hover:scale-110"
       />
       Aggiungi a Chrome
     </a>
