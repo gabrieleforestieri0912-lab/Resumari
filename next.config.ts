@@ -21,6 +21,32 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  // Routes solo in inglese: redirect alias italiani -> inglesi
+  async redirects() {
+    return [
+      { source: '/impostazioni', destination: '/settings', permanent: true },
+      { source: '/impostazioni/:path*', destination: '/settings/:path*', permanent: true },
+      { source: '/profilo', destination: '/settings', permanent: true },
+      { source: '/profilo/:path*', destination: '/settings/:path*', permanent: true },
+      { source: '/trascrizioni', destination: '/videos', permanent: true },
+      { source: '/trascrizioni/:path*', destination: '/videos/:path*', permanent: true },
+      { source: '/cruscotto', destination: '/dashboard', permanent: true },
+      { source: '/bacheca', destination: '/dashboard', permanent: true },
+      { source: '/contatti', destination: '/contact', permanent: true },
+      { source: '/contatto', destination: '/contact', permanent: true },
+      { source: '/accedi', destination: '/login', permanent: true },
+      { source: '/registrati', destination: '/signup', permanent: true },
+      { source: '/registrazione', destination: '/signup', permanent: true },
+      { source: '/prezzi', destination: '/#pricing', permanent: true },
+      { source: '/prezzo', destination: '/#pricing', permanent: true },
+      { source: '/strumenti', destination: '/tools', permanent: true },
+      { source: '/strumenti/:path*', destination: '/tools/:path*', permanent: true },
+      { source: '/supporto', destination: '/support', permanent: true },
+      { source: '/termini', destination: '/terms', permanent: true },
+      { source: '/privacy-policy', destination: '/privacy', permanent: true },
+      { source: '/chiavi-api', destination: '/api-keys', permanent: true },
+    ]
+  },
 }
 
 export default nextConfig
