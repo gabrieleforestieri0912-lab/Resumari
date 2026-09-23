@@ -257,7 +257,7 @@ export default function DemoSection() {
         setLoading(false);
         const words = fullText.match(/\S+\s*/g) || [fullText];
         let i = 0;
-        const speed = 38;
+        const speed = 40;
         const typeInterval = setInterval(() => {
           if (i < words.length) {
             const partial = words.slice(0, i + 1).join("");
@@ -605,32 +605,7 @@ export default function DemoSection() {
                   )}
 
                   {messages.length === 0 && !selectedChannel ? (
-                    <div className="flex-1 flex flex-col items-center justify-center p-6 text-center overflow-y-auto">
-                      <Image
-                        src="/resumari.png"
-                        alt="Resumari"
-                        width={56}
-                        height={56}
-                        className="w-14 h-14 rounded-2xl object-cover mb-3 shadow-lg shadow-purple-500/20"
-                      />
-                      <h3 className="text-base font-black text-gray-900 dark:text-gray-100 mb-1">
-                        Scegli un canale
-                      </h3>
-                      <p               className="text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-4">
-                        Seleziona un canale dalla sidebar per iniziare a chattare con i suoi contenuti.
-                      </p>
-                      <div className="flex flex-wrap justify-center gap-1.5 max-w-lg">
-                        {(aiSuggestions.length > 0 ? aiSuggestions : FALLBACK_SUGGESTIONS).slice(0, 4).map((s) => (
-                          <button
-                            key={s}
-                            onClick={() => handleSuggestionClick(s)}
-                            className="px-2.5 py-1.5 bg-gray-50 dark:bg-zinc-800 hover:bg-purple-50 dark:hover:bg-purple-950/40 hover:text-purple-700 dark:hover:text-purple-400 border border-gray-100 dark:border-zinc-700 hover:border-purple-200 dark:hover:border-purple-700 rounded-xl text-[11px] font-semibold text-gray-600 dark:text-gray-300 transition-all"
-                          >
-                            {s}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                    <div className="flex-1" />
                   ) : (
                     <div className="flex-1 flex flex-col overflow-hidden relative">
                       {selectedChannel && channelData[selectedChannel.id]?.channelThumbnail && (

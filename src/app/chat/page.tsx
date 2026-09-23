@@ -1018,7 +1018,7 @@ function ChatContent() {
 
         const words = fullText.match(/\S+\s*/g) || [];
         let i = 0;
-        const speed = 60;
+        const speed = 40;
         const typeInterval = setInterval(() => {
           if (i < words.length) {
             const partialText = words.slice(0, i + 1).join("");
