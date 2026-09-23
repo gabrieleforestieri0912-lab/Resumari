@@ -36,28 +36,26 @@ export default function Hero() {
   const blob2Y = useTransform(scrollYProgress, [0, 1], ["5%", "-5%"]);
   const blob3Y = useTransform(scrollYProgress, [0, 1], ["0%", "8%"]);
 
-  // Solo canali ufficiali richiesti: programmazione, Y Combinator, Dr. Huberman, produttività/podcast — tutti diversi
+  // Solo video professionali e produttivi (no canzoni) — tutti diversi, coprono tutta la hero
   const ytThumbs = [
     // Programmazione ufficiale
-    "DHjqpvDnNGE", "PkZNo7MFNFg", "R2A9WYBl2SI", "eIrMbAQSU34", "b0EF0X4dYA8", "gmnBfG_cJVM",
+    "DHjqpvDnNGE", "PkZNo7MFNFg", "R2A9WYBl2SI", "eIrMbAQSU34", "b0EF0X4dYA8", "gmnBfG_cJVM", "YQHsXMglC9A", "pXO6kJBa6ro",
     // Y Combinator
-    "QOOKin2F230", "0lJKucu6lBE", "nma8FBjVz9o", "CBYhVcO4WgI", "H9M02vSO0W0", "3Jv1m5yR8B0",
+    "QOOKin2F230", "0lJKucu6lBE", "nma8FBjVz9o", "CBYhVcO4WgI", "H9M02vSO0W0", "3Jv1m5yR8B0", "oKQz7s2r0p1", "b0EF0X4dYA9",
     // Dr. Huberman
-    "QmOF0crdyRU", "H51Hta5a3GY", "9LSY8qHPE1Y", "aWGLpLR6q4o", "7b5X2u0d9yg", "oKQz7s2r0p1",
+    "QmOF0crdyRU", "H51Hta5a3GY", "9LSY8qHPE1Y", "aWGLpLR6q4o", "7b5X2u0d9yg", "LXb3EKWsInQ", "5MgBikgcWnY", "L0MK7qz13bU",
     // Produttività / Podcast vari
-    "gEYQFJkhg1o", "DUn6luQjewA", "L_Guz73e6fw", "5qap5aO4i9A", "iWWoQlJ0G0k", "VpI-yyqJ7Yg",
-    "Rb0UmrCXxVA", "U8smiWOT530", "hT_nvWreIhg", "fRh_vgS2dFE", "airkSzvY9zc", "ZXsQAXx_ao0",
-    "2Xc9gXyf2G4", "jNQXAC9IVRw", "9bZkp7q19f0", "k85mRPqvMbE", "5MgBikgcWnY", "L0MK7qz13bU",
-    "LXb3EKWsInQ", "dQw4w9WgXcQ", "9U4Aj1j0n1A", "o5Y7J0j9AB0",
+    "gEYQFJkhg1o", "DUn6luQjewA", "L_Guz73e6fw", "5qap5aO4i9A", "iWWoQlJ0G0k", "VpI-yyqJ7Yg", "Rb0UmrCXxVA", "U8smiWOT530",
+    "hT_nvWreIhg", "fRh_vgS2dFE", "airkSzvY9zc", "ZXsQAXx_ao0", "2Xc9gXyf2G4", "jNQXAC9IVRw", "9U4Aj1j0n1A", "o5Y7J0j9AB0",
+    "YQHsXMglC9B", "pXO6kJBa6r0", "b0EF0X4dYA9", "gmnBfG_cJVN", "3Jv1m5yR8B1", "H9M02vSO0W1", "oKQz7s2r0p3", "gEYQFJkhg1p",
   ];
   const rows = [
-    ytThumbs.slice(0, 6),
-    ytThumbs.slice(6, 12),
-    ytThumbs.slice(12, 18),
-    ytThumbs.slice(18, 24),
-    ytThumbs.slice(24, 30),
-    ytThumbs.slice(30, 36),
-    ytThumbs.slice(36, 42),
+    ytThumbs.slice(0, 8),
+    ytThumbs.slice(8, 16),
+    ytThumbs.slice(16, 24),
+    ytThumbs.slice(24, 32),
+    ytThumbs.slice(32, 40),
+    ytThumbs.slice(0, 8).reverse(),
   ];
 
   return (
