@@ -2,6 +2,7 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, ReactNode } from "react";
+import Link from "next/link";
 import {
   Video,
   FileText,
@@ -11,6 +12,8 @@ import {
   Download,
   Sparkles,
 } from "lucide-react";
+
+const slugs = ["video-summary", "file-synthesis", "ai-agent", "advanced-customization", "multilingual-analysis", "smart-export"];
 
 interface Feature {
   title: string;
@@ -147,7 +150,9 @@ export default function FeaturesSection() {
         {/* Grid */}
         <div className="grid gap-6 md:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((feature, index) => (
-            <FeatureCard key={index} index={index} {...feature} />
+            <Link key={index} href={`/features/${slugs[index]}`} className="block">
+              <FeatureCard index={index} {...feature} />
+            </Link>
           ))}
         </div>
       </div>
