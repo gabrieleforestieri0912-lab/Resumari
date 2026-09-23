@@ -2,9 +2,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Check, Star, Zap, Sparkles, Building2, Gem, LucideIcon } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
+import AddToChromeButton from "./AddToChromeButton";
 
 const getToken = (): string | null => {
   return typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -43,8 +43,8 @@ export default function Pricing() {
       color: "purple",
       description: "Perfetto per provare la potenza di Resumari senza impegno.",
       features: [
-        "10 Crediti omaggio — ≈ 10 min video / ~20 pagine (D2: 1 credito ≈ 1 min)",
-        "Trascrizioni base (video)",
+        "10 Crediti omaggio",
+        "Trascrizioni base",
         "Esporta in TXT",
         "Supporto Community",
       ],
@@ -63,10 +63,10 @@ export default function Pricing() {
       description:
         "Per chi usa Resumari con costanza e vuole più spazio per trascrizioni e chat.",
       features: [
-        "1000 Crediti / mese — ≈ 1000 min video / ~2000 pagine",
-        "Crediti per trascrizioni (1) e chat (1)",
+        "1000 Crediti / mese",
+        "Crediti per trascrizioni e chat AI",
         "Reset automatico ogni mese",
-        "Esporta in TXT e JSON (verificato)",
+        "Esporta in TXT e JSON",
         "Supporto via email",
       ],
       buttonText: "Scegli Standard",
@@ -85,10 +85,10 @@ export default function Pricing() {
       description:
         "Ideale per creatori e studenti che analizzano video quotidianamente.",
       features: [
-        "2500 Crediti / mese — ≈ 2500 min video / ~5000 pagine",
-        "Crediti per trascrizioni (1) e chat (1) — D2: 1 credito ≈ 1 min",
+        "2500 Crediti / mese",
+        "Crediti per trascrizioni e chat AI",
         "Reset automatico ogni mese",
-        "Esporta in TXT, JSON, SRT (verificato)",
+        "Formati avanzati (JSON, CSV, SRT)",
         "Accesso API Beta",
         "Supporto prioritario 24/7",
       ],
@@ -99,24 +99,29 @@ export default function Pricing() {
       planType: "pro",
     },
     {
-      name: "Team",
-      priceMonthly: "",
-      priceAnnual: "",
-      periodMonthly: "",
-      periodAnnual: "",
+      name: "Business",
+      priceMonthly: "9.99",
+      priceAnnual: "99.90",
+      periodMonthly: "/mese",
+      periodAnnual: "/anno",
       icon: Building2,
       color: "purple",
-      description: "Per team che vogliono collaborare. Accesso in anteprima — lista d'attesa, nessun addebito ora.",
+      description:
+        "Per team e aziende che necessitano di analisi massiva e supporto.",
       features: [
-        "Lista d'attesa — nessun prezzo mostrato (D5)",
-        "Crediti e limiti da definire con voi",
-        "Accesso anticipato funzioni Team",
-        "Nessuna promessa di fatturazione/Account Manager fino a lancio",
+        "6000 Crediti / mese",
+        "Crediti per trascrizioni e chat AI",
+        "Reset automatico ogni mese",
+        "Team Management",
+        "Fatturazione aziendale",
+        "Custom Workflow",
+        "Account Manager dedicato",
       ],
-      buttonText: "Unisciti alla lista d'attesa",
-      popular: false,
+      buttonText: "Scegli Business",
+      popular: true,
+      badge: "Best Value",
       isFree: false,
-      planType: "team",
+      planType: "business",
     },
   ];
 
@@ -252,13 +257,11 @@ export default function Pricing() {
                 </h3>
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-4xl font-black text-gray-900 dark:text-gray-100 tracking-tighter">
-                    {plan.name === "Team"
-                      ? "Lista d'attesa"
-                      : billingCycle === "monthly"
+                    {billingCycle === "monthly"
                       ? (plan.priceMonthly === "0" ? "Gratis" : `€${plan.priceMonthly}`)
                       : (plan.priceAnnual === "0" ? "Gratis" : `€${plan.priceAnnual}`)}
                   </span>
-                  {!plan.isFree && plan.name !== "Team" && (
+                  {!plan.isFree && (
                     <span className="text-gray-400 font-bold text-xs uppercase tracking-widest">
                       {billingCycle === "monthly" ? plan.periodMonthly : plan.periodAnnual}
                     </span>
@@ -294,15 +297,6 @@ export default function Pricing() {
                     {plan.buttonText}
                   </span>
                 </button>
-              ) : plan.name === "Team" ? (
-                <Link
-                  href="/support"
-                  className="group relative px-1 py-1 rounded-4xl bg-linear-to-r from-purple-600 to-red-600 hover:scale-[1.02] transition-all shadow-lg shadow-purple-500/25 cursor-pointer w-full block text-center"
-                >
-                  <span className="block px-7 py-2 bg-white dark:bg-zinc-950 text-gray-900 dark:text-white text-sm font-bold rounded-[1.8rem] transition-colors group-hover:bg-gray-50 dark:group-hover:bg-zinc-900">
-                    {plan.buttonText}
-                  </span>
-                </Link>
               ) : (
                 <button
                   onClick={() => handleCheckout(plan.planType)}
@@ -318,7 +312,17 @@ export default function Pricing() {
         })}
       </div>
 
-      {/* D1: CTA Chrome nascosta in pricing */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="mt-20 flex flex-col items-center justify-center gap-4"
+      >
+        <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
+          Preferisci lavorare direttamente su YouTube?
+        </p>
+        <AddToChromeButton variant="section" />
+      </motion.div>
 
       <div className="mt-12 text-center">
         <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">

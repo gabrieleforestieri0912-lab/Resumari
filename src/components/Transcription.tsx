@@ -127,36 +127,93 @@ export default function TranscriptionSection() {
           </h2>
         </motion.div>
 
-        {/* Esempio reale prima/dopo */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-gray-100 dark:border-zinc-800"
-          >
-            <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Prima — 12 minuti di video</p>
-            <div className="h-64 overflow-y-auto text-xs text-gray-600 dark:text-zinc-400 leading-relaxed bg-gray-50 dark:bg-zinc-800 rounded-xl p-4 font-mono">
-              [00:00] Ciao oggi parliamo di come funziona il cervello e perché la luce del mattino è fondamentale... [02:34] Il protocollo prevede esposizione 5-10 minuti... [05:12] Dati da studi su 2000 soggetti mostrano miglioramento del sonno... [09:40] Conclusioni e takeaway pratici...
+        {/* Card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="bg-white dark:bg-zinc-900 rounded-2xl p-10 md:p-16 shadow-2xl shadow-purple-500/5 border border-white dark:border-zinc-800"
+        >
+          <div className="max-w-2xl mx-auto text-center">
+            {/* Mode Switcher */}
+            <div className="flex justify-center mb-10">
+              <div className="bg-gray-100 dark:bg-zinc-800 p-1 rounded-2xl flex gap-1">
+                <button
+                  onClick={() => setRouteMode("video")}
+                  className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${mode === "video" ? "bg-white dark:bg-zinc-700 text-gray-900 dark:text-gray-100 shadow-sm" : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"}`}
+                >
+                  Singolo Video
+                </button>
+                <button
+                  onClick={() => setRouteMode("channel")}
+                  className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${mode === "channel" ? "bg-white dark:bg-zinc-700 text-gray-900 dark:text-gray-100 shadow-sm" : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"}`}
+                >
+                  Intero Canale
+                </button>
+              </div>
             </div>
-            <p className="text-[11px] text-gray-400 mt-2">Trascrizione completa estratta dal video</p>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="bg-gradient-to-br from-purple-600 to-red-600 rounded-2xl p-6 text-white"
-          >
-            <p className="text-xs font-black text-white/70 uppercase tracking-widest mb-3">Dopo — riassunto + chat</p>
-            <h4 className="font-black mb-2">Riassunto (3 punti)</h4>
-            <ul className="text-sm leading-relaxed space-y-1 mb-4">
-              <li>• Luce mattutina 5-10 min migliora sonno e focus</li>
-              <li>• Evidenza su 2000 soggetti</li>
-              <li>• Protocollo pratico giornaliero</li>
-            </ul>
-            <div className="bg-white/10 rounded-xl p-3 text-xs">Chat: &quot;Quando fare l&apos;esposizione?&quot; → Risposta con <span className="underline">00:12</span> timestamp cliccabile</div>
-          </motion.div>
-        </div>
+
+            <h3 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-4">
+              {mode === "video" ? "Analizza un Video" : "Analizza un Canale"}
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400 font-medium mb-12">
+              {mode === "video"
+                ? "Incolla il link di un video YouTube per ottenere la trascrizione."
+                : "Incolla il link di un canale (es. @hubermanlab) per trascrivere tutti i video."}
+            </p>
+
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div className="relative group">
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors">
+                  {mode === "video" ? (
+                    <Youtube size={20} />
+                  ) : (
+                    <Users size={20} />
+                  )}
+                </div>
+                <input
+                  type="url"
+                  required
+                  value={url}
+                  onChange={(e) => {
+                    setUrl(e.target.value);
+                    setError("");
+                  }}
+                  placeholder={
+                    mode === "video"
+                      ? "https://youtube.com/watch?v=..."
+                      : "https://youtube.com/@nomecanale"
+                  }
+                  className="w-full pl-14 pr-6 py-5 bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-2xl text-sm font-medium text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-4 focus:ring-purple-500/5 focus:border-purple-200 dark:focus:border-purple-700 transition-all"
+                />
+              </div>
+
+              {error && (
+                <div className="px-4 py-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl text-red-600 dark:text-red-400 text-sm font-medium text-center">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="w-full flex items-center justify-center gap-3 px-8 py-4 bg-gray-900 dark:bg-purple-600 dark:hover:bg-purple-500 text-white rounded-2xl font-black text-base hover:bg-black transition-all transform hover:-translate-y-1 shadow-xl shadow-gray-200 dark:shadow-none active:scale-95"
+              >
+                <Search size={20} />
+                {mode === "video" ? "Trascrivi Video" : "Trascrivi Canale"}
+              </button>
+            </form>
+
+            <div className="mt-8 flex items-center justify-center gap-6 opacity-40">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-900 dark:text-gray-300">
+                <Sparkles size={12} /> No Account Req.
+              </div>
+              <div className="w-1 h-1 rounded-full bg-gray-300 dark:bg-zinc-600" />
+              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-900 dark:text-gray-300">
+                <Sparkles size={12} /> IA Unlimited
+              </div>
+            </div>
+          </div>
+        </motion.div>
 
         {/* Mini CTA */}
         <motion.div

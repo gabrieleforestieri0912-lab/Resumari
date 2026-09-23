@@ -1,32 +1,10 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight } from "lucide-react";
-import { useRef, useState } from "react";
+import { ArrowRight, Zap, Shield, Sparkles } from "lucide-react";
+import { useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-
-function HeroInput() {
-  const router = useRouter();
-  const [value, setValue] = useState("");
-  const [dragOver, setDragOver] = useState(false);
-  const ytRegex = /(youtube\.com|youtu\.be)/i;
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const v = value.trim();
-    if (!v) return;
-    if (ytRegex.test(v)) router.push(`/chat?video=${encodeURIComponent(v)}`);
-    else router.push("/chat");
-  };
-  return (
-    <form onSubmit={onSubmit} onDragOver={(e) => { e.preventDefault(); setDragOver(true); }} onDragLeave={() => setDragOver(false)} onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files?.[0]; if (f) router.push("/chat"); }}
-      className={`flex items-center gap-2 p-2 rounded-2xl border bg-white dark:bg-zinc-900 shadow-lg ${dragOver ? "border-purple-400 ring-2 ring-purple-200" : "border-gray-200 dark:border-zinc-800"}`}>
-      <input value={value} onChange={(e) => setValue(e.target.value)} placeholder="Incolla un link YouTube (video o canale) o trascina qui un PDF/TXT" className="flex-1 px-4 py-3 bg-transparent outline-none text-sm font-medium" />
-      <button type="submit" className="px-5 py-2.5 rounded-xl bg-purple-600 text-white font-black text-sm hover:bg-purple-700 transition-colors">Analizza</button>
-    </form>
-  );
-}
-// D1: estensione non pubblicata → CTA Chrome nascosta in hero (verrà gestita in pricing)
+import AddToChromeButton from "./AddToChromeButton";
 
 export default function Hero() {
   const containerVariants = {
@@ -58,43 +36,70 @@ export default function Hero() {
   const blob2Y = useTransform(scrollYProgress, [0, 1], ["5%", "-5%"]);
   const blob3Y = useTransform(scrollYProgress, [0, 1], ["0%", "8%"]);
 
-  // Fase 1: max 6 in vista, solo video reali pertinenti verificati, no duplicati — 6 unici YT educativi
+  // Solo canali ufficiali richiesti: programmazione, Y Combinator, Dr. Huberman, produttività/podcast — tutti diversi
   const ytThumbs = [
-    "DHjqpvDnNGE", // Fireship - 100s
-    "PkZNo7MFNFg", // freeCodeCamp
-    "QOOKin2F230", // Y Combinator
-    "QmOF0crdyRU", // Huberman Lab
-    "gEYQFJkhg1o", // Lex Fridman
-    "LXb3EKWsInQ", // Veritasium
+    // Programmazione ufficiale
+    "DHjqpvDnNGE", "PkZNo7MFNFg", "R2A9WYBl2SI", "eIrMbAQSU34", "b0EF0X4dYA8", "gmnBfG_cJVM",
+    // Y Combinator
+    "QOOKin2F230", "0lJKucu6lBE", "nma8FBjVz9o", "CBYhVcO4WgI", "H9M02vSO0W0", "3Jv1m5yR8B0",
+    // Dr. Huberman
+    "QmOF0crdyRU", "H51Hta5a3GY", "9LSY8qHPE1Y", "aWGLpLR6q4o", "7b5X2u0d9yg", "oKQz7s2r0p1",
+    // Produttività / Podcast vari
+    "gEYQFJkhg1o", "DUn6luQjewA", "L_Guz73e6fw", "5qap5aO4i9A", "iWWoQlJ0G0k", "VpI-yyqJ7Yg",
+    "Rb0UmrCXxVA", "U8smiWOT530", "hT_nvWreIhg", "fRh_vgS2dFE", "airkSzvY9zc", "ZXsQAXx_ao0",
+    "2Xc9gXyf2G4", "jNQXAC9IVRw", "9bZkp7q19f0", "k85mRPqvMbE", "5MgBikgcWnY", "L0MK7qz13bU",
+    "LXb3EKWsInQ", "dQw4w9WgXcQ", "9U4Aj1j0n1A", "o5Y7J0j9AB0",
+  ];
+  const rows = [
+    ytThumbs.slice(0, 6),
+    ytThumbs.slice(6, 12),
+    ytThumbs.slice(12, 18),
+    ytThumbs.slice(18, 24),
+    ytThumbs.slice(24, 30),
+    ytThumbs.slice(30, 36),
+    ytThumbs.slice(36, 42),
   ];
 
   return (
     <section ref={sectionRef} className="min-h-screen flex flex-col items-center justify-center text-center px-6 pt-28 pb-16 md:pt-44 md:pb-20 overflow-hidden bg-white dark:bg-zinc-950" style={{ position: 'relative' }}>
-      {/* Pannello a griglia — Fase 1: 6 miniature reali pertinenti, no duplicati, lazy, max 6 in vista */}
+      {/* Pannello a griglia con copertine YT — copre TUTTA la hero, brick-wall, scroll orizzontale */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none" aria-hidden>
-        <div className="absolute inset-0 flex items-center justify-center opacity-[0.18] dark:opacity-[0.14]">
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-4 max-w-3xl px-6">
-            {ytThumbs.map((vid) => (
-              <div
-                key={vid}
-                className="shrink-0 w-full aspect-video rounded-lg overflow-hidden bg-white dark:bg-zinc-800 shadow-sm ring-1 ring-black/5 dark:ring-white/5"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={`https://img.youtube.com/vi/${vid}/hqdefault.jpg`}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-full object-cover"
-                  draggable={false}
-                  onError={(e) => { (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${vid}/mqdefault.jpg`; }}
-                />
-              </div>
-            ))}
-          </div>
+        <div className="absolute inset-0 flex flex-col justify-center gap-2 md:gap-3 py-4 opacity-100">
+          {rows.map((row, rowIdx) => (
+            <div
+              key={rowIdx}
+              className="flex gap-3 md:gap-4 w-max will-change-transform"
+              style={{
+                marginLeft: rowIdx % 2 === 1 ? "-86px" : "0px",
+                animation: `hero-scroll 22s linear infinite`,
+                animationDelay: `${rowIdx * -3.2}s`,
+              }}
+            >
+              {[...row, ...row].map((vid, i) => (
+                <div
+                  key={`${rowIdx}-${i}-${vid}`}
+                  className="shrink-0 w-[132px] md:w-[156px] lg:w-[172px] aspect-video rounded-lg overflow-hidden bg-white dark:bg-zinc-800 shadow-md ring-1 ring-black/10 dark:ring-white/10 opacity-95"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`https://img.youtube.com/vi/${vid}/hqdefault.jpg`}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                    draggable={false}
+                    onError={(e) => { (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${vid}/mqdefault.jpg`; }}
+                  />
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
-        <div className="absolute inset-0 bg-white/75 dark:bg-zinc-950/70 backdrop-blur-[0.5px]" />
+        {/* Velo leggero per leggibilità — griglia mantenuta ben visibile e in scorrimento orizzontale */}
+        <div className="absolute inset-0 bg-white/55 dark:bg-zinc-950/45 backdrop-blur-[0.5px]" />
       </div>
+
+      <style>{`@keyframes hero-scroll { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } } @media (prefers-reduced-motion: reduce) { [style*="hero-scroll"] { animation: none !important; } }`}</style>
 
       {/* Blobs decorativi dietro la griglia */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none opacity-40">
@@ -107,39 +112,72 @@ export default function Hero() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="max-w-3xl w-full flex flex-col items-center relative z-10"
+        className="max-w-7xl min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] w-full flex flex-col items-center relative z-10"
       >
+        {/* Title */}
         <motion.h1
           variants={itemVariants}
-          className="text-4xl md:text-5xl font-black leading-tight text-gray-900 dark:text-gray-100 tracking-tight"
+          className="text-5xl md:text-7xl font-black leading-[1.1] text-gray-900 dark:text-gray-100 tracking-tight"
         >
-          Video, documenti e canali YouTube: <span className="bg-clip-text text-transparent bg-linear-to-r from-purple-600 via-red-500 to-red-600">riassumi, trascrivi e chatta</span> con qualsiasi contenuto.
+          Smettila di rincorrere il tempo.{" "}
+          <span className="relative inline-block">
+            <span className="bg-clip-text text-transparent bg-linear-to-r from-purple-600 via-red-500 to-red-600">
+              Trascrivi ore di video
+            </span>
+
+          </span>
+          <br />
+          <span className="text-gray-900 dark:text-gray-100">
+            in pochi{" "}
+            <span className="inline-block px-4 -mx-2 italic text-glow-pulse py-1">
+              semplici secondi
+            </span>
+          </span>
         </motion.h1>
+
+        {/* Subtitle */}
         <motion.p
           variants={itemVariants}
-          className="mt-4 text-base md:text-lg text-gray-500 dark:text-gray-400 max-w-2xl leading-relaxed font-medium"
+          className="mt-8 text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-3xl leading-relaxed font-semibold tracking-tight"
         >
-          Incolla un link o trascina un file — l&apos;IA estrae riassunto, trascrizione (video) e chat contestuale.
+          Basta subire il sovraccarico di informazioni. La nostra IA distilla i
+          concetti chiave da video YouTube e documenti infiniti, consegnandoti
+          solo la conoscenza che conta per il tuo successo.
         </motion.p>
 
-        {/* D8: unico campo link + drag&drop file */}
-        <motion.div variants={itemVariants} className="mt-8 w-full">
-          <HeroInput />
-          <div className="mt-3 flex justify-center gap-2">
-            <span className="px-3 py-1 rounded-full bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 text-xs font-bold text-purple-700 dark:text-purple-300">Video</span>
-            <span className="px-3 py-1 rounded-full bg-gray-50 dark:bg-zinc-800 border text-xs font-bold text-gray-600 dark:text-zinc-300">Documento</span>
-            <span className="px-3 py-1 rounded-full bg-gray-50 dark:bg-zinc-800 border text-xs font-bold text-gray-600 dark:text-zinc-300">Canale</span>
-          </div>
-          <p className="mt-3 text-xs text-gray-400 dark:text-zinc-500 font-medium">10 crediti gratis con account — accedi per iniziare. Nessun costo finché non usi i crediti.</p>
-        </motion.div>
-
-        <motion.div variants={itemVariants} className="mt-6">
+        {/* CTA Buttons */}
+        <motion.div
+          variants={itemVariants}
+          className="mt-10 flex flex-col sm:flex-row flex-wrap gap-4 w-full max-w-2xl justify-center items-center"
+        >
           <Link
             href="/chat"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-zinc-900 font-black text-sm hover:opacity-90 transition-opacity"
+            aria-label="Inizia ora a riassumere i tuoi video gratuitamente"
+            className="group flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl text-white font-black text-base bg-linear-to-r from-purple-600 to-red-600 hover:from-purple-700 hover:to-red-700 transition-all transform hover:-translate-y-1 hover:shadow-2xl active:scale-95 shadow-xl shadow-purple-500/25"
           >
-            Vai alla chat <ArrowRight size={16} />
+            Prova Gratis
+            <ArrowRight
+              size={18}
+              className="group-hover:translate-x-1 transition-transform"
+            />
           </Link>
+          <AddToChromeButton variant="hero" />
+        </motion.div>
+
+        {/* Trust Badges */}
+        <motion.div
+          variants={itemVariants}
+          className="mt-16 flex flex-wrap justify-center gap-8 opacity-40 grayscale hover:grayscale-0 transition-all duration-500"
+        >
+          <div className="flex items-center gap-2 font-bold text-sm tracking-tighter uppercase">
+            <Zap size={18} fill="currentColor" /> Turbo Processing
+          </div>
+          <div className="flex items-center gap-2 font-bold text-sm tracking-tighter uppercase">
+            <Shield size={18} fill="currentColor" /> Secure Data
+          </div>
+          <div className="flex items-center gap-2 font-bold text-sm tracking-tighter uppercase">
+            <Sparkles size={18} fill="currentColor" /> AI Powered
+          </div>
         </motion.div>
       </motion.div>
     </section>

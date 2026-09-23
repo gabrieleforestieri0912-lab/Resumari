@@ -446,7 +446,7 @@ export default function DemoSection() {
 
   return (
         <section className="w-full px-4 md:px-6 min-[1920px]:px-10 min-[2560px]:px-16 py-12 md:py-16 min-[1920px]:py-20 relative" id="demo">
-      <div className="absolute top-8 left-0 z-20 bg-gradient-to-r from-purple-600 to-red-600 text-white text-[11px] font-black tracking-wider uppercase px-10 py-1.5 shadow-lg rotate-[-30deg] -translate-x-2 origin-top-left">Prova la demo</div>
+      <div className="absolute top-8 left-0 z-20 bg-gradient-to-r from-purple-600 to-red-600 text-white text-[11px] font-black tracking-wider uppercase px-10 py-1.5 shadow-lg rotate-[-30deg] -translate-x-2 origin-top-left rounded-full">Prova la demo</div>
       <div className="max-w-[1360px] lg:max-w-[1420px] xl:max-w-[1480px] min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] mx-auto relative">
         <div className="text-center mb-8 min-[1920px]:mb-10">
           <div className="w-16 h-1 bg-gradient-to-r from-purple-600 to-red-500 rounded-full mb-4 mx-auto" />

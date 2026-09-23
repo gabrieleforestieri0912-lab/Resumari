@@ -12,20 +12,23 @@ interface Step {
 const steps: Step[] = [
   {
     number: 1,
-    title: "Incolla un link o carica un file",
-    description: "YouTube (video o canale) o trascina PDF/TXT. Un solo campo per tutto.",
+    title: "Incolla o Carica",
+    description:
+      "Inserisci il testo direttamente, carica un documento o incolla il link di un video da piattaforme come YouTube.",
     icon: <MousePointerClick className="w-6 h-6" />,
   },
   {
     number: 2,
-    title: "Scegli cosa ottenere",
-    description: "Riassunto, trascrizione (solo video) o chat con il contenuto. L'IA usa solo ciò che hai fornito.",
+    title: "Analisi Intelligente",
+    description:
+      "La nostra intelligenza artificiale elabora il contenuto, identificando concetti chiave e distillando l'essenziale.",
     icon: <Cpu className="w-6 h-6" />,
   },
   {
     number: 3,
-    title: "Esporta o continua a chattare",
-    description: "Scarica in TXT/JSON/SRT o continua a fare domande con timestamp cliccabili.",
+    title: "Ottieni il Riassunto",
+    description:
+      "Ricevi un riassunto conciso e accurato, pronto per essere utilizzato. Risparmia tempo prezioso.",
     icon: <Layout className="w-6 h-6" />,
   },
 ];

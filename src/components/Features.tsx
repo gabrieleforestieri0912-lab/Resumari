@@ -25,7 +25,8 @@ interface Feature {
 const features: Feature[] = [
   {
     title: "Riassunto Video Universale",
-    description: "Trasforma qualsiasi video YouTube in un riassunto testuale chiaro e conciso con capitoli e timestamp.",
+    description:
+      "Trasforma qualsiasi video, da YouTube a qualsiasi altra piattaforma, in un riassunto testuale chiaro e conciso.",
     icon: <Video size={28} />,
     highlighted: true,
   },
@@ -36,8 +37,9 @@ const features: Feature[] = [
     icon: <FileText size={24} />,
   },
   {
-    title: "Agente IA Interattivo",
-    description: "Chiacchiera con il nostro Agente IA per affinare i tuoi riassunti ed esplorare dettagli specifici.",
+    title: "Agente AI Interattivo",
+    description:
+      "Chiacchiera con il nostro Agente AI per affinare i tuoi riassunti ed esplorare dettagli specifici.",
     icon: <MessageSquare size={24} />,
   },
   {
@@ -49,12 +51,14 @@ const features: Feature[] = [
   },
   {
     title: "Analisi Multilingua",
-    description: "Trascrivi e riassumi in italiano e inglese con rilevamento automatico della lingua.",
+    description:
+      "Trascrivi e riassumi contenuti in oltre 50 lingue diverse, superando ogni barriera linguistica.",
     icon: <Globe size={24} />,
   },
   {
     title: "Esportazione Intelligente",
-    description: "Salva i tuoi risultati in TXT, JSON o SRT e organizza la tua conoscenza facilmente.",
+    description:
+      "Salva i tuoi risultati in PDF, Word o testo semplice e organizza la tua conoscenza facilmente.",
     icon: <Download size={24} />,
   },
 ];

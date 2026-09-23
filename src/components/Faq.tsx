@@ -14,15 +14,12 @@ const faqData: FaqItem[] = [
   {
     question: "Come funziona il riassunto video?",
     answer:
-      "Incolla un link YouTube nella hero o nella chat. L'IA trascrive l'audio (se mancano i sottotitoli) e genera un riassunto con capitoli e timestamp cliccabili in pochi secondi.",
+      "Basta incollare il link del video (es. da YouTube) nella barra di ricerca. La nostra IA analizza l'audio e il testo, estraendo i punti chiave per fornirti un riassunto conciso e strutturato in pochi secondi.",
   },
   {
     question: "Quali tipi di file posso riassumere?",
-    answer: "Al momento PDF e TXT (max 16k caratteri estratti). DOCX/PPTX e foto con testo richiedono il modello vision e non sono garantiti: verifica la matrice di capacità.",
-  },
-  {
-    question: "Posso analizzare un intero canale YouTube?",
-    answer: "Sì. Incolla il link del canale (es. @hubermanlab) e scegli 'Intero Canale': trascriviamo fino a 10 video del canale per chattare su tutti i contenuti.",
+    answer:
+      "Oltre ai video, puoi caricare documenti di testo come PDF, DOCX e TXT, presentazioni PowerPoint e persino immagini contenenti testo (OCR). Il sistema processa il contenuto e genera un'analisi dettagliata.",
   },
   {
     question: "C'è un limite di lunghezza per i riassunti?",
@@ -32,7 +29,7 @@ const faqData: FaqItem[] = [
   {
     question: "Posso personalizzare il tono del riassunto?",
     answer:
-      "Assolutamente. Dopo la generazione, puoi interagire con l'Agente IA per chiedere di cambiare il registro (es. più formale o più semplice), estrarre solo i dati tecnici o creare una lista di task operativi.",
+      "Assolutamente. Dopo la generazione, puoi interagire con l'Agente AI per chiedere di cambiare il registro (es. più formale o più semplice), estrarre solo i dati tecnici o creare una lista di task operativi.",
   },
 ];
 
@@ -77,9 +74,6 @@ export default function Faq() {
                 }`}
               >
                 <button
-                  aria-expanded={isActive}
-                  aria-controls={`faq-answer-${index}`}
-                  id={`faq-question-${index}`}
                   className="w-full flex justify-between items-center p-4 text-left cursor-pointer"
                   onClick={() => setActiveIndex(isActive ? null : index)}
                 >
@@ -95,16 +89,21 @@ export default function Faq() {
                   </div>
                 </button>
 
-                <div
-                  id={`faq-answer-${index}`}
-                  role="region"
-                  aria-labelledby={`faq-question-${index}`}
-                  className={`overflow-hidden transition-all ${isActive ? "block" : "hidden"}`}
-                >
-                  <div className="px-4 pb-4 text-sm text-gray-600 dark:text-gray-300 leading-relaxed border-t border-gray-50 dark:border-zinc-800 pt-3 mt-1">
-                    {item.answer}
-                  </div>
-                </div>
+                <AnimatePresence>
+                  {isActive && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-4 pb-4 text-sm text-gray-600 dark:text-gray-300 leading-relaxed border-t border-gray-50 dark:border-zinc-800 pt-3 mt-1">
+                        {item.answer}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             );
           })}
