@@ -293,6 +293,20 @@ export default function Chat() {
     return () => window.clearInterval(timer);
   }, [isTyping]);
 
+  useEffect(() => {
+    function handleOutside(e: MouseEvent) {
+      const target = e.target as Node;
+      if (newChatMenuRef.current && !newChatMenuRef.current.contains(target)) {
+        setIsNewChatMenuOpen(false);
+      }
+      if (askMenuRef.current && !askMenuRef.current.contains(target)) {
+        setIsAskMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, []);
+
   /**
    * Gestisce l'aggiunta di un'immagine come allegato
    */
@@ -1448,6 +1462,24 @@ export default function Chat() {
     setChatMessagesMap((prev) => ({ ...prev, [newChat.id]: [] }));
     setCurrentVideoId(null);
     setHasStartedChat(false);
+    setIsNewChatMenuOpen(false);
+  };
+
+  const createNewDocChat = () => {
+    const newChat = {
+      id: Date.now(),
+      title: "Chat Documenti",
+      createdAt: Date.now(),
+    };
+    setChats([newChat, ...chats]);
+    setActiveChatId(newChat.id);
+    setMessages([]);
+    setChatMessagesMap((prev) => ({ ...prev, [newChat.id]: [] }));
+    setCurrentVideoId(null);
+    setCurrentFileContext("");
+    setHasStartedChat(true);
+    setIsNewChatMenuOpen(false);
+    setTimeout(() => textareaRef.current?.focus(), 100);
   };
 
   /**
@@ -1606,6 +1638,8 @@ export default function Chat() {
   const askMenuRef = useRef<HTMLDivElement>(null);
   const [deleteConfirmChatId, setDeleteConfirmChatId] = useState<any>(null);
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
+  const [isNewChatMenuOpen, setIsNewChatMenuOpen] = useState(false);
+  const newChatMenuRef = useRef<HTMLDivElement>(null);
 
   /**
    * Recupera suggerimenti di domande dall'AI basandosi sul contesto attuale
@@ -2273,17 +2307,56 @@ export default function Chat() {
 
             <div className="pb-6 px-4 md:px-8 max-w-4xl w-full mx-auto">
               <div className="flex justify-between items-center gap-2 mb-3 relative">
-                <button
-                  onClick={createNewChat}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-transparent border border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all text-xs font-bold shadow-sm group"
-                  title="Inizia una nuova conversazione"
-                >
-                  <Plus
-                    size={14}
-                    className="text-gray-900 dark:text-zinc-100 group-hover:scale-110 transition-transform"
-                  />
-                  Nuova Chat
-                </button>
+                <div className="relative" ref={newChatMenuRef}>
+                  <button
+                    onClick={() => setIsNewChatMenuOpen(!isNewChatMenuOpen)}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-transparent border border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all text-xs font-bold shadow-sm group"
+                    title="Inizia una nuova conversazione"
+                  >
+                    <Plus
+                      size={14}
+                      className={`text-gray-900 dark:text-zinc-100 group-hover:scale-110 transition-transform ${isNewChatMenuOpen ? "rotate-45" : ""}`}
+                    />
+                    Nuova Chat
+                    <ChevronDown size={12} className={`transition-transform ${isNewChatMenuOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  <AnimatePresence>
+                    {isNewChatMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute bottom-full left-0 mb-2 w-64 bg-white dark:bg-zinc-900 rounded-xl border border-gray-100 dark:border-zinc-800 shadow-xl z-20 overflow-hidden"
+                      >
+                        <button
+                          onClick={createNewChat}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950 flex items-center justify-center text-red-600 dark:text-red-400 shrink-0">
+                            <Video size={16} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-gray-900 dark:text-zinc-100">Chat video YouTube</p>
+                            <p className="text-xs text-gray-500 dark:text-zinc-400">Incolla un link per iniziare</p>
+                          </div>
+                        </button>
+                        <button
+                          onClick={createNewDocChat}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors border-t border-gray-100 dark:border-zinc-800"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-950 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
+                            <FileText size={16} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-gray-900 dark:text-zinc-100">Chat documenti</p>
+                            <p className="text-xs text-gray-500 dark:text-zinc-400">Chat normale con input al centro</p>
+                          </div>
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
 
                 <div className="flex items-center gap-2">
                   <button
@@ -2501,9 +2574,6 @@ export default function Chat() {
                 >
                   {isTyping ? <Square size={14} className="fill-current" /> : <Send size={16} />}
                 </button>
-                <div className="absolute left-3 -top-6 text-[9px] text-gray-400 dark:text-zinc-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                  Trascina immagini qui o incollale con Ctrl+V
-                </div>
               </div>
             </div>
           </>
