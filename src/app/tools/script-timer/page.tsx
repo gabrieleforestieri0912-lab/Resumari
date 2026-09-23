@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ToolExtraSections from "@/components/tools/ToolExtraSections";
 import Breadcrumb from "@/components/Breadcrumb";
 import { Clock, FileText } from "lucide-react";
 
@@ -115,6 +116,7 @@ export default function ScriptTimerPage() {
             </div>
           )}
         </div>
+        <ToolExtraSections slug="script-timer" />
       </main>
       <Footer />
     </div>

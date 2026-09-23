@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ToolExtraSections from "@/components/tools/ToolExtraSections";
 import Breadcrumb from "@/components/Breadcrumb";
 import { Hash, Eye } from "lucide-react";
 
@@ -159,6 +160,7 @@ export default function TitleCounterPage() {
             )}
           </div>
         </div>
+        <ToolExtraSections slug="title-counter" />
       </main>
       <Footer />
     </div>

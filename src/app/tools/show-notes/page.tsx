@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ToolExtraSections from "@/components/tools/ToolExtraSections";
 import Breadcrumb from "@/components/Breadcrumb";
 import { Mic, Copy, Check, FileText } from "lucide-react";
 
@@ -251,6 +252,7 @@ export default function ShowNotesPage() {
             </div>
           )}
         </div>
+        <ToolExtraSections slug="show-notes" />
       </main>
       <Footer />
     </div>

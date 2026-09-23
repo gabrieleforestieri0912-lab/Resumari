@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ToolExtraSections from "@/components/tools/ToolExtraSections";
 import Breadcrumb from "@/components/Breadcrumb";
 import { List, Copy, Check, Plus, Trash2, AlertCircle } from "lucide-react";
 
@@ -247,6 +248,7 @@ export default function TimestampGeneratorPage() {
             />
           </div>
         </div>
+        <ToolExtraSections slug="timestamp-generator" />
       </main>
       <Footer />
     </div>

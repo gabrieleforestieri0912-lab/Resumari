@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ToolExtraSections from "@/components/tools/ToolExtraSections";
 import Breadcrumb from "@/components/Breadcrumb";
 import { Download, LinkIcon, AlertCircle } from "lucide-react";
 
@@ -150,6 +151,7 @@ export default function ThumbnailDownloaderPage() {
             </div>
           )}
         </div>
+        <ToolExtraSections slug="thumbnail-downloader" />
       </main>
       <Footer />
     </div>

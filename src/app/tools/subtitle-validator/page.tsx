@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ToolExtraSections from "@/components/tools/ToolExtraSections";
 import Breadcrumb from "@/components/Breadcrumb";
 import { CheckSquare, AlertTriangle, XCircle } from "lucide-react";
 
@@ -245,6 +246,7 @@ export default function SubtitleValidatorPage() {
             </>
           )}
         </div>
+        <ToolExtraSections slug="subtitle-validator" />
       </main>
       <Footer />
     </div>

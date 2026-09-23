@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ToolExtraSections from "@/components/tools/ToolExtraSections";
 import Breadcrumb from "@/components/Breadcrumb";
 import { FileText, Copy, Check, ArrowRightLeft } from "lucide-react";
 
@@ -216,6 +217,7 @@ export default function SubtitleConverterPage() {
             </button>
           </div>
         </div>
+        <ToolExtraSections slug="subtitle-converter" />
       </main>
       <Footer />
     </div>

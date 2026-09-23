@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ToolExtraSections from "@/components/tools/ToolExtraSections";
 import Breadcrumb from "@/components/Breadcrumb";
 import { DollarSign, TrendingUp, Award } from "lucide-react";
 
@@ -198,6 +199,7 @@ export default function EarningsCalculatorPage() {
             </div>
           </div>
         </div>
+        <ToolExtraSections slug="earnings-calculator" />
       </main>
       <Footer />
     </div>

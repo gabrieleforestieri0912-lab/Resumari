@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ToolExtraSections from "@/components/tools/ToolExtraSections";
 import Breadcrumb from "@/components/Breadcrumb";
 import { Tag, Copy, Check, Sparkles, X } from "lucide-react";
 
@@ -215,6 +216,7 @@ export default function TagGeneratorPage() {
             </>
           )}
         </div>
+        <ToolExtraSections slug="tag-generator" />
       </main>
       <Footer />
     </div>
