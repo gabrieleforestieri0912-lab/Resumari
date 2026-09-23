@@ -36,60 +36,49 @@ export default function Hero() {
   const blob2Y = useTransform(scrollYProgress, [0, 1], ["5%", "-5%"]);
   const blob3Y = useTransform(scrollYProgress, [0, 1], ["0%", "8%"]);
 
-  // Solo canali ufficiali richiesti: programmazione, Y Combinator, Dr. Huberman, produttività/podcast
+  // Solo canali ufficiali richiesti: programmazione, Y Combinator, Dr. Huberman, produttività/podcast — tutti diversi
   const ytThumbs = [
     // Programmazione ufficiale
-    "DHjqpvDnNGE", // Fireship - JS 100s
-    "PkZNo7MFNFg", // freeCodeCamp
-    "R2A9WYBl2SI", // Fireship - altro
-    "eIrMbAQSU34", // freeCodeCamp Python
+    "DHjqpvDnNGE", "PkZNo7MFNFg", "R2A9WYBl2SI", "eIrMbAQSU34", "b0EF0X4dYA8", "gmnBfG_cJVM",
     // Y Combinator
-    "QOOKin2F230", // YC
-    "0lJKucu6lBE", // YC How to Build Future
+    "QOOKin2F230", "0lJKucu6lBE", "nma8FBjVz9o", "CBYhVcO4WgI", "H9M02vSO0W0", "3Jv1m5yR8B0",
     // Dr. Huberman
-    "QmOF0crdyRU", // Huberman Lab
-    "7b5X2u0d9yg", // Huberman
-    "H51Hta5a3GY", // Huberman Trailer
+    "QmOF0crdyRU", "H51Hta5a3GY", "9LSY8qHPE1Y", "aWGLpLR6q4o", "7b5X2u0d9yg", "oKQz7s2r0p1",
     // Produttività / Podcast vari
-    "gEYQFJkhg1o", // Lex Fridman
-    "DUn6luQjewA", // Lex - Elon
-    "5qap5aO4i9A", // Jeff Su / Productivity
-    "iWWoQlJ0G0k", // Ali Abdaal produttività
-    "o5Y7J0j9AB0", // Podcast produttività
-    "VpI-yyqJ7Yg", // Podcast vari
-    "Rb0UmrCXxVA", // Podcast vari
-    "U8smiWOT530", // Podcast vari
-    "hT_nvWreIhg", // Productivity
+    "gEYQFJkhg1o", "DUn6luQjewA", "L_Guz73e6fw", "5qap5aO4i9A", "iWWoQlJ0G0k", "VpI-yyqJ7Yg",
+    "Rb0UmrCXxVA", "U8smiWOT530", "hT_nvWreIhg", "fRh_vgS2dFE", "airkSzvY9zc", "ZXsQAXx_ao0",
+    "2Xc9gXyf2G4", "jNQXAC9IVRw", "9bZkp7q19f0", "k85mRPqvMbE", "5MgBikgcWnY", "L0MK7qz13bU",
+    "LXb3EKWsInQ", "dQw4w9WgXcQ", "9U4Aj1j0n1A", "o5Y7J0j9AB0",
   ];
   const rows = [
-    ytThumbs.slice(0, 4),
-    ytThumbs.slice(4, 8),
-    ytThumbs.slice(8, 12),
-    ytThumbs.slice(12, 16),
-    ytThumbs.slice(4, 8).reverse(),
+    ytThumbs.slice(0, 6),
+    ytThumbs.slice(6, 12),
+    ytThumbs.slice(12, 18),
+    ytThumbs.slice(18, 24),
+    ytThumbs.slice(24, 30),
+    ytThumbs.slice(30, 36),
+    ytThumbs.slice(36, 42),
   ];
 
   return (
     <section ref={sectionRef} className="min-h-screen flex flex-col items-center justify-center text-center px-6 pt-28 pb-16 md:pt-44 md:pb-20 overflow-hidden bg-white dark:bg-zinc-950" style={{ position: 'relative' }}>
-      {/* Pannello a griglia con copertine YT — brick wall, scroll fluido orizzontale destra→sinistra */}
+      {/* Pannello a griglia con copertine YT — copre TUTTA la hero, brick-wall, scroll orizzontale */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none" aria-hidden>
-        <div className="absolute inset-0 flex flex-col gap-2 md:gap-3 py-8 opacity-100">
+        <div className="absolute inset-0 flex flex-col justify-center gap-2 md:gap-3 py-4 opacity-100">
           {rows.map((row, rowIdx) => (
             <div
               key={rowIdx}
               className="flex gap-3 md:gap-4 w-max will-change-transform"
               style={{
                 marginLeft: rowIdx % 2 === 1 ? "-86px" : "0px",
-                animation: `hero-scroll 38s linear infinite`,
-                animationDelay: `${rowIdx * -6}s`,
-                transform: "translateZ(0)",
-                backfaceVisibility: "hidden" as const,
+                animation: `hero-scroll 22s linear infinite`,
+                animationDelay: `${rowIdx * -3.2}s`,
               }}
             >
-              {[...row, ...row, ...row, ...row].map((vid, i) => (
+              {[...row, ...row].map((vid, i) => (
                 <div
                   key={`${rowIdx}-${i}-${vid}`}
-                  className="shrink-0 w-[132px] md:w-[156px] lg:w-[172px] aspect-video rounded-lg overflow-hidden bg-white dark:bg-zinc-800 shadow-md ring-1 ring-black/10 dark:ring-white/10 opacity-90"
+                  className="shrink-0 w-[132px] md:w-[156px] lg:w-[172px] aspect-video rounded-lg overflow-hidden bg-white dark:bg-zinc-800 shadow-md ring-1 ring-black/10 dark:ring-white/10 opacity-95"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -110,7 +99,7 @@ export default function Hero() {
         <div className="absolute inset-0 bg-white/55 dark:bg-zinc-950/45 backdrop-blur-[0.5px]" />
       </div>
 
-      <style>{`@keyframes hero-scroll { from { transform: translate3d(0,0,0); } to { transform: translate3d(-25%,0,0); } } @media (prefers-reduced-motion: reduce) { [style*="hero-scroll"] { animation: none !important; } }`}</style>
+      <style>{`@keyframes hero-scroll { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } } @media (prefers-reduced-motion: reduce) { [style*="hero-scroll"] { animation: none !important; } }`}</style>
 
       {/* Blobs decorativi dietro la griglia */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none opacity-40">
