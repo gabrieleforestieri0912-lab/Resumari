@@ -312,17 +312,7 @@ export default function Pricing() {
         })}
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="mt-20 flex flex-col items-center justify-center gap-4"
-      >
-        <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
-          Preferisci lavorare direttamente su YouTube?
-        </p>
-        <AddToChromeButton variant="section" />
-      </motion.div>
+      {/* D1: CTA Chrome nascosta in pricing */}
 
       <div className="mt-12 text-center">
         <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">

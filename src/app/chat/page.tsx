@@ -2009,15 +2009,7 @@ function ChatContent() {
                   )}
                 </form>
 
-                <div className="mt-6 flex items-center justify-center gap-4 opacity-40">
-                  <div className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-gray-900 dark:text-zinc-200">
-                    <Sparkles size={10} /> IA Unlimited
-                  </div>
-                  <div className="w-1 h-1 rounded-full bg-gray-300 dark:bg-zinc-700" />
-                  <div className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-gray-900 dark:text-zinc-200">
-                    <MessageSquare size={10} /> Chat Intelligente
-                  </div>
-                </div>
+                {/* D3: rimosso IA Unlimited — richiede login */}
               </div>
             </div>
           </div>
