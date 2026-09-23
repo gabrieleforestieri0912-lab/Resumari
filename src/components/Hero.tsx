@@ -36,25 +36,44 @@ export default function Hero() {
   const blob2Y = useTransform(scrollYProgress, [0, 1], ["5%", "-5%"]);
   const blob3Y = useTransform(scrollYProgress, [0, 1], ["0%", "8%"]);
 
-  // Copertine YT educative per il pannello a griglia in background (brick-wall, scroll orizzontale)
+  // Solo canali ufficiali richiesti: programmazione, Y Combinator, Dr. Huberman, produttività/podcast
   const ytThumbs = [
-    "jNQXAC9IVRw", "dQw4w9WgXcQ", "9bZkp7q19f0", "k85mRPqvMbE", "5MgBikgcWnY", "L0MK7qz13bU",
-    "LXb3EKWsInQ", "VpI-yyqJ7Yg", "Rb0UmrCXxVA", "YQHsXMglC9A", "pXO6kJBa6ro", "U8smiWOT530",
-    "hT_nvWreIhg", "QcIy9NiNbmo", "fRh_vgS2dFE", "airkSzvY9zc", "ZXsQAXx_ao0", "2Xc9gXyf2G4",
+    // Programmazione ufficiale
+    "DHjqpvDnNGE", // Fireship - JS 100s
+    "PkZNo7MFNFg", // freeCodeCamp
+    "R2A9WYBl2SI", // Fireship - altro
+    "eIrMbAQSU34", // freeCodeCamp Python
+    // Y Combinator
+    "QOOKin2F230", // YC
+    "0lJKucu6lBE", // YC How to Build Future
+    // Dr. Huberman
+    "QmOF0crdyRU", // Huberman Lab
+    "7b5X2u0d9yg", // Huberman
+    "H51Hta5a3GY", // Huberman Trailer
+    // Produttività / Podcast vari
+    "gEYQFJkhg1o", // Lex Fridman
+    "DUn6luQjewA", // Lex - Elon
+    "5qap5aO4i9A", // Jeff Su / Productivity
+    "iWWoQlJ0G0k", // Ali Abdaal produttività
+    "o5Y7J0j9AB0", // Podcast produttività
+    "VpI-yyqJ7Yg", // Podcast vari
+    "Rb0UmrCXxVA", // Podcast vari
+    "U8smiWOT530", // Podcast vari
+    "hT_nvWreIhg", // Productivity
   ];
   const rows = [
-    ytThumbs.slice(0, 6),
-    ytThumbs.slice(6, 12),
-    ytThumbs.slice(12, 18),
-    ytThumbs.slice(0, 6).reverse(),
-    ytThumbs.slice(6, 12).reverse(),
+    ytThumbs.slice(0, 4),
+    ytThumbs.slice(4, 8),
+    ytThumbs.slice(8, 12),
+    ytThumbs.slice(12, 16),
+    ytThumbs.slice(4, 8).reverse(),
   ];
 
   return (
     <section ref={sectionRef} className="min-h-screen flex flex-col items-center justify-center text-center px-6 pt-28 pb-16 md:pt-44 md:pb-20 overflow-hidden bg-white dark:bg-zinc-950" style={{ position: 'relative' }}>
-      {/* Pannello a griglia con copertine YT — brick wall, scroll fluido destra→sinistra */}
+      {/* Pannello a griglia con copertine YT — brick wall, scroll fluido orizzontale destra→sinistra */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none" aria-hidden>
-        <div className="absolute inset-0 flex flex-col gap-2 md:gap-3 py-6 opacity-[0.38] dark:opacity-[0.32]">
+        <div className="absolute inset-0 flex flex-col gap-2 md:gap-3 py-8 opacity-100">
           {rows.map((row, rowIdx) => (
             <div
               key={rowIdx}
@@ -70,31 +89,31 @@ export default function Hero() {
               {[...row, ...row, ...row, ...row].map((vid, i) => (
                 <div
                   key={`${rowIdx}-${i}-${vid}`}
-                  className="shrink-0 w-[132px] md:w-[156px] lg:w-[172px] aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-zinc-800 shadow-sm ring-1 ring-black/5 dark:ring-white/5"
+                  className="shrink-0 w-[132px] md:w-[156px] lg:w-[172px] aspect-video rounded-lg overflow-hidden bg-white dark:bg-zinc-800 shadow-md ring-1 ring-black/10 dark:ring-white/10 opacity-90"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`https://img.youtube.com/vi/${vid}/mqdefault.jpg`}
+                    src={`https://img.youtube.com/vi/${vid}/hqdefault.jpg`}
                     alt=""
                     loading="lazy"
                     decoding="async"
                     className="w-full h-full object-cover"
                     draggable={false}
+                    onError={(e) => { (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${vid}/mqdefault.jpg`; }}
                   />
                 </div>
               ))}
             </div>
           ))}
         </div>
-        {/* Velo leggero per leggibilità testo hero — mantiene griglia ben visibile */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/42 via-white/30 to-white/55 dark:from-zinc-950/55 dark:via-zinc-950/40 dark:to-zinc-950/65" />
-        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] bg-size-[32px_32px] mask-[radial-gradient(ellipse_65%_60%_at_50%_38%,#000_60%,transparent_92%)] opacity-[0.10] dark:opacity-[0.06]" />
+        {/* Velo leggero per leggibilità — griglia mantenuta ben visibile e in scorrimento orizzontale */}
+        <div className="absolute inset-0 bg-white/55 dark:bg-zinc-950/45 backdrop-blur-[0.5px]" />
       </div>
 
       <style>{`@keyframes hero-scroll { from { transform: translate3d(0,0,0); } to { transform: translate3d(-25%,0,0); } } @media (prefers-reduced-motion: reduce) { [style*="hero-scroll"] { animation: none !important; } }`}</style>
 
-      {/* Background Decorative Blobs with Parallax — dietro la griglia */}
-      <div className="absolute inset-0 z-[1] overflow-hidden pointer-events-none opacity-60">
+      {/* Blobs decorativi dietro la griglia */}
+      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none opacity-40">
         <motion.div style={{ y: blob1Y }} className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-100/40 dark:bg-purple-900/18 rounded-full blur-[140px] animate-pulse" />
         <motion.div style={{ y: blob2Y }} className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-red-50/40 dark:bg-red-900/16 rounded-full blur-[120px]" />
         <motion.div style={{ y: blob3Y }} className="absolute top-[20%] right-[15%] w-[30%] h-[30%] bg-blue-50/30 dark:bg-blue-900/14 rounded-full blur-[100px]" />
