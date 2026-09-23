@@ -53,8 +53,8 @@ export default function Hero() {
   return (
     <section ref={sectionRef} className="min-h-screen flex flex-col items-center justify-center text-center px-6 pt-28 pb-16 md:pt-44 md:pb-20 overflow-hidden bg-white dark:bg-zinc-950" style={{ position: 'relative' }}>
       {/* Pannello a griglia con copertine YT — brick wall, scroll fluido destra→sinistra */}
-      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none select-none" aria-hidden>
-        <div className="absolute inset-0 flex flex-col gap-3 md:gap-4 py-6 opacity-[0.11] dark:opacity-[0.14] [mask-image:linear-gradient(to_bottom,transparent_0%,black_12%,black_88%,transparent_100%)] [mask-image:radial-gradient(ellipse_80%_70%_at_50%_50%,black_55%,transparent_92%)]">
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none" aria-hidden>
+        <div className="absolute inset-0 flex flex-col gap-3 md:gap-4 py-10 opacity-[0.38] dark:opacity-[0.32]">
           {rows.map((row, rowIdx) => (
             <div
               key={rowIdx}
@@ -86,18 +86,18 @@ export default function Hero() {
             </div>
           ))}
         </div>
-        {/* Velo per leggibilità testo hero */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/85 via-white/72 to-white/90 dark:from-zinc-950/90 dark:via-zinc-950/75 dark:to-zinc-950/90" />
-        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] bg-size-[32px_32px] mask-[radial-gradient(ellipse_65%_60%_at_50%_38%,#000_60%,transparent_92%)] opacity-[0.14] dark:opacity-[0.08]" />
+        {/* Velo leggero per leggibilità testo hero — mantiene griglia ben visibile */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/42 via-white/30 to-white/55 dark:from-zinc-950/55 dark:via-zinc-950/40 dark:to-zinc-950/65" />
+        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] bg-size-[32px_32px] mask-[radial-gradient(ellipse_65%_60%_at_50%_38%,#000_60%,transparent_92%)] opacity-[0.10] dark:opacity-[0.06]" />
       </div>
 
       <style>{`@keyframes hero-scroll { from { transform: translate3d(0,0,0); } to { transform: translate3d(-25%,0,0); } } @media (prefers-reduced-motion: reduce) { [style*="hero-scroll"] { animation: none !important; } }`}</style>
 
-      {/* Background Decorative Blobs with Parallax */}
-      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-        <motion.div style={{ y: blob1Y }} className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-100/50 dark:bg-purple-900/20 rounded-full blur-[140px] animate-pulse" />
-        <motion.div style={{ y: blob2Y }} className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-red-50/60 dark:bg-red-900/20 rounded-full blur-[120px]" />
-        <motion.div style={{ y: blob3Y }} className="absolute top-[20%] right-[15%] w-[30%] h-[30%] bg-blue-50/40 dark:bg-blue-900/20 rounded-full blur-[100px]" />
+      {/* Background Decorative Blobs with Parallax — dietro la griglia */}
+      <div className="absolute inset-0 z-[1] overflow-hidden pointer-events-none opacity-60">
+        <motion.div style={{ y: blob1Y }} className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-100/40 dark:bg-purple-900/18 rounded-full blur-[140px] animate-pulse" />
+        <motion.div style={{ y: blob2Y }} className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-red-50/40 dark:bg-red-900/16 rounded-full blur-[120px]" />
+        <motion.div style={{ y: blob3Y }} className="absolute top-[20%] right-[15%] w-[30%] h-[30%] bg-blue-50/30 dark:bg-blue-900/14 rounded-full blur-[100px]" />
       </div>
 
       <motion.div
