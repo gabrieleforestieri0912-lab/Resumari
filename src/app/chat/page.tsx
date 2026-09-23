@@ -551,22 +551,10 @@ function ChatContent() {
   }, [chats, chatMessagesMap]);
 
   /**
-   * Restituisce i messaggi di benvenuto predefiniti per una nuova chat
+   * Nessun messaggio placeholder: la chat parte vuota, l'AI risponde parola-per-parola
    */
-  const getDefaultMessagesForChat = () => {
-    const now = new Date().toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    return [
-      {
-        text: locale === 'it'
-          ? "Benvenuto nella chat di riassunto video! Incolla un link YouTube o chiedimi qualcosa."
-          : "Welcome to the video summary chat! Paste a YouTube link or ask me something.",
-        sender: "system",
-        time: now,
-      },
-    ];
+  const getDefaultMessagesForChat = (): any[] => {
+    return [];
   };
 
   /**
@@ -2067,11 +2055,7 @@ function ChatContent() {
               className={`flex-1 ${messages.length === 0 ? "overflow-hidden" : "overflow-y-auto"} px-4 md:px-8 py-6 space-y-6 scroll-smooth custom-scrollbar relative`}
             >
               <AnimatePresence>
-                {messages.length === 0 ? (
-                  <div className="h-full flex items-center justify-center">
-                    <p className="text-gray-400 dark:text-zinc-500 font-medium">Inizia una conversazione</p>
-                  </div>
-                ) : (
+                {
                   <div className="space-y-6">
                     {(() => {
                       let lastDate = "";
@@ -2270,7 +2254,7 @@ function ChatContent() {
                       });
                     })()}
                   </div>
-                )}
+                }
               </AnimatePresence>
 
               {isTyping && (

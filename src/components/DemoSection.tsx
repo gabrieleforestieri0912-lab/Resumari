@@ -229,6 +229,7 @@ export default function DemoSection() {
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
+    let startedTyping = false;
 
     try {
       const response = await fetch("/api/ai/demo", {
@@ -248,7 +249,28 @@ export default function DemoSection() {
         raw = formatYouTubeLinks(raw);
         raw = formatTimestampLinks(raw, currentVideo);
         raw = cleanResponse(raw);
-        addMessage(raw, "system", { videoId: currentVideo });
+        const fullText = String(raw).replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu, "");
+        const msgId = Date.now() + Math.random();
+        const now = new Date().toISOString();
+        setMessages((prev) => [...prev, { id: msgId, text: "", sender: "system" as const, time: now, videoId: currentVideo }]);
+        startedTyping = true;
+        setLoading(false);
+        const words = fullText.match(/\S+\s*/g) || [fullText];
+        let i = 0;
+        const speed = 38;
+        const typeInterval = setInterval(() => {
+          if (i < words.length) {
+            const partial = words.slice(0, i + 1).join("");
+            setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, text: partial } : m)));
+            i++;
+          } else {
+            clearInterval(typeInterval);
+            setIsProcessingQueue(false);
+            setLoading(false);
+            abortControllerRef.current = null;
+            setMessageQueue((prev) => prev.slice(1));
+          }
+        }, speed);
       } else {
         addMessage((data.message || "Errore durante l'elaborazione."), "system");
       }
@@ -263,10 +285,12 @@ export default function DemoSection() {
         addMessage("Errore di rete. Assicurati che il server sia in esecuzione.", "system");
       }
     } finally {
-      setIsProcessingQueue(false);
-      setLoading(false);
-      abortControllerRef.current = null;
-      setMessageQueue((prev) => prev.slice(1));
+      if (!startedTyping) {
+        setIsProcessingQueue(false);
+        setLoading(false);
+        abortControllerRef.current = null;
+        setMessageQueue((prev) => prev.slice(1));
+      }
     }
   }, [currentVideo, addMessage]);
 
@@ -403,14 +427,6 @@ export default function DemoSection() {
     setMessages([]);
     setCurrentVideo(null);
     setVideoStartTime(null);
-
-    const ch = channelData[channel.id];
-    if (ch?.channelDescription) {
-      const intro = `Ciao! Sono **${ch.channelTitle}**.${ch.channelDescription ? `\n\n${ch.channelDescription.slice(0, 800)}` : ""}\n\nFammi qualsiasi domanda sui miei contenuti, video o argomenti!`;
-      addMessage(cleanResponse(intro), "system");
-    } else {
-      addMessage(cleanResponse(`Ciao! Sono **${channel.name}**. Chiedimi tutto sui miei video e contenuti!`), "system");
-    }
 
     fetchSuggestions(channel.name);
     inputRef.current?.focus({ preventScroll: true });
