@@ -115,6 +115,14 @@ export default function Footer() {
             </li>
             <li>
               <Link
+                href="/tools"
+                className="transition-all hover:text-[#7b2ff7] hover:pl-1"
+              >
+                Free Tools
+              </Link>
+            </li>
+            <li>
+              <Link
                 href="/api-keys"
                 className="transition-all hover:text-[#7b2ff7] hover:pl-1"
               >
@@ -196,7 +204,7 @@ export default function Footer() {
 
       {/* Bottom */}
       <div className="max-w-6xl min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] mx-auto mt-16 pt-8 border-t border-white/5 text-sm text-gray-500">
-        {year} Resumari. All rights reserved.
+        © {year} Resumari. Tutti i diritti riservati.
       </div>
     </footer>
   );

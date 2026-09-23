@@ -99,11 +99,7 @@ export default function Navbar() {
   const displayName = user?.name || user?.email?.split("@")[0] || "Utente";
 
   const navLinks: NavLink[] = [
-    { href: "/tools", label: "Free Tools" },
-    { href: "/api-keys", label: "API Keys" },
-    { href: "/mcp", label: "MCP" },
     { href: "/#steps", label: "Come funziona" },
-    { href: "/#features", label: "Funzionalità" },
     { href: "/#pricing", label: "Prezzi" },
     { href: "/#faq", label: "FAQ" },
   ];
