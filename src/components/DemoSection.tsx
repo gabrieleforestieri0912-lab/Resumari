@@ -444,7 +444,7 @@ export default function DemoSection() {
       <div className="absolute -bottom-40 -left-40 w-80 h-80 min-[1920px]:w-[420px] min-[1920px]:h-[420px] bg-red-500/12 rounded-full blur-[120px] pointer-events-none" />
       {/* Aureola gradient ampliata: racchiude la card demo */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] min-[1920px]:w-[1400px] min-[1920px]:h-[1400px] bg-gradient-to-br from-purple-500/40 via-red-500/24 to-transparent rounded-full blur-[120px] pointer-events-none" />
-      <div className="max-w-7xl min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] mx-auto">
+      <div className="max-w-[1360px] lg:max-w-[1420px] xl:max-w-[1480px] min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] mx-auto">
         <div className="text-center mb-8 min-[1920px]:mb-10">
           <div className="w-16 h-1 bg-gradient-to-r from-purple-600 to-red-500 rounded-full mb-4 mx-auto" />
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-wider">
@@ -462,7 +462,7 @@ export default function DemoSection() {
         <div className="flex gap-4 min-[1920px]:gap-6 min-[2560px]:gap-8 items-start">
           <div className="flex-1 min-w-0">
             <div className={`bg-white dark:bg-zinc-900 rounded-2xl min-[1920px]:rounded-3xl border shadow-xl overflow-hidden transition-all duration-500 ${selectedChannel ? "border-purple-200 dark:border-purple-800 shadow-purple-500/15 shadow-2xl" : "border-gray-200 dark:border-zinc-800 shadow-purple-500/5"}`}>
-              <div className="flex h-[520px] md:h-[560px] min-[1920px]:h-[680px] min-[2560px]:h-[740px] max-h-[75vh] min-[1920px]:max-h-[720px] relative">
+              <div className="flex h-[620px] lg:h-[640px] xl:h-[660px] min-[1920px]:h-[680px] min-[2560px]:h-[740px] max-h-[78vh] min-[1920px]:max-h-[720px] relative">
                 <AnimatePresence>
                   {sidebarOpen && (
                     <motion.aside
@@ -470,7 +470,7 @@ export default function DemoSection() {
                       animate={{ width: 230, opacity: 1 }}
                       exit={{ width: 0, opacity: 0 }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
-                      className="hidden md:flex flex-col shrink-0 border-r border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-950/60 overflow-hidden relative min-[1920px]:!w-[300px]"
+                      className="hidden md:flex flex-col shrink-0 border-r border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-950/60 overflow-hidden relative lg:!w-[260px] xl:!w-[280px] min-[1920px]:!w-[300px]"
                     >
                       <div className="absolute right-0 top-0 bottom-0 w-px bg-gradient-to-b from-purple-400/30 via-purple-600/40 to-red-400/30 pointer-events-none" />
                       <div className="p-3 border-b border-gray-100 dark:border-zinc-800">
@@ -509,7 +509,7 @@ export default function DemoSection() {
                                   className="w-10 h-10 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
                                 />
                               ) : (
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-red-500 flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm">
+                                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 flex items-center justify-center text-gray-500 dark:text-zinc-400 text-sm font-bold shrink-0">
                                   {ch.name[0]}
                                 </div>
                               )}
@@ -554,7 +554,7 @@ export default function DemoSection() {
                                       className="w-10 h-10 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
                                     />
                                   ) : (
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-red-500 flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm ring-2 ring-purple-200/50">
+                                    <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 flex items-center justify-center text-gray-500 dark:text-zinc-400 text-sm font-bold shrink-0">
                                       {ch.name[0]}
                                     </div>
                                   )}
@@ -673,7 +673,8 @@ export default function DemoSection() {
                                 alt="Resumari"
                                 width={24}
                                 height={24}
-                                className="w-6 h-6 shrink-0 rounded-full object-cover shadow-md mt-0.5"
+                                className="w-6 h-6 shrink-0 rounded-full object-cover bg-transparent mt-0.5"
+                                style={{ background: "transparent" }}
                               />
                             )}
                             <div className="flex flex-col gap-1 max-w-[88%]">
@@ -750,7 +751,8 @@ export default function DemoSection() {
                               alt="Resumari"
                               width={24}
                               height={24}
-                              className="w-6 h-6 shrink-0 rounded-full object-cover shadow-md"
+                              className="w-6 h-6 shrink-0 rounded-full object-cover bg-transparent"
+                              style={{ background: "transparent" }}
                             />
                             <div className="bg-purple-50 dark:bg-purple-950/50 px-3.5 py-2.5 rounded-2xl rounded-bl-sm border border-purple-100 dark:border-purple-900 flex items-center gap-1">
                               <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
@@ -799,7 +801,7 @@ export default function DemoSection() {
             </div>
           </div>
 
-          <div className="hidden xl:block w-80 min-[1920px]:w-[420px] min-[2560px]:w-[480px] shrink-0">
+          <div className="hidden xl:block w-[360px] xl:w-[400px] min-[1920px]:w-[420px] min-[2560px]:w-[480px] shrink-0">
             <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-200 dark:border-zinc-800 shadow-xl shadow-purple-500/5 overflow-hidden">
               <div className="p-3 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
                 <span className="text-[10px] font-black text-gray-900 dark:text-gray-100 uppercase tracking-wider">
