@@ -19,7 +19,15 @@ const faqJsonLd = {
       name: "Quali tipi di file posso riassumere?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Oltre ai video, puoi caricare documenti di testo come PDF, DOCX e TXT, presentazioni PowerPoint e persino immagini contenenti testo (OCR). Il sistema processa il contenuto e genera un'analisi dettagliata.",
+        text: "Al momento PDF e TXT (max 16k caratteri). DOCX/PPTX e foto con testo richiedono il modello vision e non sono garantiti.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Posso analizzare un intero canale YouTube?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Sì. Incolla il link del canale (es. @hubermanlab) e scegli 'Intero Canale': trascriviamo fino a 10 video del canale per chattare su tutti i contenuti.",
       },
     },
     {

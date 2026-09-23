@@ -115,6 +115,14 @@ export default function Footer() {
             </li>
             <li>
               <Link
+                href="/tools"
+                className="transition-all hover:text-[#7b2ff7] hover:pl-1"
+              >
+                Free Tools
+              </Link>
+            </li>
+            <li>
+              <Link
                 href="/api-keys"
                 className="transition-all hover:text-[#7b2ff7] hover:pl-1"
               >
