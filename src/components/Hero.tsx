@@ -54,15 +54,15 @@ export default function Hero() {
     <section ref={sectionRef} className="min-h-screen flex flex-col items-center justify-center text-center px-6 pt-28 pb-16 md:pt-44 md:pb-20 overflow-hidden bg-white dark:bg-zinc-950" style={{ position: 'relative' }}>
       {/* Pannello a griglia con copertine YT — brick wall, scroll fluido destra→sinistra */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none" aria-hidden>
-        <div className="absolute inset-0 flex flex-col gap-3 md:gap-4 py-10 opacity-[0.38] dark:opacity-[0.32]">
+        <div className="absolute inset-0 flex flex-col gap-2 md:gap-3 py-6 opacity-[0.38] dark:opacity-[0.32]">
           {rows.map((row, rowIdx) => (
             <div
               key={rowIdx}
               className="flex gap-3 md:gap-4 w-max will-change-transform"
               style={{
-                marginLeft: rowIdx % 2 === 1 ? "-114px" : "0px",
-                animation: `hero-scroll 42s linear infinite`,
-                animationDelay: `${rowIdx * -7}s`,
+                marginLeft: rowIdx % 2 === 1 ? "-86px" : "0px",
+                animation: `hero-scroll 38s linear infinite`,
+                animationDelay: `${rowIdx * -6}s`,
                 transform: "translateZ(0)",
                 backfaceVisibility: "hidden" as const,
               }}
@@ -70,7 +70,7 @@ export default function Hero() {
               {[...row, ...row, ...row, ...row].map((vid, i) => (
                 <div
                   key={`${rowIdx}-${i}-${vid}`}
-                  className="shrink-0 w-[168px] md:w-[204px] lg:w-[228px] aspect-video rounded-xl overflow-hidden bg-gray-100 dark:bg-zinc-800 shadow-sm ring-1 ring-black/5 dark:ring-white/5"
+                  className="shrink-0 w-[132px] md:w-[156px] lg:w-[172px] aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-zinc-800 shadow-sm ring-1 ring-black/5 dark:ring-white/5"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
