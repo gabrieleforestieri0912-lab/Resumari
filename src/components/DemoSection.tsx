@@ -131,15 +131,22 @@ function YoutubeEmbed({ videoId, startTime, onClose }: { videoId: string; startT
   );
 }
 
+const DEMO_EXAMPLE_VIDEO = "DHjqpvDnNGE";
+const DEMO_EXAMPLE_MESSAGES: Message[] = [
+  { id: 1, text: "Riassumi questo video", sender: "user", time: new Date().toISOString(), videoId: DEMO_EXAMPLE_VIDEO },
+  { id: 2, text: "Riassunto: il video spiega JavaScript in 100 secondi — vari tipi, closure e async. Momenti chiave: <button class=\"timestamp-link\" data-seconds=\"12\" data-videoid=\"DHjqpvDnNGE\">00:12</button> tipi, <button class=\"timestamp-link\" data-seconds=\"45\" data-videoid=\"DHjqpvDnNGE\">00:45</button> closure. Guarda: <button class=\"video-link\" data-videoid=\"DHjqpvDnNGE\">Guarda il video</button>", sender: "system", time: new Date().toISOString(), videoId: DEMO_EXAMPLE_VIDEO },
+  { id: 3, text: "Trascrizione (estratto): [00:00] Introduzione a JS — [00:12] Tipi primitivi — [00:45] Closure spiega lo scope.", sender: "system", time: new Date().toISOString(), videoId: DEMO_EXAMPLE_VIDEO },
+];
+
 export default function DemoSection() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(DEMO_EXAMPLE_MESSAGES);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [showLimitPopup, setShowLimitPopup] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [channelData, setChannelData] = useState<Record<string, ChannelData>>({});
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
-  const [currentVideo, setCurrentVideo] = useState<string | null>(null);
+  const [currentVideo, setCurrentVideo] = useState<string | null>(DEMO_EXAMPLE_VIDEO);
   const [videoStartTime, setVideoStartTime] = useState<number | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);

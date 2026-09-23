@@ -1,9 +1,31 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, Zap, Shield, Sparkles } from "lucide-react";
-import { useRef } from "react";
+import { ArrowRight } from "lucide-react";
+import { useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+function HeroInput() {
+  const router = useRouter();
+  const [value, setValue] = useState("");
+  const [dragOver, setDragOver] = useState(false);
+  const ytRegex = /(youtube\.com|youtu\.be)/i;
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const v = value.trim();
+    if (!v) return;
+    if (ytRegex.test(v)) router.push(`/chat?video=${encodeURIComponent(v)}`);
+    else router.push("/chat");
+  };
+  return (
+    <form onSubmit={onSubmit} onDragOver={(e) => { e.preventDefault(); setDragOver(true); }} onDragLeave={() => setDragOver(false)} onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files?.[0]; if (f) router.push("/chat"); }}
+      className={`flex items-center gap-2 p-2 rounded-2xl border bg-white dark:bg-zinc-900 shadow-lg ${dragOver ? "border-purple-400 ring-2 ring-purple-200" : "border-gray-200 dark:border-zinc-800"}`}>
+      <input value={value} onChange={(e) => setValue(e.target.value)} placeholder="Incolla un link YouTube (video o canale) o trascina qui un PDF/TXT" className="flex-1 px-4 py-3 bg-transparent outline-none text-sm font-medium" />
+      <button type="submit" className="px-5 py-2.5 rounded-xl bg-purple-600 text-white font-black text-sm hover:bg-purple-700 transition-colors">Analizza</button>
+    </form>
+  );
+}
 // D1: estensione non pubblicata → CTA Chrome nascosta in hero (verrà gestita in pricing)
 
 export default function Hero() {
@@ -85,58 +107,40 @@ export default function Hero() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="max-w-7xl min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] w-full flex flex-col items-center relative z-10"
+        className="max-w-3xl w-full flex flex-col items-center relative z-10"
       >
-        {/* Title */}
         <motion.h1
           variants={itemVariants}
-          className="text-5xl md:text-7xl font-black leading-[1.1] text-gray-900 dark:text-gray-100 tracking-tight"
+          className="text-4xl md:text-5xl font-black leading-tight text-gray-900 dark:text-gray-100 tracking-tight"
         >
-          Smettila di rincorrere il tempo.{" "}
-          <span className="relative inline-block">
-            <span className="bg-clip-text text-transparent bg-linear-to-r from-purple-600 via-red-500 to-red-600">
-              Trascrivi ore di video
-            </span>
-
-          </span>
-          <br />
-          <span className="text-gray-900 dark:text-gray-100">
-            in pochi{" "}
-            <span className="inline-block px-4 -mx-2 italic text-glow-pulse py-1">
-              semplici secondi
-            </span>
-          </span>
+          Video, documenti e canali YouTube: <span className="bg-clip-text text-transparent bg-linear-to-r from-purple-600 via-red-500 to-red-600">riassumi, trascrivi e chatta</span> con qualsiasi contenuto.
         </motion.h1>
-
-        {/* Subtitle */}
         <motion.p
           variants={itemVariants}
-          className="mt-8 text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-3xl leading-relaxed font-semibold tracking-tight"
+          className="mt-4 text-base md:text-lg text-gray-500 dark:text-gray-400 max-w-2xl leading-relaxed font-medium"
         >
-          Basta subire il sovraccarico di informazioni. La nostra IA distilla i
-          concetti chiave da video YouTube e documenti infiniti, consegnandoti
-          solo la conoscenza che conta per il tuo successo.
+          Incolla un link o trascina un file — l&apos;IA estrae riassunto, trascrizione (video) e chat contestuale.
         </motion.p>
 
-        {/* CTA Buttons */}
-        <motion.div
-          variants={itemVariants}
-          className="mt-10 flex flex-col sm:flex-row flex-wrap gap-4 w-full max-w-2xl justify-center items-center"
-        >
-          <Link
-            href="/chat"
-            aria-label="Inizia ora a riassumere i tuoi video gratuitamente"
-            className="group flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl text-white font-black text-base bg-linear-to-r from-purple-600 to-red-600 hover:from-purple-700 hover:to-red-700 transition-all transform hover:-translate-y-1 hover:shadow-2xl active:scale-95 shadow-xl shadow-purple-500/25"
-          >
-            Prova Gratis
-            <ArrowRight
-              size={18}
-              className="group-hover:translate-x-1 transition-transform"
-            />
-          </Link>
+        {/* D8: unico campo link + drag&drop file */}
+        <motion.div variants={itemVariants} className="mt-8 w-full">
+          <HeroInput />
+          <div className="mt-3 flex justify-center gap-2">
+            <span className="px-3 py-1 rounded-full bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 text-xs font-bold text-purple-700 dark:text-purple-300">Video</span>
+            <span className="px-3 py-1 rounded-full bg-gray-50 dark:bg-zinc-800 border text-xs font-bold text-gray-600 dark:text-zinc-300">Documento</span>
+            <span className="px-3 py-1 rounded-full bg-gray-50 dark:bg-zinc-800 border text-xs font-bold text-gray-600 dark:text-zinc-300">Canale</span>
+          </div>
+          <p className="mt-3 text-xs text-gray-400 dark:text-zinc-500 font-medium">10 crediti gratis con account — accedi per iniziare. Nessun costo finché non usi i crediti.</p>
         </motion.div>
 
-        {/* Badge rimossi in Fase 1 — sostituiti da fatti verificabili in hero subtitle se necessario */}
+        <motion.div variants={itemVariants} className="mt-6">
+          <Link
+            href="/chat"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-zinc-900 font-black text-sm hover:opacity-90 transition-opacity"
+          >
+            Vai alla chat <ArrowRight size={16} />
+          </Link>
+        </motion.div>
       </motion.div>
     </section>
   );
