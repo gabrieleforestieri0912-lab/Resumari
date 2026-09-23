@@ -102,7 +102,7 @@ function StepCard({ number, title, description, icon, index }: StepCardProps) {
 export default function StepsSection() {
   return (
     <section id="steps" className="w-full px-6 py-16 bg-gradient-to-b from-white via-indigo-50/10 to-white dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-950 relative overflow-hidden">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] mx-auto">
         {/* Title */}
         <div className="mb-12">
           <div className="w-16 h-1 bg-gradient-to-r from-purple-600 to-red-500 rounded-full mb-4" />

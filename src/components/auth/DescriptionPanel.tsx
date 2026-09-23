@@ -4,9 +4,8 @@ import { Sparkles } from "lucide-react";
 
 interface DescriptionPanelProps {
   view: 'login' | 'register';
-  animationState: 'idle' | 'leaving' | 'entering';
-  side: 'left' | 'right';
   locale: string;
+  compact?: boolean;
 }
 
 const content = {
@@ -20,29 +19,21 @@ const content = {
   },
 };
 
-export default function DescriptionPanel({ view, animationState, side, locale }: DescriptionPanelProps) {
+export default function DescriptionPanel({ view, locale, compact }: DescriptionPanelProps) {
   const t = content[view];
-  const animClass =
-    animationState === 'leaving'
-      ? side === 'left' ? 'auth-panel-leaving-left' : 'auth-panel-leaving-right'
-      : animationState === 'entering'
-        ? side === 'left' ? 'auth-panel-entering-left' : 'auth-panel-entering-right'
-        : 'auth-panel-idle';
 
   return (
-    <div className={`auth-desc-panel ${animClass}`}>
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-red-600/10 z-0" />
-      <div className="relative z-10 flex flex-col items-center justify-center px-12 py-16 text-center">
-        <div className="w-20 h-20 bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl flex items-center justify-center mb-8 text-purple-600 rotate-12">
-          <Sparkles size={40} />
-        </div>
-        <h3 className="text-3xl font-black text-gray-900 dark:text-gray-100 mb-5 leading-tight">
-          {t.panelTitle[locale as 'it' | 'en'] || t.panelTitle.en}
-        </h3>
-        <p className="text-gray-500 dark:text-gray-400 font-medium max-w-sm leading-relaxed text-sm">
-          {t.panelDesc[locale as 'it' | 'en'] || t.panelDesc.en}
-        </p>
+    <div className={`relative z-10 flex flex-col items-center justify-center text-center ${compact ? 'px-6 py-6' : 'px-12 py-16'}`}>
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-red-600/10 -z-10" />
+      <div className={`bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl flex items-center justify-center mb-6 text-purple-600 rotate-12 ${compact ? 'w-14 h-14' : 'w-20 h-20'}`}>
+        <Sparkles size={compact ? 28 : 40} />
       </div>
+      <h3 className={`font-black text-gray-900 dark:text-gray-100 mb-3 leading-tight ${compact ? 'text-lg' : 'text-3xl'}`}>
+        {t.panelTitle[locale as 'it' | 'en'] || t.panelTitle.en}
+      </h3>
+      <p className={`text-gray-500 dark:text-gray-400 font-medium leading-relaxed ${compact ? 'text-xs max-w-xs' : 'text-sm max-w-sm'}`}>
+        {t.panelDesc[locale as 'it' | 'en'] || t.panelDesc.en}
+      </p>
     </div>
   );
 }

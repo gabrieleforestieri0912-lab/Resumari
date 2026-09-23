@@ -10,7 +10,8 @@ import {
   LayoutDashboard,
   Home,
   Video,
-  ChevronDown
+  ChevronDown,
+  CreditCard
 } from "lucide-react";
 import { RefObject } from "react";
 
@@ -216,10 +217,22 @@ export default function ChatSidebar({
 
           {isAccountMenuOpen && (
             <div className="overflow-hidden mt-2 py-2 bg-white dark:bg-zinc-900 rounded-xl border border-gray-100 dark:border-zinc-800 shadow-lg absolute bottom-full left-0 right-0 z-55 mb-2">
-              <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors">
+              <Link
+                href="/settings"
+                onClick={() => setIsAccountMenuOpen(false)}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
+              >
                 <Settings size={16} className="text-gray-500 dark:text-zinc-400" />
-                Impostazioni account
-              </button>
+                Impostazioni
+              </Link>
+              <Link
+                href="/#pricing"
+                onClick={() => setIsAccountMenuOpen(false)}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <CreditCard size={16} className="text-gray-500 dark:text-zinc-400" />
+                Pricing
+              </Link>
               <button
                 onClick={() => {
                   handleLogout();

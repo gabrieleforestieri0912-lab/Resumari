@@ -1,25 +1,21 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/components/LanguageContext";
 import FormPanel from "@/components/auth/FormPanel";
 import DescriptionPanel from "@/components/auth/DescriptionPanel";
 
 type AuthView = 'login' | 'register';
-type AnimationState = 'idle' | 'leaving' | 'entering';
 
 export default function AuthPage() {
   const { locale } = useLanguage();
   const searchParams = useSearchParams();
   const [view, setView] = useState<AuthView>('login');
-  const [animationState, setAnimationState] = useState<AnimationState>('idle');
-  const pendingViewRef = useRef<AuthView | null>(null);
 
-  // Sync the initial view from the URL by adjusting state during render
-  // (avoids calling setState synchronously inside an effect).
   const urlMode = searchParams.get('mode');
   const [prevMode, setPrevMode] = useState<string | null>(urlMode);
   if (prevMode !== urlMode) {
@@ -28,40 +24,30 @@ export default function AuthPage() {
   }
 
   useEffect(() => {
-    document.title = "Accedi | Resumari";
-  }, []);
-
-  const switchView = useCallback(() => {
-    if (animationState !== 'idle') return;
-    pendingViewRef.current = view === 'login' ? 'register' : 'login';
-    setAnimationState('leaving');
-  }, [animationState, view]);
-
-  useEffect(() => {
-    if (animationState === 'leaving') {
-      const timer = setTimeout(() => {
-        if (pendingViewRef.current) {
-          setView(pendingViewRef.current);
-          pendingViewRef.current = null;
-        }
-        setAnimationState('entering');
-      }, 400);
-      return () => clearTimeout(timer);
-    }
-    if (animationState === 'entering') {
-      const timer = setTimeout(() => {
-        setAnimationState('idle');
-      }, 400);
-      return () => clearTimeout(timer);
-    }
-  }, [animationState]);
+    document.title = view === 'login' ? "Accedi | Resumari" : "Registrati | Resumari";
+  }, [view]);
 
   const isLogin = view === 'login';
-  const formSide = isLogin ? 'left' : 'right';
-  const descSide = isLogin ? 'right' : 'left';
+
+  const switchView = () => {
+    setView((v) => (v === 'login' ? 'register' : 'login'));
+  };
+
+  // Varianti solo framer-motion: slide orizzontale desktop, verticale mobile via CSS media query gestita da motion con custom
+  const formVariants = {
+    initial: (isLogin: boolean) => ({ x: isLogin ? -24 : 24, opacity: 0 }),
+    animate: { x: 0, opacity: 1 },
+    exit: (isLogin: boolean) => ({ x: isLogin ? 24 : -24, opacity: 0 }),
+  };
+
+  const descVariants = {
+    initial: (isLogin: boolean) => ({ x: isLogin ? 24 : -24, opacity: 0 }),
+    animate: { x: 0, opacity: 1 },
+    exit: (isLogin: boolean) => ({ x: isLogin ? -24 : 24, opacity: 0 }),
+  };
 
   return (
-    <div className={`min-h-screen bg-white dark:bg-zinc-950 flex overflow-hidden auth-container`} aria-live="polite" aria-label={isLogin ? "Pagina di login" : "Pagina di registrazione"}>
+    <div className="min-h-screen bg-white dark:bg-zinc-950 flex overflow-hidden" aria-live="polite" aria-label={isLogin ? "Pagina di login" : "Pagina di registrazione"}>
       <Link
         href="/"
         className="absolute top-6 left-6 z-20 flex items-center gap-2 font-black text-xl text-purple-600 hover:scale-105 transition-transform"
@@ -72,20 +58,52 @@ export default function AuthPage() {
         </span>
       </Link>
 
-      <div className={`auth-wrapper ${!isLogin ? 'auth-wrapper-register' : ''}`}>
-        <FormPanel
-          view={view}
-          animationState={animationState}
-          side={formSide}
-          onSwitch={switchView}
-          locale={locale}
-        />
-        <DescriptionPanel
-          view={view}
-          animationState={animationState}
-          side={descSide}
-          locale={locale}
-        />
+      <div className={`flex w-full overflow-hidden ${!isLogin ? 'flex-row-reverse md:flex-row-reverse flex-col' : 'flex-row flex-col'} md:flex-row`}>
+        <AnimatePresence mode="wait" custom={isLogin}>
+          <motion.div
+            key={`form-${view}`}
+            custom={isLogin}
+            variants={formVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ duration: 0.35, ease: [0.77, 0, 0.175, 1] }}
+            className="w-full md:w-1/2 flex items-center justify-center p-6 min-h-[50vh] md:min-h-screen"
+          >
+            <FormPanel view={view} onSwitch={switchView} locale={locale} />
+          </motion.div>
+        </AnimatePresence>
+
+        <AnimatePresence mode="wait" custom={isLogin}>
+          <motion.div
+            key={`desc-${view}`}
+            custom={isLogin}
+            variants={descVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ duration: 0.35, ease: [0.77, 0, 0.175, 1] }}
+            className="w-full md:w-1/2 hidden md:flex md:min-h-screen bg-gray-50 dark:bg-zinc-900 relative overflow-hidden items-center justify-center"
+          >
+            <DescriptionPanel view={view} locale={locale} />
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Mobile description: framer-motion verticale */}
+        <div className="md:hidden w-full">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`desc-mobile-${view}`}
+              initial={{ y: 12, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -12, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="h-[180px] bg-gray-50 dark:bg-zinc-900 relative overflow-hidden flex items-center justify-center"
+            >
+              <DescriptionPanel view={view} locale={locale} compact />
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );

@@ -123,7 +123,7 @@ export default function FeaturesSection() {
         <motion.div style={{ y: blobRightY }} className="absolute bottom-1/4 right-0 w-96 h-96 bg-red-50 dark:bg-red-950/40 rounded-full blur-3xl opacity-50" />
       </div>
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] mx-auto">
         {/* Title */}
         <div className="text-center mb-12">
           <div className="w-16 h-1 bg-gradient-to-r from-purple-600 to-red-500 rounded-full mb-4 mx-auto" />

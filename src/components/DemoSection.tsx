@@ -422,32 +422,31 @@ export default function DemoSection() {
   };
 
   return (
-        <section className="w-full px-4 md:px-6 py-12 md:py-16 bg-gradient-to-b from-white via-purple-50/20 to-white dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-950 relative overflow-hidden" id="demo">
-      {/* Two soft corner orbs */}
-      <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/8 rounded-full blur-[110px] pointer-events-none" />
-      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-red-500/8 rounded-full blur-[110px] pointer-events-none" />
-      {/* Aureola gradient che incornicia il componente demo (centrata sulla card) */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-gradient-to-br from-purple-500/25 via-red-500/12 to-transparent rounded-full blur-[110px] pointer-events-none" />
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-6">
+        <section className="w-full px-4 md:px-6 min-[1920px]:px-10 min-[2560px]:px-16 py-12 md:py-16 min-[1920px]:py-20 relative overflow-hidden" id="demo">
+      {/* Coda radiale che incornicia l'intero componente demo */}
+      <div className="absolute -top-40 -right-40 w-80 h-80 min-[1920px]:w-[420px] min-[1920px]:h-[420px] bg-purple-500/12 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute -bottom-40 -left-40 w-80 h-80 min-[1920px]:w-[420px] min-[1920px]:h-[420px] bg-red-500/12 rounded-full blur-[120px] pointer-events-none" />
+      {/* Aureola gradient ampliata: racchiude la card demo */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] min-[1920px]:w-[1400px] min-[1920px]:h-[1400px] bg-gradient-to-br from-purple-500/40 via-red-500/24 to-transparent rounded-full blur-[120px] pointer-events-none" />
+      <div className="max-w-7xl min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] mx-auto">
+        <div className="text-center mb-8 min-[1920px]:mb-10">
           <div className="w-16 h-1 bg-gradient-to-r from-purple-600 to-red-500 rounded-full mb-4 mx-auto" />
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-wider">
             <Sparkles size={14} />
             Prova Gratuita
           </span>
-          <h2 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-gray-100 mt-4 mb-2 tracking-tight">
+          <h2 className="text-3xl md:text-4xl min-[1920px]:text-5xl font-black text-gray-900 dark:text-gray-100 mt-4 mb-2 tracking-tight">
             Chat con un canale YouTube
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base max-w-xl mx-auto">
+          <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base min-[1920px]:text-lg max-w-xl min-[1920px]:max-w-2xl mx-auto">
             Scegli un canale educativo e chatta con i suoi contenuti via AI.
-            {userMsgCount > 0 && ` (${userMsgCount}/${DEMO_MESSAGE_LIMIT})`}
           </p>
         </div>
 
-        <div className="flex gap-4 items-start">
+        <div className="flex gap-4 min-[1920px]:gap-6 min-[2560px]:gap-8 items-start">
           <div className="flex-1 min-w-0">
-            <div className={`bg-white dark:bg-zinc-900 rounded-2xl border shadow-xl overflow-hidden transition-all duration-500 ${selectedChannel ? "border-purple-200 dark:border-purple-800 shadow-purple-500/15 shadow-2xl" : "border-gray-200 dark:border-zinc-800 shadow-purple-500/5"}`}>
-              <div className="flex h-[520px] max-h-[75vh] relative">
+            <div className={`bg-white dark:bg-zinc-900 rounded-2xl min-[1920px]:rounded-3xl border shadow-xl overflow-hidden transition-all duration-500 ${selectedChannel ? "border-purple-200 dark:border-purple-800 shadow-purple-500/15 shadow-2xl" : "border-gray-200 dark:border-zinc-800 shadow-purple-500/5"}`}>
+              <div className="flex h-[520px] md:h-[560px] min-[1920px]:h-[680px] min-[2560px]:h-[740px] max-h-[75vh] min-[1920px]:max-h-[720px] relative">
                 <AnimatePresence>
                   {sidebarOpen && (
                     <motion.aside
@@ -455,7 +454,7 @@ export default function DemoSection() {
                       animate={{ width: 230, opacity: 1 }}
                       exit={{ width: 0, opacity: 0 }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
-                      className="hidden md:flex flex-col shrink-0 border-r border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-950/60 overflow-hidden relative"
+                      className="hidden md:flex flex-col shrink-0 border-r border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-950/60 overflow-hidden relative min-[1920px]:!w-[300px]"
                     >
                       <div className="absolute right-0 top-0 bottom-0 w-px bg-gradient-to-b from-purple-400/30 via-purple-600/40 to-red-400/30 pointer-events-none" />
                       <div className="p-3 border-b border-gray-100 dark:border-zinc-800">
@@ -784,7 +783,7 @@ export default function DemoSection() {
             </div>
           </div>
 
-          <div className="hidden xl:block w-80 shrink-0">
+          <div className="hidden xl:block w-80 min-[1920px]:w-[420px] min-[2560px]:w-[480px] shrink-0">
             <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-200 dark:border-zinc-800 shadow-xl shadow-purple-500/5 overflow-hidden">
               <div className="p-3 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
                 <span className="text-[10px] font-black text-gray-900 dark:text-gray-100 uppercase tracking-wider">

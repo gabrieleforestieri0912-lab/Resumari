@@ -170,7 +170,7 @@ export default function ContactPage() {
 
               <div className="space-y-6">
                 <a
-                  href="mailto:gabriele.forestieri0912@gmail.com"
+                  href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'gabriele.forestieri0912@gmail.com'}`}
                   className="flex items-start gap-4 p-4 bg-white dark:bg-zinc-950 rounded-2xl border border-gray-100 dark:border-zinc-800 hover:border-purple-200 dark:hover:border-purple-700 transition-all group"
                 >
                   <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -178,23 +178,8 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 dark:text-gray-100">Email</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">gabriele.forestieri0912@gmail.com</p>
-                  </div>
-                </a>
-
-                <a
-                  href="https://discord.gg/resumari"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-start gap-4 p-4 bg-white dark:bg-zinc-950 rounded-2xl border border-gray-100 dark:border-zinc-800 hover:border-purple-200 dark:hover:border-purple-700 transition-all group"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <MessageSquare size={24} />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 dark:text-gray-100">Discord</h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Entra nella community
+                      {process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'gabriele.forestieri0912@gmail.com'}
                     </p>
                   </div>
                 </a>
@@ -205,8 +190,7 @@ export default function ContactPage() {
                   Orari di risposta
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Rispondiamo Lun-Ven dalle 9:00 alle 18:00. Per questioni
-                  urgenti, scrivici su Discord.
+                  Rispondiamo Lun-Ven dalle 9:00 alle 18:00.
                 </p>
               </div>
             </div>

@@ -17,7 +17,6 @@ import {
   Key,
   Server,
 } from "lucide-react";
-import ThemeToggle from "./ThemeToggle";
 import {
   clearSession,
   readStoredUser,
@@ -113,8 +112,7 @@ export default function Navbar() {
     { href: "/chat", icon: LayoutDashboard, label: "Chat" },
     { href: "/api-keys", icon: Key, label: "API Keys" },
     { href: "/mcp", icon: Server, label: "MCP Server" },
-    { href: "/profile", icon: User, label: "Profilo" },
-    { href: "/settings", icon: Settings, label: "Impostazioni" },
+    { href: "/settings", icon: Settings, label: "Profilo e Impostazioni" },
   ];
 
   return (
@@ -145,7 +143,6 @@ export default function Navbar() {
       </div>
 
       <div className="flex items-center gap-3">
-        <ThemeToggle />
         {user ? (
           <div className="flex items-center gap-3">
             <Link

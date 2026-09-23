@@ -1,34 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import React, { SVGProps } from "react";
+import React from "react";
 
-const Facebook = ({ size = 24, className = "", ...props }: SVGProps<SVGSVGElement> & { size?: number }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    className={className}
-    {...props}
-  >
-    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-  </svg>
-);
+// Social icons: Instagram + TikTok (mantenuti); Facebook/Twitter/LinkedIn rimossi.
 
-const Twitter = ({ size = 24, className = "", ...props }: SVGProps<SVGSVGElement> & { size?: number }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    className={className}
-    {...props}
-  >
-    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-  </svg>
-);
 
-const Instagram = ({ size = 24, className = "", ...props }: SVGProps<SVGSVGElement> & { size?: number }) => (
+const Instagram = ({ size = 24, className = "", ...props }: React.SVGProps<SVGSVGElement> & { size?: number }) => (
   <svg
     width={size}
     height={size}
@@ -47,20 +24,7 @@ const Instagram = ({ size = 24, className = "", ...props }: SVGProps<SVGSVGEleme
   </svg>
 );
 
-const Linkedin = ({ size = 24, className = "", ...props }: SVGProps<SVGSVGElement> & { size?: number }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    className={className}
-    {...props}
-  >
-    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-  </svg>
-);
-
-const TikTok = ({ size = 24, className = "", ...props }: SVGProps<SVGSVGElement> & { size?: number }) => (
+const TikTok = ({ size = 24, className = "", ...props }: React.SVGProps<SVGSVGElement> & { size?: number }) => (
   <svg
     width={size}
     height={size}
@@ -87,16 +51,15 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   const socialLinks: SocialLink[] = [
-    { name: "Facebook", icon: <Facebook size={20} />, href: "#" },
-    { name: "Twitter", icon: <Twitter size={20} />, href: "#" },
     { name: "Instagram", icon: <Instagram size={20} />, href: "https://instagram.com/resumari" },
     { name: "TikTok", icon: <TikTok size={20} />, href: "https://tiktok.com/@resumari" },
-    { name: "Linkedin", icon: <Linkedin size={20} />, href: "https://linkedin.com/company/resumari" },
   ];
 
   return (
-    <footer className="bg-black dark:bg-zinc-950 border-t border-white/5 pt-20 pb-10 px-6">
-      <div className="max-w-6xl mx-auto grid gap-12 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+    <footer className="bg-black dark:bg-zinc-950 border-t border-white/5 pt-20 pb-10 px-6 relative overflow-hidden">
+      {/* Gradienti attorno al componente demo: sfondo sull'area centrale */}
+      <div className="absolute inset-0 bg-gradient-to-br from-yellow-300 via-orange-400 to-pink-400 opacity-90 blur-3xl [mask-image:radial-gradient(ellipse_at_center,transparent_45%,#000_110%)] dark:[mask-image:radial-gradient(ellipse_at_center,#000_50%,transparent_130%)] pointer-events-none -z-10" />
+      <div className="max-w-6xl min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] mx-auto grid gap-12 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {/* Brand */}
         <div>
           <Link href="/" className="inline-block mb-5">
@@ -233,7 +196,7 @@ export default function Footer() {
       </div>
 
       {/* Bottom */}
-      <div className="max-w-6xl mx-auto mt-16 pt-8 border-t border-white/5 text-sm text-gray-500">
+      <div className="max-w-6xl min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] mx-auto mt-16 pt-8 border-t border-white/5 text-sm text-gray-500">
         {year} Resumari. All rights reserved.
       </div>
     </footer>

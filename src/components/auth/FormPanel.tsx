@@ -2,12 +2,9 @@
 
 import LoginForm from "@/components/auth/LoginForm";
 import RegisterForm from "@/components/auth/RegisterForm";
-import { Sparkles } from "lucide-react";
 
 interface FormPanelProps {
   view: 'login' | 'register';
-  animationState: 'idle' | 'leaving' | 'entering';
-  side: 'left' | 'right';
   onSwitch: () => void;
   locale: string;
 }
@@ -23,32 +20,24 @@ const content = {
   },
 };
 
-export default function FormPanel({ view, animationState, side, onSwitch, locale }: FormPanelProps) {
+export default function FormPanel({ view, onSwitch, locale }: FormPanelProps) {
   const t = content[view];
-  const animClass =
-    animationState === 'leaving'
-      ? side === 'left' ? 'auth-panel-leaving-left' : 'auth-panel-leaving-right'
-      : animationState === 'entering'
-        ? side === 'left' ? 'auth-panel-entering-left' : 'auth-panel-entering-right'
-        : 'auth-panel-idle';
 
   return (
-    <div className={`auth-form-panel ${animClass}`}>
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 mb-2 tracking-tight">
-            {t.title[locale as 'it' | 'en'] || t.title.en}
-          </h2>
-          <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">
-            {t.desc[locale as 'it' | 'en'] || t.desc.en}
-          </p>
-        </div>
-        {view === 'login' ? (
-          <LoginForm locale={locale} onSwitch={onSwitch} />
-        ) : (
-          <RegisterForm locale={locale} onSwitch={onSwitch} />
-        )}
+    <div className="w-full max-w-md">
+      <div className="mb-8 text-center">
+        <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 mb-2 tracking-tight">
+          {t.title[locale as 'it' | 'en'] || t.title.en}
+        </h2>
+        <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">
+          {t.desc[locale as 'it' | 'en'] || t.desc.en}
+        </p>
       </div>
+      {view === 'login' ? (
+        <LoginForm locale={locale} onSwitch={onSwitch} />
+      ) : (
+        <RegisterForm locale={locale} onSwitch={onSwitch} />
+      )}
     </div>
   );
 }

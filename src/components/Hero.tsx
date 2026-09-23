@@ -36,21 +36,75 @@ export default function Hero() {
   const blob2Y = useTransform(scrollYProgress, [0, 1], ["5%", "-5%"]);
   const blob3Y = useTransform(scrollYProgress, [0, 1], ["0%", "8%"]);
 
+  // Copertine YT educative per il pannello a griglia in background (brick-wall, scroll orizzontale)
+  const ytThumbs = [
+    "jNQXAC9IVRw", "dQw4w9WgXcQ", "9bZkp7q19f0", "k85mRPqvMbE", "5MgBikgcWnY", "L0MK7qz13bU",
+    "LXb3EKWsInQ", "VpI-yyqJ7Yg", "Rb0UmrCXxVA", "YQHsXMglC9A", "pXO6kJBa6ro", "U8smiWOT530",
+    "hT_nvWreIhg", "QcIy9NiNbmo", "fRh_vgS2dFE", "airkSzvY9zc", "ZXsQAXx_ao0", "2Xc9gXyf2G4",
+  ];
+  const rows = [
+    ytThumbs.slice(0, 6),
+    ytThumbs.slice(6, 12),
+    ytThumbs.slice(12, 18),
+    ytThumbs.slice(0, 6).reverse(),
+    ytThumbs.slice(6, 12).reverse(),
+  ];
+
   return (
     <section ref={sectionRef} className="min-h-screen flex flex-col items-center justify-center text-center px-6 pt-28 pb-16 md:pt-44 md:pb-20 overflow-hidden bg-white dark:bg-zinc-950" style={{ position: 'relative' }}>
+      {/* Pannello a griglia con copertine YT — brick wall, scroll fluido destra→sinistra */}
+      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none select-none" aria-hidden>
+        <div className="absolute inset-0 flex flex-col gap-3 md:gap-4 py-6 opacity-[0.11] dark:opacity-[0.14] [mask-image:linear-gradient(to_bottom,transparent_0%,black_12%,black_88%,transparent_100%)] [mask-image:radial-gradient(ellipse_80%_70%_at_50%_50%,black_55%,transparent_92%)]">
+          {rows.map((row, rowIdx) => (
+            <div
+              key={rowIdx}
+              className="flex gap-3 md:gap-4 w-max will-change-transform"
+              style={{
+                marginLeft: rowIdx % 2 === 1 ? "-114px" : "0px",
+                animation: `hero-scroll 42s linear infinite`,
+                animationDelay: `${rowIdx * -7}s`,
+                transform: "translateZ(0)",
+                backfaceVisibility: "hidden" as const,
+              }}
+            >
+              {[...row, ...row, ...row, ...row].map((vid, i) => (
+                <div
+                  key={`${rowIdx}-${i}-${vid}`}
+                  className="shrink-0 w-[168px] md:w-[204px] lg:w-[228px] aspect-video rounded-xl overflow-hidden bg-gray-100 dark:bg-zinc-800 shadow-sm ring-1 ring-black/5 dark:ring-white/5"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`https://img.youtube.com/vi/${vid}/mqdefault.jpg`}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                    draggable={false}
+                  />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+        {/* Velo per leggibilità testo hero */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/85 via-white/72 to-white/90 dark:from-zinc-950/90 dark:via-zinc-950/75 dark:to-zinc-950/90" />
+        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] bg-size-[32px_32px] mask-[radial-gradient(ellipse_65%_60%_at_50%_38%,#000_60%,transparent_92%)] opacity-[0.14] dark:opacity-[0.08]" />
+      </div>
+
+      <style>{`@keyframes hero-scroll { from { transform: translate3d(0,0,0); } to { transform: translate3d(-25%,0,0); } } @media (prefers-reduced-motion: reduce) { [style*="hero-scroll"] { animation: none !important; } }`}</style>
+
       {/* Background Decorative Blobs with Parallax */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
         <motion.div style={{ y: blob1Y }} className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-100/50 dark:bg-purple-900/20 rounded-full blur-[140px] animate-pulse" />
         <motion.div style={{ y: blob2Y }} className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-red-50/60 dark:bg-red-900/20 rounded-full blur-[120px]" />
         <motion.div style={{ y: blob3Y }} className="absolute top-[20%] right-[15%] w-[30%] h-[30%] bg-blue-50/40 dark:bg-blue-900/20 rounded-full blur-[100px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] bg-size-[32px_32px] mask-[radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20" />
       </div>
 
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="max-w-7xl w-full flex flex-col items-center relative z-10"
+        className="max-w-7xl min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] w-full flex flex-col items-center relative z-10"
       >
         {/* Title */}
         <motion.h1

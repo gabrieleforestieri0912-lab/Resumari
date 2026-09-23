@@ -15,6 +15,9 @@ import {
   Video,
   Home,
   PanelLeftClose,
+  Settings,
+  CreditCard,
+  ChevronDown,
 } from "lucide-react";
 
 export default function Videos() {
@@ -27,6 +30,8 @@ export default function Videos() {
   const [loadingText, setLoadingText] = useState("");
   const [selectedVideo, setSelectedVideo] = useState<any>(null);
   const serverFetchedRef = useRef(false);
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement | null>(null);
 
   // Attende il ripristino della sessione (LocalStorage o cookie NextAuth) prima di
   // decidere se l'utente debba essere rimandato al login.
@@ -335,6 +340,16 @@ export default function Videos() {
     meta.setAttribute('content', 'Gestisci le tue trascrizioni video');
   }, []);
 
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(e.target as Node)) {
+        setIsAccountMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const handleLogout = () => {
     clearSession();
     router.push("/");
@@ -400,27 +415,53 @@ export default function Videos() {
               })}
             </div>
 
-            <div className="mt-auto p-4 border-t border-gray-100">
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 hover:border-purple-200 dark:hover:border-purple-700 hover:bg-purple-50/30 dark:hover:bg-purple-900/30 transition-all group">
-                <div className="w-9 h-9 rounded-xl bg-linear-to-br from-purple-600 to-red-500 text-white flex items-center justify-center font-black text-xs shrink-0">
-                  {userInitial}
-                </div>
-                <div className="min-w-0 flex-1 text-left">
-                  <p className="text-sm font-bold text-gray-900 dark:text-zinc-100 truncate">
-                    {displayName}
-                  </p>
-                  <p className="text-[10px] font-bold text-gray-400 dark:text-zinc-500 truncate">
-                    {user?.email}
-                  </p>
-                </div>
+            <div className="mt-auto p-4 border-t border-gray-100 dark:border-zinc-800" ref={accountMenuRef}>
+              <div className="relative">
+                <button
+                  onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 hover:border-purple-200 dark:hover:border-purple-700 hover:bg-purple-50/30 dark:hover:bg-purple-900/30 transition-all group"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-linear-to-br from-purple-600 to-red-500 text-white flex items-center justify-center font-black text-xs shrink-0">
+                    {userInitial}
+                  </div>
+                  <div className="min-w-0 flex-1 text-left">
+                    <p className="text-sm font-bold text-gray-900 dark:text-zinc-100 truncate">
+                      {displayName}
+                    </p>
+                    <p className="text-[10px] font-bold text-gray-400 dark:text-zinc-500 truncate">
+                      {user?.email}
+                    </p>
+                  </div>
+                  <ChevronDown size={16} className={`text-gray-400 dark:text-zinc-500 shrink-0 transition-transform ${isAccountMenuOpen ? "rotate-180" : ""}`} />
+                </button>
+                {isAccountMenuOpen && (
+                  <div className="absolute bottom-full left-0 right-0 mb-2 py-2 bg-white dark:bg-zinc-900 rounded-xl border border-gray-100 dark:border-zinc-800 shadow-lg overflow-hidden z-50">
+                    <Link
+                      href="/settings"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
+                    >
+                      <Settings size={16} className="text-gray-500 dark:text-zinc-400" />
+                      Impostazioni
+                    </Link>
+                    <Link
+                      href="/#pricing"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
+                    >
+                      <CreditCard size={16} className="text-gray-500 dark:text-zinc-400" />
+                      Pricing
+                    </Link>
+                    <button
+                      onClick={() => { handleLogout(); setIsAccountMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
+                    >
+                      <LogOut size={16} />
+                      Esci
+                    </button>
+                  </div>
+                )}
               </div>
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 dark:text-zinc-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition-all mt-2"
-              >
-                <LogOut size={16} />
-                <span className="font-bold text-sm">Esci</span>
-              </button>
             </div>
           </motion.aside>
         )}
@@ -466,17 +507,25 @@ export default function Videos() {
                 >
                   ← Torna alla lista
                 </button>
-                <div className="aspect-video w-full rounded-xl overflow-hidden bg-gray-100 dark:bg-zinc-800 mb-4">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    src={`https://www.youtube.com/embed/${selectedVideo.videoId}`}
-                    title={selectedVideo.title}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="w-full h-full"
+                <div className="aspect-video w-full rounded-xl overflow-hidden bg-gray-100 dark:bg-zinc-800 mb-4 relative group">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`https://img.youtube.com/vi/${selectedVideo.videoId}/hqdefault.jpg`}
+                    alt={selectedVideo.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
                   />
+                  <a
+                    href={`https://www.youtube.com/watch?v=${selectedVideo.videoId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors"
+                    title="Apri su YouTube"
+                  >
+                    <span className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Video size={20} className="text-red-600 ml-0.5" />
+                    </span>
+                  </a>
                 </div>
                 <h3 className="text-xl font-black text-gray-900 dark:text-zinc-100 mb-1">
                   {selectedVideo.title}
@@ -558,25 +607,24 @@ export default function Videos() {
           ) : (
             <div className="grid gap-4">
               {videos.map((video: any, idx: number) => (
-                <div
-                  key={idx}
-                  className="bg-white rounded-2xl p-6 border border-gray-100 shadow-lg shadow-gray-100/50 hover:shadow-xl hover:shadow-purple-500/5 transition-all"
+                <button
+                  key={`${video.videoId}-${idx}`}
+                  onClick={() => setSelectedVideo(video)}
+                  className="w-full text-left bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-gray-100 dark:border-zinc-800 shadow-lg shadow-gray-100/50 dark:shadow-none hover:shadow-xl hover:shadow-purple-500/5 hover:border-purple-200 dark:hover:border-purple-800 transition-all cursor-pointer group"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="w-48 h-28 rounded-xl overflow-hidden bg-gray-100 dark:bg-zinc-800 shrink-0">
-                      <iframe
-                        width="100%"
-                        height="100%"
-                        src={`https://www.youtube.com/embed/${video.videoId}`}
-                        title={video.title}
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        className="w-full h-full"
+                    <div className="w-48 h-28 rounded-xl overflow-hidden bg-gray-100 dark:bg-zinc-800 shrink-0 relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`}
+                        alt={video.title}
+                        className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform"
+                        loading="lazy"
                       />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-black text-gray-900 dark:text-zinc-100 mb-1 line-clamp-2">
+                      <h3 className="font-black text-gray-900 dark:text-zinc-100 mb-1 line-clamp-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                         {video.title}
                       </h3>
                       <p className="text-sm text-gray-500 dark:text-zinc-400 mb-3">
@@ -586,10 +634,13 @@ export default function Videos() {
                         <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold rounded-md">
                           {video.transcript.length} segmenti
                         </span>
+                        <span className="text-xs font-bold text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                          Apri trascrizione →
+                        </span>
                       </div>
                     </div>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           )}

@@ -19,9 +19,16 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [locale, setLocale] = useState<Locale>('it');
   const [translations, setTranslations] = useState<Record<string, string>>(getTranslations('it'));
 
-  // La lingua salvata può essere letta solo nel browser (localStorage), quindi va
-  // applicata dopo il mount per non generare un hydration mismatch.
+  // Configurazione manuale: se mode=auto usa lingua browser, se manual usa quella salvata
   useEffect(() => {
+    const mode = localStorage.getItem('resumari_locale_mode') as 'manual' | 'auto' | null;
+    if (mode === 'auto') {
+      const browser = typeof navigator !== 'undefined' ? navigator.language.slice(0, 2) : 'it';
+      const autoLocale: Locale = browser === 'it' ? 'it' : 'en';
+      setLocale(autoLocale);
+      setTranslations(getTranslations(autoLocale));
+      return;
+    }
     const savedLocale = localStorage.getItem('resumari_locale') as Locale | null;
     if (savedLocale && (savedLocale === 'it' || savedLocale === 'en')) {
       setLocale(savedLocale);

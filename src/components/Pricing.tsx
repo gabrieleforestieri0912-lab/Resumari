@@ -176,7 +176,7 @@ export default function Pricing() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] bg-size-[16px_16px] mask-[radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-40" />
       </div>
 
-      <div className="max-w-7xl mx-auto text-center mb-16">
+      <div className="max-w-7xl min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] mx-auto text-center mb-16">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -218,7 +218,7 @@ export default function Pricing() {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4 max-w-7xl mx-auto items-center">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4 min-[1920px]:grid-cols-4 min-[2560px]:gap-8 max-w-7xl min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] mx-auto items-center">
         {plans.map((plan, index) => {
           const Icon = plan.icon;
           return (
@@ -262,9 +262,11 @@ export default function Pricing() {
                       ? (plan.priceMonthly === "0" ? "Gratis" : `€${plan.priceMonthly}`)
                       : (plan.priceAnnual === "0" ? "Gratis" : `€${plan.priceAnnual}`)}
                   </span>
-                  <span className="text-gray-400 font-bold text-xs uppercase tracking-widest">
-                    {billingCycle === "monthly" ? plan.periodMonthly : plan.periodAnnual}
-                  </span>
+                  {!plan.isFree && (
+                    <span className="text-gray-400 font-bold text-xs uppercase tracking-widest">
+                      {billingCycle === "monthly" ? plan.periodMonthly : plan.periodAnnual}
+                    </span>
+                  )}
                 </div>
               </div>
 

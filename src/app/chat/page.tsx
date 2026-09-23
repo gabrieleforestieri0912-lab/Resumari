@@ -429,6 +429,18 @@ export default function Chat() {
 
   const displayName = user?.name || user?.email?.split("@")[0] || "Utente";
 
+  // Titolo scheda = titolo chat attiva
+  useEffect(() => {
+    const active = chats.find((c: any) => c.id === activeChatId);
+    if (active?.title && active.title !== "Nuova Conversazione") {
+      document.title = `${active.title} | Resumari`;
+    } else if (activeChatId) {
+      document.title = "Chat | Resumari";
+    } else {
+      document.title = "Chat | Resumari";
+    }
+  }, [activeChatId, chats]);
+
   /**
    * Esegue il logout eliminando sessione e dati locali
    */
@@ -1670,24 +1682,58 @@ export default function Chat() {
   };
 
   /**
-   * Esporta l'intera conversazione in un file .txt
+   * Esporta l'intera conversazione rispettando le impostazioni di formato e percorso
+   * (txt/json/md) salvate in Impostazioni. Se disponibile usa File System Access
+   * per scrivere direttamente nella cartella scelta, altrimenti fallback download.
    */
-  const handleExportConversation = () => {
+  const handleExportConversation = async () => {
     const chat = chats.find((c: any) => c.id === activeChatId);
-    const title = chat?.title || "conversazione";
-    const lines = messages.map((msg: any) => {
-      const role = msg.sender === "user" ? "Tu" : "Resumari";
-      return `[${msg.time || "--:--"}] ${role}:\n${msg.text || ""}`;
-    });
-    const content = `Resumari Chat — ${title}\n${new Date().toLocaleDateString("it-IT")}\n${"=".repeat(40)}\n\n${lines.join("\n\n")}`;
-    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const rawTitle = chat?.title || "conversazione";
+    const safeTitle = rawTitle.replace(/[^a-z0-9]/gi, "_");
+    const fmt = (typeof window !== 'undefined' ? (localStorage.getItem('resumari_export_format') as 'txt' | 'json' | 'md' | null) : null) || 'txt';
+    const configuredPath = typeof window !== 'undefined' ? localStorage.getItem('resumari_export_path') : null;
+
+    let content: string;
+    let ext: string;
+    let mime: string;
+    if (fmt === 'json') {
+      content = JSON.stringify({ title: rawTitle, exportedAt: new Date().toISOString(), path: configuredPath, messages }, null, 2);
+      ext = 'json'; mime = 'application/json;charset=utf-8';
+    } else if (fmt === 'md') {
+      const mdLines = messages.map((msg: any) => `### ${msg.sender === 'user' ? 'Tu' : 'Resumari'} — ${msg.time || ''}\n\n${msg.text || ''}\n`);
+      content = `# ${rawTitle}\n\n*Esportato il ${new Date().toLocaleDateString('it-IT')} — ${configuredPath || 'Download di sistema'}*\n\n---\n\n${mdLines.join('\n')}`;
+      ext = 'md'; mime = 'text/markdown;charset=utf-8';
+    } else {
+      const lines = messages.map((msg: any) => `[${msg.time || "--:--"}] ${msg.sender === "user" ? "Tu" : "Resumari"}:\n${msg.text || ""}`);
+      content = `Resumari Chat — ${rawTitle}\n${new Date().toLocaleDateString("it-IT")}\n${configuredPath ? `Percorso: ${configuredPath}` : ''}\n${"=".repeat(40)}\n\n${lines.join("\n\n")}`;
+      ext = 'txt'; mime = 'text/plain;charset=utf-8';
+    }
+
+    const fileName = `${safeTitle}.${ext}`;
+    const dirHandle = (window as any).__resumariDirHandle;
+
+    // Tentativo scrittura diretta nella cartella configurata
+    if (dirHandle?.getFileHandle) {
+      try {
+        const fileHandle = await dirHandle.getFileHandle(fileName, { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(new Blob([content], { type: mime }));
+        await writable.close();
+        addToast?.(configuredPath ? `Salvata in ${configuredPath}/${fileName}` : `Conversazione esportata come ${ext.toUpperCase()}`, "success");
+        return;
+      } catch {
+        // fallback a download
+      }
+    }
+
+    const blob = new Blob([content], { type: mime });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${title.replace(/[^a-z0-9]/gi, "_")}.txt`;
+    a.download = fileName;
     a.click();
     URL.revokeObjectURL(url);
-    addToast?.("Conversazione esportata", "success");
+    addToast?.(configuredPath ? `Esportata (${ext.toUpperCase()}) — percorso configurato: ${configuredPath}` : `Conversazione esportata come ${ext.toUpperCase()}`, "success");
   };
 
   /**
