@@ -438,8 +438,9 @@ export default function DemoSection() {
   };
 
   return (
-        <section className="w-full px-4 md:px-6 min-[1920px]:px-10 min-[2560px]:px-16 py-12 md:py-16 min-[1920px]:py-20 relative overflow-hidden" id="demo">
-      <div className="max-w-[1360px] lg:max-w-[1420px] xl:max-w-[1480px] min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] mx-auto">
+        <section className="w-full px-4 md:px-6 min-[1920px]:px-10 min-[2560px]:px-16 py-12 md:py-16 min-[1920px]:py-20 relative" id="demo">
+      <div className="absolute top-8 left-0 z-20 bg-gradient-to-r from-purple-600 to-red-600 text-white text-[11px] font-black tracking-wider uppercase px-10 py-1.5 shadow-lg rotate-[-30deg] -translate-x-2 origin-top-left">Prova la demo</div>
+      <div className="max-w-[1360px] lg:max-w-[1420px] xl:max-w-[1480px] min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] mx-auto relative">
         <div className="text-center mb-8 min-[1920px]:mb-10">
           <div className="w-16 h-1 bg-gradient-to-r from-purple-600 to-red-500 rounded-full mb-4 mx-auto" />
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-wider">
@@ -462,23 +463,17 @@ export default function DemoSection() {
                   {sidebarOpen && (
                     <motion.aside
                       initial={{ width: 0, opacity: 0 }}
-                      animate={{ width: 230, opacity: 1 }}
+                      animate={{ width: 260, opacity: 1 }}
                       exit={{ width: 0, opacity: 0 }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
-                      className="hidden md:flex flex-col shrink-0 border-r border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-950/60 overflow-hidden relative lg:!w-[260px] xl:!w-[280px] min-[1920px]:!w-[300px]"
+                      className="hidden md:flex flex-col shrink-0 border-r border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-950/60 overflow-hidden relative lg:!w-[285px] xl:!w-[305px] min-[1920px]:!w-[320px]"
                     >
                       <div className="absolute right-0 top-0 bottom-0 w-px bg-gradient-to-b from-purple-400/30 via-purple-600/40 to-red-400/30 pointer-events-none" />
                       <div className="p-3 border-b border-gray-100 dark:border-zinc-800">
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center">
                           <span className="text-[10px] font-black text-gray-900 dark:text-gray-100 uppercase tracking-wider">
-                            Canali
+                            Conversazioni
                           </span>
-                          <button
-                            onClick={() => setSidebarOpen(false)}
-                            className="p-1 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                          >
-                            <X size={13} />
-                          </button>
                         </div>
                       </div>
                       <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
@@ -512,7 +507,7 @@ export default function DemoSection() {
                                 <p className="text-[13px] font-bold text-gray-900 dark:text-gray-100 truncate leading-tight">
                                   {ch.name}
                                 </p>
-                                <p className="text-[10px] text-gray-400 truncate leading-tight">
+                                <p className="text-[11px] font-semibold text-gray-600 dark:text-zinc-300 truncate leading-tight">
                                   {ch.desc}
                                 </p>
                               </div>
@@ -521,12 +516,6 @@ export default function DemoSection() {
                         })}
                         {premiumChannels.length > 0 && (
                           <>
-                            <div className="pt-2 pb-1 px-1">
-                              <div className="h-px bg-gradient-to-r from-purple-400/20 via-purple-600/30 to-red-400/20" />
-                              <p className="text-[9px] font-bold text-purple-600 uppercase tracking-wider mt-2 mb-1 px-1">
-                                Premium
-                              </p>
-                            </div>
                             {premiumChannels.map((ch) => {
                               const cd = channelData[ch.id];
                               return (
@@ -571,24 +560,7 @@ export default function DemoSection() {
                   )}
                 </AnimatePresence>
 
-                <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-zinc-900">
-                  {!sidebarOpen && (
-                    <div className="hidden md:flex items-center gap-2 px-3 py-1.5 border-b border-gray-100 dark:border-zinc-800">
-                      <button
-                        onClick={() => setSidebarOpen(true)}
-                        className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded-lg transition-colors"
-                      >
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.55 9.38.55 9.38.55s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z" /></svg>
-                        Canali
-                      </button>
-                      {selectedChannel && (
-                        <span className="text-[11px] text-gray-400 font-medium">
-                          / {selectedChannel.name}
-                        </span>
-                      )}
-                    </div>
-                  )}
-
+                <div className="flex-[0.92] flex flex-col min-w-0 bg-white dark:bg-zinc-900 max-w-[62%] lg:max-w-[60%] xl:max-w-[58%]">
                   {messages.length === 0 && !selectedChannel ? (
                     <div className="flex-1" />
                   ) : (
