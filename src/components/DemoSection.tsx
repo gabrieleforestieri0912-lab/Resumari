@@ -439,11 +439,6 @@ export default function DemoSection() {
 
   return (
         <section className="w-full px-4 md:px-6 min-[1920px]:px-10 min-[2560px]:px-16 py-12 md:py-16 min-[1920px]:py-20 relative overflow-hidden" id="demo">
-      {/* Coda radiale che incornicia l'intero componente demo */}
-      <div className="absolute -top-40 -right-40 w-80 h-80 min-[1920px]:w-[420px] min-[1920px]:h-[420px] bg-purple-500/12 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute -bottom-40 -left-40 w-80 h-80 min-[1920px]:w-[420px] min-[1920px]:h-[420px] bg-red-500/12 rounded-full blur-[120px] pointer-events-none" />
-      {/* Aureola gradient ampliata: racchiude la card demo */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] min-[1920px]:w-[1400px] min-[1920px]:h-[1400px] bg-gradient-to-br from-purple-500/40 via-red-500/24 to-transparent rounded-full blur-[120px] pointer-events-none" />
       <div className="max-w-[1360px] lg:max-w-[1420px] xl:max-w-[1480px] min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] mx-auto">
         <div className="text-center mb-8 min-[1920px]:mb-10">
           <div className="w-16 h-1 bg-gradient-to-r from-purple-600 to-red-500 rounded-full mb-4 mx-auto" />
@@ -524,7 +519,7 @@ export default function DemoSection() {
                             </button>
                           );
                         })}
-                        {isLoggedIn && premiumChannels.length > 0 && (
+                        {premiumChannels.length > 0 && (
                           <>
                             <div className="pt-2 pb-1 px-1">
                               <div className="h-px bg-gradient-to-r from-purple-400/20 via-purple-600/30 to-red-400/20" />
@@ -572,16 +567,6 @@ export default function DemoSection() {
                           </>
                         )}
                       </div>
-                      {!isLoggedIn && (
-                        <div className="p-3 border-t border-gray-100 dark:border-zinc-800">
-                          <Link
-                            href="/login?mode=signup"
-                            className="block w-full py-2 text-center text-[10px] font-bold text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded-lg transition-colors"
-                          >
-                            Sblocca tutti i canali →
-                          </Link>
-                        </div>
-                      )}
                     </motion.aside>
                   )}
                 </AnimatePresence>
