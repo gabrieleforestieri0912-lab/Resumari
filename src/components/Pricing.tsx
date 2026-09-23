@@ -129,7 +129,6 @@ export default function Pricing() {
     const token = getToken();
 
     if (!token) {
-      addToast("Devi essere loggato per acquistare un piano.", "error");
       router.push("/login");
       return;
     }
