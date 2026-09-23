@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -171,7 +171,7 @@ function groupTranscriptByInterval(lines: any[], intervalSeconds = 30) {
   return buckets.filter(Boolean);
 }
 
-export default function Chat() {
+function ChatContent() {
   // --- Stato Applicazione e UI ---
   const { locale, t } = useLanguage();
   const pathname = usePathname();
@@ -2705,5 +2705,13 @@ export default function Chat() {
       </AnimatePresence>
     </div>
     </div>
+  );
+}
+
+export default function Chat() {
+  return (
+    <Suspense fallback={null}>
+      <ChatContent />
+    </Suspense>
   );
 }
