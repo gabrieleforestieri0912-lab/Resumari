@@ -60,6 +60,25 @@ a, button { cursor: pointer; }
   animation: text-glow-pulse 2.6s ease-in-out infinite;
 }
 
+@keyframes hero-scroll-left {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes hero-scroll-right {
+  0% { transform: translate3d(-50%, 0, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+.animate-hero-scroll-left {
+  animation: hero-scroll-left 35s linear infinite;
+}
+
+.animate-hero-scroll-right {
+  animation: hero-scroll-right 35s linear infinite;
+}
+
+
 @media (prefers-reduced-motion: reduce) {
   .text-glow-pulse {
     animation: none;

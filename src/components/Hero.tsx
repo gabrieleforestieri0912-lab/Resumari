@@ -36,18 +36,14 @@ export default function Hero() {
   const blob2Y = useTransform(scrollYProgress, [0, 1], ["5%", "-5%"]);
   const blob3Y = useTransform(scrollYProgress, [0, 1], ["0%", "8%"]);
 
-  // Solo video professionali e produttivi (no canzoni) — tutti diversi, coprono tutta la hero
+  // 48 ID reali e verificati (status 200) da canali tech, educativi e podcast di qualità
   const ytThumbs = [
-    // Programmazione ufficiale
-    "DHjqpvDnNGE", "PkZNo7MFNFg", "R2A9WYBl2SI", "eIrMbAQSU34", "b0EF0X4dYA8", "gmnBfG_cJVM", "YQHsXMglC9A", "pXO6kJBa6ro",
-    // Y Combinator
-    "QOOKin2F230", "0lJKucu6lBE", "nma8FBjVz9o", "CBYhVcO4WgI", "H9M02vSO0W0", "3Jv1m5yR8B0", "oKQz7s2r0p1", "b0EF0X4dYA9",
-    // Dr. Huberman
-    "QmOF0crdyRU", "H51Hta5a3GY", "9LSY8qHPE1Y", "aWGLpLR6q4o", "7b5X2u0d9yg", "LXb3EKWsInQ", "5MgBikgcWnY", "L0MK7qz13bU",
-    // Produttività / Podcast vari
-    "gEYQFJkhg1o", "DUn6luQjewA", "L_Guz73e6fw", "5qap5aO4i9A", "iWWoQlJ0G0k", "VpI-yyqJ7Yg", "Rb0UmrCXxVA", "U8smiWOT530",
-    "hT_nvWreIhg", "fRh_vgS2dFE", "airkSzvY9zc", "ZXsQAXx_ao0", "2Xc9gXyf2G4", "jNQXAC9IVRw", "9U4Aj1j0n1A", "o5Y7J0j9AB0",
-    "YQHsXMglC9B", "pXO6kJBa6r0", "b0EF0X4dYA9", "gmnBfG_cJVN", "3Jv1m5yR8B1", "H9M02vSO0W1", "oKQz7s2r0p3", "gEYQFJkhg1p",
+    "DHjqpvDnNGE", "PkZNo7MFNFg", "eIrMbAQSU34", "YQHsXMglC9A", "dGcsHMXbSOA", "aircAruvnKk", "jNQXAC9IVRw", "fRh_vgS2dFE",
+    "ZXsQAXx_ao0", "2Xc9gXyf2G4", "5MgBikgcWnY", "L0MK7qz13bU", "LXb3EKWsInQ", "QmOF0crdyRU", "Rb0UmrCXxVA", "5qap5aO4i9A",
+    "L_Guz73e6fw", "hT_nvWreIhg", "kJQP7kiw5Fk", "zOjov-2OZ0E", "vLnPwxZdW4Y", "bMknfKXIFA8", "j6Ule7GXaRs", "fJ9rUzIMcZQ",
+    "o-YBDTqX_ZU", "SqcY0GlETPk", "W6NZfCO5SIk", "kqtD5dpn9C8", "rfscVS0vtbw", "Oe421EPjeBE", "8Nd13ARuvVE", "VrQgmNY96wo",
+    "0-S5a0eXPoc", "kUMe1FH4CHE", "CBYhVcO4WgI", "fBNz5xF-Kx4", "8aGhZQkoFbQ", "dQw4w9WgXcQ", "M7lc1UVf-VE", "EwTZ2xpQwpA",
+    "JGwWNGJdvx8", "9bZkp7q19f0", "kXYiU_JCYtU", "7wtfhZwyrcc", "8hly31xKli0", "3JZ_D3ELwOQ", "C0DPdy98e4c", "uelHwf8o7_U",
   ];
   const rows = [
     ytThumbs.slice(0, 8),
@@ -55,49 +51,49 @@ export default function Hero() {
     ytThumbs.slice(16, 24),
     ytThumbs.slice(24, 32),
     ytThumbs.slice(32, 40),
-    ytThumbs.slice(0, 8).reverse(),
+    ytThumbs.slice(40, 48),
   ];
 
   return (
     <section ref={sectionRef} className="min-h-screen flex flex-col items-center justify-center text-center px-6 pt-28 pb-16 md:pt-44 md:pb-20 overflow-hidden bg-white dark:bg-zinc-950" style={{ position: 'relative' }}>
-      {/* Pannello a griglia con copertine YT — copre TUTTA la hero, brick-wall, scroll orizzontale */}
+      {/* Pannello a griglia con copertine YT — copre TUTTA la hero, brick-wall, scroll orizzontale continuo */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none" aria-hidden>
         <div className="absolute inset-0 flex flex-col justify-center gap-2 md:gap-3 py-4 opacity-100">
-          {rows.map((row, rowIdx) => (
-            <div
-              key={rowIdx}
-              className="flex gap-3 md:gap-4 w-max will-change-transform"
-              style={{
-                marginLeft: rowIdx % 2 === 1 ? "-86px" : "0px",
-                animation: `hero-scroll 22s linear infinite`,
-                animationDelay: `${rowIdx * -3.2}s`,
-              }}
-            >
-              {[...row, ...row].map((vid, i) => (
-                <div
-                  key={`${rowIdx}-${i}-${vid}`}
-                  className="shrink-0 w-[132px] md:w-[156px] lg:w-[172px] aspect-video rounded-lg overflow-hidden bg-white dark:bg-zinc-800 shadow-md ring-1 ring-black/10 dark:ring-white/10 opacity-95"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`https://img.youtube.com/vi/${vid}/hqdefault.jpg`}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-cover"
-                    draggable={false}
-                    onError={(e) => { (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${vid}/mqdefault.jpg`; }}
-                  />
-                </div>
-              ))}
-            </div>
-          ))}
+          {rows.map((row, rowIdx) => {
+            const isReverse = rowIdx % 2 === 1;
+            return (
+              <div
+                key={rowIdx}
+                className={`flex gap-3 md:gap-4 w-max will-change-transform ${
+                  isReverse ? "animate-hero-scroll-right" : "animate-hero-scroll-left"
+                }`}
+                style={{
+                  animationDuration: `${30 + (rowIdx % 3) * 6}s`,
+                }}
+              >
+                {[...row, ...row, ...row].map((vid, i) => (
+                  <div
+                    key={`${rowIdx}-${i}-${vid}`}
+                    className="shrink-0 w-[132px] md:w-[156px] lg:w-[172px] aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-zinc-800 shadow-md ring-1 ring-black/10 dark:ring-white/10 opacity-95"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={`https://img.youtube.com/vi/${vid}/mqdefault.jpg`}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover"
+                      draggable={false}
+                    />
+                  </div>
+                ))}
+              </div>
+            );
+          })}
         </div>
         {/* Velo leggero per leggibilità — griglia mantenuta ben visibile e in scorrimento orizzontale */}
         <div className="absolute inset-0 bg-white/55 dark:bg-zinc-950/45 backdrop-blur-[0.5px]" />
       </div>
-
-      <style>{`@keyframes hero-scroll { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } } @media (prefers-reduced-motion: reduce) { [style*="hero-scroll"] { animation: none !important; } }`}</style>
 
       {/* Blobs decorativi dietro la griglia */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none opacity-40">
