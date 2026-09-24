@@ -98,6 +98,31 @@ const codeExamples = {
   ].join("\n"),
 };
 
+const authExample = `X-API-Key: rsm_live_YOUR_KEY_HERE`;
+
+const sseExample = `event: metadata
+data: {"title":"Edmund Yong","source":"channel","totalVideos":21}
+
+event: batch
+data: {"batchIndex":0,"videos":[...],"stats":{"processed":21,...}}
+
+event: done
+data: {"stats":{"total":21,"succeeded":20,"failed":1}}`;
+
+const responseExample = `{
+  "video_id": "dQw4w9WgXcQ",
+  "title": "Rick Astley - Never Gonna Give You Up",
+  "channel": "Rick Astley",
+  "duration": 212,
+  "transcript": [
+    { "text": "We're no strangers to love", "start": 18.0, "duration": 3.5 }
+  ],
+  "text": "We're no strangers to love ...",
+  "language": "en",
+  "credits_used": 2,
+  "credits_remaining": 98
+}`;
+
 const errors = [
   {
     code: "missing_api_key",
@@ -481,9 +506,7 @@ export default function ApiKeysPage() {
             in ogni richiesta.
           </p>
           <div className="bg-gray-900 dark:bg-black rounded-2xl p-6 overflow-x-auto">
-            <pre className="text-sm text-gray-300 font-mono whitespace-pre">
-              X-API-Key: rsm_live_YOUR_KEY_HERE
-            </pre>
+            <pre className="text-sm text-gray-300 font-mono whitespace-pre">{authExample}</pre>
           </div>
         </div>
       </section>
@@ -643,14 +666,7 @@ export default function ApiKeysPage() {
                       <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase mb-2">
                         Eventi SSE
                       </p>
-                      <pre className="text-sm text-gray-600 dark:text-gray-300 font-mono whitespace-pre">{`event: metadata
-data: {"title":"Edmund Yong","source":"channel","totalVideos":21}
-
-event: batch
-data: {"batchIndex":0,"videos":[...],"stats":{"processed":21,...}}
-
-event: done
-data: {"stats":{"total":21,"succeeded":20,"failed":1}}`}</pre>
+                                            <pre className="text-sm text-gray-600 dark:text-gray-300 font-mono whitespace-pre">{sseExample}</pre>
                     </div>
                   </div>
                 </motion.div>
@@ -670,19 +686,7 @@ data: {"stats":{"total":21,"succeeded":20,"failed":1}}`}</pre>
             </h2>
           </div>
           <div className="bg-gray-900 dark:bg-black rounded-2xl p-6 overflow-x-auto">
-            <pre className="text-sm text-gray-300 font-mono whitespace-pre">{`{
-  "video_id": "dQw4w9WgXcQ",
-  "title": "Rick Astley - Never Gonna Give You Up",
-  "channel": "Rick Astley",
-  "duration": 212,
-  "transcript": [
-    { "text": "We're no strangers to love", "start": 18.0, "duration": 3.5 }
-  ],
-  "text": "We're no strangers to love ...",
-  "language": "en",
-  "credits_used": 2,
-  "credits_remaining": 98
-}`}</pre>
+            <pre className="text-sm text-gray-300 font-mono whitespace-pre">{responseExample}</pre>
           </div>
         </div>
       </section>

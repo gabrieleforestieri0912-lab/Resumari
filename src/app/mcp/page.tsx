@@ -153,6 +153,34 @@ const prompts = [
   },
 ];
 
+
+const jobResponseExample = `{
+  "job_id": "7e1f...",
+  "status": "completed",
+  "video": {
+    "title": "How Transformers Work",
+    "channel": "Example Channel"
+  },
+  "transcript": {
+    "format": "markdown",
+    "text": "# How Transformers Work\\n\\n..."
+  },
+  "usage": {
+    "credits_used": 12
+  }
+}`;
+
+const dockerJsonExample = `{
+  "name": "transcribr",
+  "transport": "streamable-http",
+  "url": "https://resumari.vercel.app/api/mcp",
+  "auth": "oauth"
+}`;
+
+const codexCommandsExample = `codex mcp remove transcribr
+codex mcp add transcribr --url https://resumari.vercel.app/api/mcp
+codex mcp list`;
+
 export default function McpPage() {
   const [expandedClient, setExpandedClient] = useState<number | null>(0);
   const [copied, setCopied] = useState<string | null>(null);
@@ -290,21 +318,7 @@ export default function McpPage() {
 
           {/* Response example */}
           <div className="mt-8 bg-gray-900 dark:bg-black rounded-2xl p-6 overflow-x-auto">
-            <pre className="text-sm text-gray-300 font-mono whitespace-pre">{`{
-  "job_id": "7e1f...",
-  "status": "completed",
-  "video": {
-    "title": "How Transformers Work",
-    "channel": "Example Channel"
-  },
-  "transcript": {
-    "format": "markdown",
-    "text": "# How Transformers Work\\n\\n..."
-  },
-  "usage": {
-    "credits_used": 12
-  }
-}`}</pre>
+                        <pre className="text-sm text-gray-300 font-mono whitespace-pre">{jobResponseExample}</pre>
           </div>
         </div>
       </section>
@@ -431,12 +445,7 @@ export default function McpPage() {
               </li>
             </ol>
             <div className="bg-gray-900 rounded-xl p-5 overflow-x-auto">
-              <pre className="text-sm text-gray-300 font-mono whitespace-pre">{`{
-  "name": "transcribr",
-  "transport": "streamable-http",
-  "url": "https://resumari.vercel.app/api/mcp",
-  "auth": "oauth"
-}`}</pre>
+                            <pre className="text-sm text-gray-300 font-mono whitespace-pre">{dockerJsonExample}</pre>
             </div>
           </div>
         </div>
@@ -473,9 +482,7 @@ export default function McpPage() {
               ))}
             </div>
             <div className="mt-4 bg-gray-50 dark:bg-zinc-800 rounded-xl p-4">
-              <pre className="text-sm text-gray-600 dark:text-gray-300 font-mono whitespace-pre">{`codex mcp remove transcribr
-codex mcp add transcribr --url https://resumari.vercel.app/api/mcp
-codex mcp list`}</pre>
+                            <pre className="text-sm text-gray-600 dark:text-gray-300 font-mono whitespace-pre">{codexCommandsExample}</pre>
             </div>
           </div>
         </div>

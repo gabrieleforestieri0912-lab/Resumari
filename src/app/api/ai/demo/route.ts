@@ -36,7 +36,8 @@ export async function POST(request: Request) {
     // Il renderer della demo interpreta solo paragrafi, elenchi e grassetto:
     // tabelle e titoli con # verrebbero mostrati come testo grezzo.
     systemPrompt +=
-      '\nFormatta la risposta in markdown semplice (paragrafi, elenchi puntati, grassetto). Non usare tabelle né titoli con #.';
+      '\nFormatta la risposta in markdown semplice (paragrafi, elenchi puntati, grassetto). Non usare tabelle né titoli con #.' +
+      '\nQuando citi momenti specifici di un video, usa il formato [MM:SS Titolo breve della sezione] (es. [01:23 Introduzione] oppure [00:45 Closure in JavaScript]). Non usare solo il secondaggio nudo, aggiungi sempre un titolo descrittivo di 2-5 parole.';
 
     const messages = [
       { role: 'system' as const, content: systemPrompt },

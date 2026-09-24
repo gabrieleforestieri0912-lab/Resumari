@@ -81,11 +81,20 @@ function parseTimeToSeconds(timeStr: string): number {
 
 function formatTimestampLinks(text: string, videoId?: string | null): string {
   if (!videoId || !text) return text;
-  const timestampRegex = /(\d{1,2}:\d{2}(?::\d{2})?)/g;
-  return text.replace(timestampRegex, (match) => {
+  // Match [MM:SS Title] or [HH:MM:SS Title] (bracketed with optional title)
+  const bracketedRegex = /\[(\d{1,2}:\d{2}(?::\d{2})?)([^\]]*?)\]/g;
+  let result = text.replace(bracketedRegex, (_, time, labelRaw) => {
+    const seconds = parseTimeToSeconds(time);
+    const label = labelRaw.trim();
+    return `<button type="button" class="timestamp-link inline-flex items-center gap-1.5 px-2 py-1 my-0.5 rounded-lg bg-red-50 border border-red-200 text-red-700 font-bold text-[11px] hover:bg-red-100 transition-colors cursor-pointer align-middle" data-seconds="${seconds}" data-videoid="${videoId}" title="Vai a ${time}${label ? ' — ' + label : ''}"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" class="text-red-500 shrink-0"><path d="m7 4 12 8-12 8V4z"/></svg><span class="font-mono">${time}</span>${label ? `<span class="text-red-600 font-semibold">${label}</span>` : ''}</button>`;
+  });
+  // Fallback: plain MM:SS not already inside a bracket or button
+  const plainRegex = /(?<!\[)(\d{1,2}:\d{2}(?::\d{2})?)(?!\]|[^<]*>)/g;
+  result = result.replace(plainRegex, (match) => {
     const seconds = parseTimeToSeconds(match);
     return `<button type="button" class="timestamp-link inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-red-50 border border-red-200 text-red-700 font-mono font-bold text-[11px] hover:bg-red-100 transition-colors cursor-pointer" data-seconds="${seconds}" data-videoid="${videoId}" title="Vai a ${match}"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" class="text-red-500 shrink-0"><path d="m7 4 12 8-12 8V4z"/></svg>${match}</button>`;
   });
+  return result;
 }
 
 function formatYouTubeLinks(text: string): string {
@@ -106,19 +115,13 @@ function cleanResponse(text: string): string {
     .replace(/((?:<li[^>]*>.*<\/li>\s*)+)/g, "<ul class='my-1.5 space-y-0.5'>$1</ul>");
 }
 
-function YoutubeEmbed({ videoId, startTime, onClose }: { videoId: string; startTime?: number | null; onClose: () => void }) {
+function YoutubeEmbed({ videoId, startTime }: { videoId: string; startTime?: number | null; onClose?: () => void }) {
   const src = startTime
     ? `https://www.youtube.com/embed/${videoId}?start=${startTime}&autoplay=1`
     : `https://www.youtube.com/embed/${videoId}?autoplay=1`;
 
   return (
     <div className="relative bg-black rounded-2xl overflow-hidden shadow-xl">
-      <button
-        onClick={onClose}
-        className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-all"
-      >
-        <X size={13} />
-      </button>
       <div className="relative aspect-video">
         <iframe
           src={src}
@@ -134,8 +137,7 @@ function YoutubeEmbed({ videoId, startTime, onClose }: { videoId: string; startT
 const DEMO_EXAMPLE_VIDEO = "DHjqpvDnNGE";
 const DEMO_EXAMPLE_MESSAGES: Message[] = [
   { id: 1, text: "Riassumi questo video", sender: "user", time: new Date().toISOString(), videoId: DEMO_EXAMPLE_VIDEO },
-  { id: 2, text: "Riassunto: il video spiega JavaScript in 100 secondi — vari tipi, closure e async. Momenti chiave: <button class=\"timestamp-link\" data-seconds=\"12\" data-videoid=\"DHjqpvDnNGE\">00:12</button> tipi, <button class=\"timestamp-link\" data-seconds=\"45\" data-videoid=\"DHjqpvDnNGE\">00:45</button> closure. Guarda: <button class=\"video-link\" data-videoid=\"DHjqpvDnNGE\">Guarda il video</button>", sender: "system", time: new Date().toISOString(), videoId: DEMO_EXAMPLE_VIDEO },
-  { id: 3, text: "Trascrizione (estratto): [00:00] Introduzione a JS — [00:12] Tipi primitivi — [00:45] Closure spiega lo scope.", sender: "system", time: new Date().toISOString(), videoId: DEMO_EXAMPLE_VIDEO },
+  { id: 2, text: `Certo! Ecco il riassunto di <strong>JavaScript in 100 secondi</strong>:<br/><br/>Il video copre i concetti fondamentali di JS in modo rapido e visivo. Momenti chiave:<br/>[00:00 Introduzione a JavaScript] [00:12 Tipi primitivi e variabili] [00:45 Closure e scope] [01:10 Async/Await e Promise] [01:30 Conclusione]<br/><br/>Guarda: <button type="button" class="video-link inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 border border-purple-200 text-purple-700 font-bold text-[11px] hover:bg-purple-100 transition-colors cursor-pointer" data-videoid="DHjqpvDnNGE"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" class="shrink-0"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.55 9.38.55 9.38.55s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z"/></svg>Guarda il video</button>`, sender: "system", time: new Date().toISOString(), videoId: DEMO_EXAMPLE_VIDEO },
 ];
 
 export default function DemoSection() {
@@ -445,8 +447,7 @@ export default function DemoSection() {
   };
 
   return (
-        <section className="w-full px-4 md:px-6 min-[1920px]:px-10 min-[2560px]:px-16 py-12 md:py-16 min-[1920px]:py-20 relative" id="demo">
-      <div className="absolute top-8 left-0 z-20 bg-gradient-to-r from-purple-600 to-red-600 text-white text-[11px] font-black tracking-wider uppercase px-10 py-1.5 shadow-lg rotate-[-30deg] -translate-x-2 origin-top-left rounded-full">Prova la demo</div>
+    <section className="w-full px-4 md:px-6 min-[1920px]:px-10 min-[2560px]:px-16 py-12 md:py-16 min-[1920px]:py-20 relative" id="demo">
       <div className="max-w-[1360px] lg:max-w-[1420px] xl:max-w-[1480px] min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] mx-auto relative">
         <div className="text-center mb-8 min-[1920px]:mb-10">
           <div className="w-16 h-1 bg-gradient-to-r from-purple-600 to-red-500 rounded-full mb-4 mx-auto" />
@@ -463,17 +464,20 @@ export default function DemoSection() {
         </div>
 
         <div className="flex gap-4 min-[1920px]:gap-6 min-[2560px]:gap-8 items-start">
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 relative">
+            <div className="absolute -top-3.5 left-4 md:left-6 z-20 bg-gradient-to-r from-purple-600 to-red-600 text-white text-[11px] font-black tracking-wider uppercase px-4 py-1 shadow-lg shadow-purple-500/25 rounded-full -rotate-6 pointer-events-none select-none">
+              Prova la demo
+            </div>
             <div className={`bg-white dark:bg-zinc-900 rounded-2xl min-[1920px]:rounded-3xl border shadow-xl overflow-hidden transition-all duration-500 ${selectedChannel ? "border-purple-200 dark:border-purple-800 shadow-purple-500/15 shadow-2xl" : "border-gray-200 dark:border-zinc-800 shadow-purple-500/5"}`}>
               <div className="flex h-[620px] lg:h-[640px] xl:h-[660px] min-[1920px]:h-[680px] min-[2560px]:h-[740px] max-h-[78vh] min-[1920px]:max-h-[720px] relative">
                 <AnimatePresence>
                   {sidebarOpen && (
                     <motion.aside
                       initial={{ width: 0, opacity: 0 }}
-                      animate={{ width: 260, opacity: 1 }}
+                      animate={{ width: 280, opacity: 1 }}
                       exit={{ width: 0, opacity: 0 }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
-                      className="hidden md:flex flex-col shrink-0 border-r border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-950/60 overflow-hidden relative lg:!w-[285px] xl:!w-[305px] min-[1920px]:!w-[320px]"
+                      className="hidden md:flex flex-col shrink-0 border-r border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-950/60 overflow-hidden relative lg:!w-[310px] xl:!w-[335px] min-[1920px]:!w-[350px]"
                     >
                       <div className="absolute right-0 top-0 bottom-0 w-px bg-gradient-to-b from-purple-400/30 via-purple-600/40 to-red-400/30 pointer-events-none" />
                       <div className="p-3 border-b border-gray-100 dark:border-zinc-800">
@@ -567,7 +571,7 @@ export default function DemoSection() {
                   )}
                 </AnimatePresence>
 
-                <div className="flex-[0.92] flex flex-col min-w-0 bg-white dark:bg-zinc-900 max-w-[62%] lg:max-w-[60%] xl:max-w-[58%]">
+                <div className="flex-1 md:flex-[0.85] flex flex-col min-w-0 bg-white dark:bg-zinc-900 w-full max-w-full md:max-w-[58%] lg:max-w-[55%] xl:max-w-[52%]">
                   {messages.length === 0 && !selectedChannel ? (
                     <div className="flex-1" />
                   ) : (
@@ -704,7 +708,7 @@ export default function DemoSection() {
                     </div>
                   )}
 
-                  <div className="p-4 pt-3 border-t border-gray-100 dark:border-zinc-800">
+                  <div className="p-4 border-t border-gray-100 dark:border-zinc-800">
                     <div className="relative group">
                       <input
                         ref={inputRef}
@@ -718,12 +722,12 @@ export default function DemoSection() {
                             : "Chiedi qualcosa sul canale..."
                         }
                         disabled={userMsgCount >= DEMO_MESSAGE_LIMIT}
-                        className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl pl-4 pr-12 py-2.5 text-xs font-medium text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500/10 focus:border-purple-200 dark:focus:border-purple-700 transition-all disabled:opacity-50"
+                        className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl pl-5 pr-14 py-3.5 text-sm font-medium text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/15 focus:border-purple-300 dark:focus:border-purple-700 transition-all disabled:opacity-50"
                       />
                       <button
                         onClick={loading ? handleCancel : handleSend}
                         disabled={!input.trim() || userMsgCount >= DEMO_MESSAGE_LIMIT}
-                        className={`absolute right-1.5 top-1.5 w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
+                        className={`absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center transition-all ${
                           input.trim() && userMsgCount < DEMO_MESSAGE_LIMIT
                             ? loading
                               ? "bg-red-500 text-white shadow-lg animate-pulse"
@@ -731,7 +735,7 @@ export default function DemoSection() {
                             : "bg-gray-200 text-gray-400"
                         }`}
                       >
-                        {loading ? <Square size={11} className="fill-current" /> : <Send size={13} />}
+                        {loading ? <Square size={13} className="fill-current" /> : <Send size={15} />}
                       </button>
                     </div>
                   </div>
