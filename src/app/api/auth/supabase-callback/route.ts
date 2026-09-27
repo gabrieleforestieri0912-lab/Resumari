@@ -25,7 +25,6 @@ export async function POST(request: Request) {
     }
 
     const client = getServiceClient();
-    if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
 
     // Verifica se esiste già un utente con l'email fornita
     let { data: user } = await client

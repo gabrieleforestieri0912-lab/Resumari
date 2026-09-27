@@ -46,7 +46,6 @@ export async function DELETE(
     const { id } = await params;
 
     const client = getServiceClient();
-    if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
 
     // Elimina la chat solo se appartiene all'utente autenticato (sicurezza)
     await client

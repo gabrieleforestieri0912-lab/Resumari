@@ -63,7 +63,6 @@ export async function POST(request: Request) {
 
   try {
     const client = getServiceClient();
-    if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as any;

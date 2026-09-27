@@ -24,7 +24,6 @@ export async function POST(request: Request) {
     const codeExpiry = new Date(Date.now() + CODE_EXPIRY);
 
     const client = getServiceClient();
-    if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
 
     // Upsert verification code
     const { data: existing } = await client

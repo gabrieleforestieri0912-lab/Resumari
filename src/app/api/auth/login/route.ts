@@ -42,7 +42,6 @@ export async function POST(request: Request) {
     }
 
     const client = getServiceClient();
-    if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
 
     // Recupero dell'utente tramite email (normalizzata in minuscolo)
     const { data: user } = await client

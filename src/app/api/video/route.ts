@@ -1,49 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { hasEnoughCredits, deductCredits, CREDIT_COSTS, creditsExhaustedMessage } from '@/lib/credits';
-import { fetchTranscriptForVideo } from '@/lib/youtube';
-
-const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || '';
-
-function getYouTubeVideoId(url: string): string | null {
-  if (!url) return null;
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
-    /^([a-zA-Z0-9_-]{11})$/,
-  ];
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match && match[1].length === 11) return match[1];
-  }
-  return null;
-}
-
-async function getVideoDetails(videoId: string) {
-  if (!YOUTUBE_API_KEY) return null;
-  try {
-    const url = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${YOUTUBE_API_KEY}&part=snippet,contentDetails,statistics`;
-    const response = await fetch(url);
-    const data = await response.json();
-    if (data.items && data.items.length > 0) {
-      const item = data.items[0];
-      return {
-        title: item.snippet.title,
-        description: item.snippet.description,
-        channelTitle: item.snippet.channelTitle,
-        thumbnail: item.snippet.thumbnails?.high?.url,
-        viewCount: item.statistics?.viewCount || '0',
-        likeCount: item.statistics?.likeCount || '0',
-        publishedAt: item.snippet.publishedAt,
-      };
-    }
-    return null;
-  } catch (error) {
-    console.error('Error fetching video details:', error);
-    return null;
-  }
-}
-
-
+import { fetchTranscriptForVideo, getVideoDetails, getYouTubeVideoId } from '@/lib/youtube';
 
 export async function POST(request: Request) {
   try {

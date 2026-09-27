@@ -17,7 +17,6 @@ export async function GET(request: Request) {
 
   try {
     const client = getServiceClient();
-    if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
 
     const [transcriptsRes, chatsRes] = await Promise.all([
       client

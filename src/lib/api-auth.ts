@@ -2,24 +2,50 @@ import crypto from 'crypto'
 import { findApiKeyByKeyHash, touchApiKey, findUserById } from '@/lib/db'
 import type { User } from '@/lib/types'
 
-// Configurazione del rate limit specifico per le chiamate via API Key
+// Configurazione del rate limit specifico per le chiamate via API Key.
+// Doppio backend come in `@/lib/rate-limit`: Supabase (`rate_limits`,
+// chiave `apikey:<id>`) quando disponibile, Map in-memory come fallback.
 const RATE_LIMIT_WINDOW = 60 * 1000
 const MAX_PER_MINUTE = 30
 // Store in-memory per il tracciamento delle richieste per chiave API
-const store = new Map<string, number[]>()
+const memoryStore = new Map<string, number[]>()
 
-/**
- * Verifica se una specifica chiave API ha superato il limite di richieste al minuto.
- * Utilizza un sistema di sliding window per monitorare l'utilizzo.
- */
-function checkRateLimit(keyId: string): { allowed: boolean; remaining: number } {
+function memoryCheckRateLimit(keyId: string): { allowed: boolean; remaining: number } {
   const now = Date.now()
-  const timestamps = store.get(keyId) || []
+  const timestamps = memoryStore.get(keyId) || []
   const valid = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW)
   if (valid.length >= MAX_PER_MINUTE) return { allowed: false, remaining: 0 }
   valid.push(now)
-  store.set(keyId, valid)
+  memoryStore.set(keyId, valid)
   return { allowed: true, remaining: MAX_PER_MINUTE - valid.length }
+}
+
+async function supabaseCheckRateLimit(keyId: string): Promise<{ allowed: boolean; remaining: number } | null> {
+  try {
+    const { getServiceClient } = await import('@/lib/supabase')
+    const client = getServiceClient()
+    const now = Date.now()
+    const windowStart = new Date(now - RATE_LIMIT_WINDOW).toISOString()
+    const key = `apikey:${keyId}`
+
+    void client.from('rate_limits').delete().lt('created_at', windowStart).then(
+      () => {},
+      () => {},
+    )
+
+    const { count } = await client
+      .from('rate_limits')
+      .select('id', { count: 'exact', head: true })
+      .eq('key', key)
+      .gte('created_at', windowStart)
+    const used = count || 0
+    if (used >= MAX_PER_MINUTE) return { allowed: false, remaining: 0 }
+    const { error } = await client.from('rate_limits').insert({ key })
+    if (error) return null
+    return { allowed: true, remaining: MAX_PER_MINUTE - used - 1 }
+  } catch {
+    return null
+  }
 }
 
 /**
@@ -63,7 +89,8 @@ export async function authenticateApiKey(request: Request): Promise<ApiAuthResul
   }
 
   // Controllo del rate limit per prevenire abusi delle API
-  const rl = checkRateLimit(keyRecord.id)
+  // (Supabase condiviso tra istanze, fallback memoria se tabella assente).
+  const rl = (await supabaseCheckRateLimit(keyRecord.id)) || memoryCheckRateLimit(keyRecord.id)
   if (!rl.allowed) {
     return { authenticated: false, error: 'rate_limited', status: 429 }
   }
@@ -73,8 +100,8 @@ export async function authenticateApiKey(request: Request): Promise<ApiAuthResul
     return { authenticated: false, error: 'invalid_api_key', status: 401 }
   }
 
-  // Aggiorna l'ultimo utilizzo della chiave
-  touchApiKey(keyRecord.id)
+  // Aggiorna l'ultimo utilizzo della chiave (fire-and-forget: non blocca la risposta)
+  void touchApiKey(keyRecord.id).catch(() => {})
 
   return {
     authenticated: true,

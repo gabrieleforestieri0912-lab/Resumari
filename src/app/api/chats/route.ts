@@ -28,7 +28,6 @@ export async function GET(request: Request) {
 
   try {
     const client = getServiceClient();
-    if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
     const { data: chats } = await client
       .from(TABLES.CHATS)
       .select()
@@ -74,7 +73,6 @@ export async function POST(request: Request) {
     };
 
     const client = getServiceClient();
-    if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
 
     // Check if chat exists
     const { data: existingChat } = await client

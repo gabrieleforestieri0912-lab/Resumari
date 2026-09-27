@@ -29,7 +29,6 @@ export async function POST(request: Request) {
     }
 
     const client = getServiceClient();
-    if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
 
     // Verifica l'esistenza di un utente con quel token e che non sia ancora scaduto
     const { data: user } = await client

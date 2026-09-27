@@ -1,4 +1,6 @@
 import crypto from 'crypto'
+import { fetchTranscriptForVideo, getVideoDetails, getYouTubeVideoId } from './youtube'
+import { getServiceClient } from './supabase'
 
 /**
  * Definizione di un job di trascrizione.
@@ -20,10 +22,35 @@ export type TranscribeJob = {
 }
 
 /**
- * Store in-memory per la gestione dei job.
- * In produzione, questo dovrebbe essere sostituito da un database o Redis.
+ * Store in-memory per la gestione dei job (path veloce) + snapshot best-effort
+ * su Supabase (`mcp_jobs`) per sopravvivere al recycle serverless tra
+ * `youtube.transcribe` e `youtube.get_transcript_job`.
  */
 const jobs = new Map<string, TranscribeJob>()
+
+/**
+ * Snapshot best-effort su Supabase. Se la tabella non esiste (migration non
+ * applicata) l'upsert fallisce in silenzio: la Map resta attiva.
+ */
+async function persistJobSnapshot(job: TranscribeJob): Promise<void> {
+  try {
+    await getServiceClient()
+      .from('mcp_jobs')
+      .upsert(
+        {
+          job_id: job.job_id,
+          video_id: job.video_id,
+          status: job.status,
+          result: job.result ?? null,
+          error: job.error ?? null,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'job_id' },
+      )
+  } catch {
+    // no-op: fallback in-memory
+  }
+}
 
 /**
  * Inizializza e salva un nuovo job di trascrizione.
@@ -36,14 +63,48 @@ export function createJob(videoId: string): TranscribeJob {
     created_at: Date.now(),
   }
   jobs.set(job.job_id, job)
+  // Best-effort: snapshot iniziale su Supabase (fire-and-forget).
+  void persistJobSnapshot(job).catch(() => {})
   return job
 }
 
 /**
  * Recupera lo stato corrente di un job tramite il suo ID.
+ *
+ * Sincrono per compatibilità con la route MCP (Map in-memory).
+ * Per il fallback cross-istanza (recycle serverless) usare `getJobAsync()`.
  */
 export function getJob(jobId: string): TranscribeJob | undefined {
   return jobs.get(jobId)
+}
+
+/**
+ * Variante async con fallback su Supabase (`mcp_jobs`).
+ * Se la tabella non esiste, ritorna solo la Map in-memory.
+ */
+export async function getJobAsync(jobId: string): Promise<TranscribeJob | undefined> {
+  const mem = jobs.get(jobId)
+  if (mem) return mem
+  try {
+    const { data } = await getServiceClient()
+      .from('mcp_jobs')
+      .select()
+      .eq('job_id', jobId)
+      .single()
+    if (!data) return undefined
+    const job: TranscribeJob = {
+      job_id: data.job_id,
+      video_id: data.video_id,
+      status: data.status,
+      created_at: new Date(data.created_at).getTime(),
+      result: data.result ?? undefined,
+      error: data.error ?? undefined,
+    }
+    jobs.set(job.job_id, job)
+    return job
+  } catch {
+    return undefined
+  }
 }
 
 /**
@@ -54,6 +115,7 @@ export function completeJob(jobId: string, result: TranscribeJob['result']) {
   if (job) {
     job.status = 'completed'
     job.result = result
+    void persistJobSnapshot(job).catch(() => {})
   }
 }
 
@@ -65,88 +127,21 @@ export function failJob(jobId: string, error: string) {
   if (job) {
     job.status = 'failed'
     job.error = error
+    void persistJobSnapshot(job).catch(() => {})
   }
-}
-
-const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || ''
-
-/**
- * Estrae l'ID di un video YouTube da un URL o da una stringa.
- */
-function getYouTubeVideoId(input: string): string | null {
-  if (!input) return null
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
-    /^([a-zA-Z0-9_-]{11})$/,
-  ]
-  for (const pattern of patterns) {
-    const match = input.match(pattern)
-    if (match && match[1].length === 11) return match[1]
-  }
-  return null
-}
-
-/**
- * Recupera i dettagli di un video tramite l'API ufficiale di YouTube.
- */
-async function getVideoDetails(videoId: string) {
-  if (!YOUTUBE_API_KEY) return null
-  try {
-    const url = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${YOUTUBE_API_KEY}&part=snippet,contentDetails`
-    const response = await fetch(url)
-    const data = await response.json()
-    if (data.items && data.items.length > 0) {
-      const item = data.items[0]
-      return {
-        title: item.snippet.title,
-        channelTitle: item.snippet.channelTitle,
-      }
-    }
-    return null
-  } catch {
-    return null
-  }
-}
-
-/**
- * Tenta di recuperare la trascrizione di un video YouTube in italiano o inglese.
- */
-async function getTranscript(videoId: string): Promise<{ transcript: { text: string; start: number; duration: number }[]; language: string } | null> {
-  const languages = ['it', 'en']
-  for (const lang of languages) {
-    try {
-      const url = `https://youtube.com/api/timedtext?v=${videoId}&lang=${lang}&fmt=json3`
-      const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } })
-      if (response.ok) {
-        const captionData = await response.json()
-        if (captionData.events && captionData.events.length > 0) {
-          const segments = captionData.events
-            .filter((e: any) => e.segs)
-            .map((e: any) => ({
-              text: e.segs.map((s: any) => s.utf8).join(' '),
-              start: (e.tStartMs || 0) / 1000,
-              duration: (e.dDurationMs || 0) / 1000,
-            }))
-          return { transcript: segments, language: lang }
-        }
-      }
-    } catch {
-      // continua al prossimo linguaggio
-    }
-  }
-  return null
 }
 
 /**
  * Processo principale di elaborazione di un job di trascrizione.
- * Recupera i dettagli del video e la trascrizione, aggiornando poi lo stato del job.
+ * Usa il layer condiviso `@/lib/youtube` (3 fallback: timedtext →
+ * pacchetto youtube-transcript → kome.ai) invece della copia locale.
  */
 export async function processJob(job: TranscribeJob) {
   try {
     const videoId = getYouTubeVideoId(job.video_id) || job.video_id
     const [details, transcriptData] = await Promise.all([
       getVideoDetails(videoId),
-      getTranscript(videoId),
+      fetchTranscriptForVideo(videoId),
     ])
 
     if (!transcriptData || transcriptData.transcript.length === 0) {
@@ -154,16 +149,21 @@ export async function processJob(job: TranscribeJob) {
       return
     }
 
-    const text = transcriptData.transcript.map(s => s.text).join(' ')
+    const transcript = transcriptData.transcript.map((s) => ({
+      text: s.text,
+      start: s.time,
+      duration: s.duration,
+    }))
+    const text = transcript.map((s) => s.text).join(' ')
 
     completeJob(job.job_id, {
       title: details?.title || 'Video',
       channel: details?.channelTitle || 'Canale sconosciuto',
-      transcript: transcriptData.transcript,
+      transcript,
       text,
       language: transcriptData.language,
     })
-  } catch (err: any) {
-    failJob(job.job_id, err.message || 'Errore durante la trascrizione')
+  } catch (err: unknown) {
+    failJob(job.job_id, err instanceof Error ? err.message : 'Errore durante la trascrizione')
   }
 }

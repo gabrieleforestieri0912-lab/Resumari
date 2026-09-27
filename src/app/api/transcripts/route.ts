@@ -12,7 +12,6 @@ export async function GET(request: Request) {
 
   try {
     const client = getServiceClient();
-    if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
     const { data } = await client
       .from(TABLES.TRANSCRIPTS)
       .select()
@@ -43,7 +42,6 @@ export async function POST(request: Request) {
     }
 
     const client = getServiceClient();
-    if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
 
     const now = new Date().toISOString();
     const row = {

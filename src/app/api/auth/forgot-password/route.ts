@@ -24,7 +24,6 @@ export async function POST(request: Request) {
     }
 
     const client = getServiceClient();
-    if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
     const { data: user } = await client
       .from(TABLES.USERS)
       .select()

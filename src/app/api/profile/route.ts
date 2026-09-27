@@ -55,7 +55,6 @@ export async function PUT(request: Request) {
     if (picture !== undefined) updateData.picture = picture || null;
 
     const client = getServiceClient();
-    if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
     const { data: updatedUser } = await client
       .from(TABLES.USERS)
       .update(updateData)
@@ -86,7 +85,6 @@ export async function DELETE(request: Request) {
 
   try {
     const client = getServiceClient();
-    if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
     await client
       .from(TABLES.USERS)
       .delete()

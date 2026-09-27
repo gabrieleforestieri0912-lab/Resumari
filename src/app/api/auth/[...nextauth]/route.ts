@@ -31,7 +31,6 @@ export const authOptions = {
         if (!credentials?.email || !credentials?.password) return null;
 
         const client = getServiceClient();
-        if (!client) return null;
         const { data: user } = await client
           .from(TABLES.USERS)
           .select()

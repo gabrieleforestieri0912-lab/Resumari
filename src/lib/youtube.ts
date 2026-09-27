@@ -1,4 +1,24 @@
 import { YoutubeTranscript } from "youtube-transcript";
+import {
+  extractYouTubeVideoId,
+  parseISODuration,
+  extractYouTubeChannelRef,
+  extractYouTubePlaylistId,
+} from "./youtube-ids";
+
+// Re-export degli helper puri (ID/playlist/durate) così le route importano
+// tutto da un solo modulo server. Gli alias legacy evitano di riscrivere i
+// nomi usati nelle route esistenti.
+export {
+  extractYouTubeVideoId,
+  parseISODuration,
+  extractYouTubeChannelRef,
+  extractYouTubePlaylistId,
+};
+export const getYouTubeVideoId = extractYouTubeVideoId;
+export const parseDuration = parseISODuration;
+export const getYouTubeChannelId = extractYouTubeChannelRef;
+export const getYouTubePlaylistId = extractYouTubePlaylistId;
 
 /**
  * YouTube transcript fetching with layered fallbacks.
@@ -146,6 +166,165 @@ async function getTranscriptFromKome(
   } catch {
     return null;
   }
+}
+
+export interface VideoDetails {
+  title: string;
+  description: string;
+  channelTitle: string;
+  channelId?: string;
+  thumbnail?: string | null;
+  viewCount?: string;
+  likeCount?: string;
+  publishedAt?: string;
+  durationSec?: number;
+}
+
+function getYouTubeApiKey(): string {
+  return process.env.YOUTUBE_API_KEY || "";
+}
+
+/**
+ * Dettagli di un video tramite YouTube Data API v3. La chiave viene letta
+ * a ogni chiamata (non a import-time) così un cambio env non richiede fix.
+ * Ritorna `null` se la chiave manca o il video non esiste.
+ */
+export async function getVideoDetails(videoId: string): Promise<VideoDetails | null> {
+  const apiKey = getYouTubeApiKey();
+  if (!apiKey) return null;
+  try {
+    const url = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet,contentDetails,statistics`;
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const data = await response.json();
+    const item = data?.items?.[0];
+    if (!item) return null;
+    return {
+      title: item.snippet.title,
+      description: item.snippet.description,
+      channelTitle: item.snippet.channelTitle,
+      channelId: item.snippet.channelId,
+      thumbnail: item.snippet.thumbnails?.high?.url,
+      viewCount: item.statistics?.viewCount || "0",
+      likeCount: item.statistics?.likeCount || "0",
+      publishedAt: item.snippet.publishedAt,
+      durationSec: parseISODuration(item.contentDetails?.duration || "PT0S"),
+    };
+  } catch (error) {
+    console.error("Error fetching video details:", error);
+    return null;
+  }
+}
+
+/**
+ * Risolve un handle/canale in channelId. Accetta URL completi o handle grezzi.
+ */
+export async function resolveChannelId(channelUrlOrHandle: string): Promise<string | null> {
+  const apiKey = getYouTubeApiKey();
+  if (!apiKey || !channelUrlOrHandle) return null;
+  const ref = extractYouTubeChannelRef(channelUrlOrHandle);
+  if (ref?.type === "id") return ref.value;
+  const query = ref?.type === "handle" ? ref.value : channelUrlOrHandle.replace(/^@/, "");
+  try {
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(query)}&key=${apiKey}&maxResults=1`;
+    const res = await fetch(searchUrl);
+    const data = await res.json();
+    return data?.items?.[0]?.id?.channelId || null;
+  } catch {
+    return null;
+  }
+}
+
+export interface ChannelVideosResult {
+  channelId: string;
+  channelTitle: string;
+  channelThumbnail: string | null;
+  channelDescription: string;
+  uploadsPlaylistId: string;
+  videos: Array<{ videoId: string; title: string; publishedAt: string }>;
+}
+
+/**
+ * Canale + ultimi video (via playlist uploads). Centralizza la logica oggi
+ * duplicata in `/api/channel-videos`, `/api/channel-info` e bulk transcript.
+ */
+export async function fetchChannelVideos(
+  channelUrlOrHandle: string,
+  maxVideos = 50,
+): Promise<ChannelVideosResult | null> {
+  const apiKey = getYouTubeApiKey();
+  if (!apiKey) return null;
+  const channelId = await resolveChannelId(channelUrlOrHandle);
+  if (!channelId) return null;
+
+  const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails&id=${channelId}&key=${apiKey}`;
+  const channelRes = await fetch(channelUrl);
+  const channelData = await channelRes.json();
+  const channel = channelData?.items?.[0];
+  if (!channel) return null;
+
+  const uploadsPlaylistId = channel.contentDetails.relatedPlaylists.uploads;
+  const videos: ChannelVideosResult["videos"] = [];
+  let nextPageToken = "";
+  do {
+    const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=50&pageToken=${nextPageToken}&key=${apiKey}`;
+    const playlistRes = await fetch(playlistUrl);
+    const playlistData = await playlistRes.json();
+    if (!playlistData?.items) break;
+    for (const item of playlistData.items) {
+      const vid = item?.snippet?.resourceId?.videoId;
+      if (vid) videos.push({ videoId: vid, title: item.snippet.title, publishedAt: item.snippet.publishedAt });
+      if (videos.length >= maxVideos) break;
+    }
+    nextPageToken = playlistData.nextPageToken || "";
+  } while (nextPageToken && videos.length < maxVideos);
+
+  return {
+    channelId,
+    channelTitle: channel.snippet.title,
+    channelThumbnail:
+      channel.snippet.thumbnails?.high?.url || channel.snippet.thumbnails?.default?.url || null,
+    channelDescription: channel.snippet.description || "",
+    uploadsPlaylistId,
+    videos: videos.slice(0, maxVideos),
+  };
+}
+
+export interface PlaylistVideosResult {
+  playlistId: string;
+  playlistTitle: string;
+  videos: Array<{ videoId: string; title: string }>;
+}
+
+/** Video di una playlist pubblica (fino a `maxVideos`, paginati a 50). */
+export async function fetchPlaylistVideos(
+  playlistUrlOrId: string,
+  maxVideos = 50,
+): Promise<PlaylistVideosResult | null> {
+  const apiKey = getYouTubeApiKey();
+  if (!apiKey) return null;
+  const playlistId = extractYouTubePlaylistId(playlistUrlOrId) || playlistUrlOrId;
+  if (!playlistId) return null;
+
+  const videos: PlaylistVideosResult["videos"] = [];
+  let playlistTitle = "";
+  let nextPageToken = "";
+  do {
+    const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50&pageToken=${nextPageToken}&key=${apiKey}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!data?.items) break;
+    playlistTitle = playlistTitle || data.items[0]?.snippet?.title || "";
+    for (const item of data.items) {
+      const vid = item?.snippet?.resourceId?.videoId;
+      if (vid) videos.push({ videoId: vid, title: item.snippet.title });
+      if (videos.length >= maxVideos) break;
+    }
+    nextPageToken = data.nextPageToken || "";
+  } while (nextPageToken && videos.length < maxVideos);
+
+  if (videos.length === 0) return null;
+  return { playlistId, playlistTitle, videos: videos.slice(0, maxVideos) };
 }
 
 /**

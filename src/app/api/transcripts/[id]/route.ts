@@ -22,7 +22,6 @@ export async function DELETE(
     const { id } = await params;
 
     const client = getServiceClient();
-    if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
 
     // Elimina la trascrizione solo se l'ID utente corrisponde (sicurezza)
     await client

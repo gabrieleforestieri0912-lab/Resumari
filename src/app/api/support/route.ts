@@ -29,7 +29,6 @@ export async function POST(request: Request) {
     }
 
     const client = getServiceClient();
-    if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
     await client
       .from(TABLES.MESSAGES)
       .insert({

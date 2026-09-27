@@ -51,7 +51,6 @@ export async function PUT(request: Request) {
     }
 
     const client = getServiceClient();
-    if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
 
     // Recupera l'utente dal database per verificare la password attuale
     const { data: user } = await client

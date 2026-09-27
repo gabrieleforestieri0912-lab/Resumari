@@ -41,7 +41,7 @@ export async function deductCredits(
   maxAttempts = 3,
 ): Promise<number | null> {
   const client = getServiceClient()
-  if (!client || cost <= 0) return null
+  if (cost <= 0) return null
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const { data: current } = await client
@@ -73,7 +73,6 @@ export async function deductCredits(
 /** Grants (or resets) the full monthly credit pool for a plan. */
 export async function setPlanCredits(userId: string, plan: string): Promise<void> {
   const client = getServiceClient()
-  if (!client) return
   await client
     .from(TABLES.USERS)
     .update({ credits: getPlanLimit(plan), updated_at: new Date().toISOString() })

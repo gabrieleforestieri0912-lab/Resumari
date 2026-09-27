@@ -1,7 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp'
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp'
 import { z } from 'zod'
-import { createJob, getJob, processJob } from '@/lib/mcp-jobs'
+import { createJob, getJobAsync, processJob } from '@/lib/mcp-jobs'
 
 /**
  * Configura il server MCP (Model Context Protocol).
@@ -32,7 +32,9 @@ function createServer() {
       }
 
       const job = createJob(videoId)
-      processJob(job)
+      // Fire-and-forget sullo stesso event loop: lo snapshot sync va su
+      // Supabase, ma l'elaborazione resta locale (fallback Map + DB in lettura).
+      void processJob(job).catch((err) => console.error('MCP job failed:', err))
 
       return {
         content: [{
@@ -63,7 +65,7 @@ function createServer() {
         return { content: [{ type: 'text', text: 'Errore: job_id richiesto' }] }
       }
 
-      const job = getJob(jobId)
+      const job = await getJobAsync(jobId)
       if (!job) {
         return { content: [{ type: 'text', text: JSON.stringify({ error: 'Job non trovato' }) }] }
       }
