@@ -6,100 +6,10 @@ import {
   VISION_AI_MODEL,
   aiErrorMessage,
   generateChatCompletion,
-  removeEmojis,
 } from '@/lib/ai';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { hasEnoughCredits, deductCredits, CREDIT_COSTS, creditsExhaustedMessage } from '@/lib/credits';
-
-// Chiave API per l'accesso ai dati di YouTube
-const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || '';
-
-// Header per simulare un browser durante le richieste a YouTube (evita blocchi)
-const BROWSER_HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-  'Accept': 'application/json, text/plain, */*',
-  'Accept-Language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
-  'Referer': 'https://www.youtube.com/',
-  'Origin': 'https://www.youtube.com',
-};
-
-/**
- * Estrae l'ID di un video YouTube da un URL o da una stringa.
- */
-function getYouTubeVideoId(url: string): string | null {
-  if (!url) return null;
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
-    /^([a-zA-Z0-9_-]{11})$/,
-  ];
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match && match[1].length === 11) return match[1];
-  }
-  return null;
-}
-
-/**
- * Recupera dettagli di un video (titolo, descrizione, ecc.) tramite l'API ufficiale di YouTube.
- */
-async function getVideoDetails(videoId: string) {
-  if (!YOUTUBE_API_KEY) return null;
-  try {
-    const url = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${YOUTUBE_API_KEY}&part=snippet,contentDetails,statistics`;
-    const response = await fetch(url);
-    const data = await response.json();
-    if (data.items && data.items.length > 0) {
-      return {
-        title: data.items[0].snippet.title,
-        description: data.items[0].snippet.description,
-        channelTitle: data.items[0].snippet.channelTitle,
-        thumbnail: data.items[0].snippet.thumbnails?.high?.url,
-      };
-    }
-    return null;
-  } catch (error) {
-    console.error('Error fetching video details:', error);
-    return null;
-  }
-}
-
-/**
- * Tenta di recuperare la trascrizione di un video YouTube in italiano o inglese.
- * Utilizza diverse fonti per massimizzare le probabilità di successo.
- */
-async function getTranscript(videoId: string) {
-  const languages = ['it', 'en'];
-  for (const lang of languages) {
-    try {
-      const url = `https://youtube.com/api/timedtext?v=${videoId}&lang=${lang}&fmt=json3`;
-      const response = await fetch(url, { headers: BROWSER_HEADERS });
-      if (response.ok) {
-        const captionData = await response.json();
-        if (captionData.events && captionData.events.length > 0) {
-          const text = captionData.events
-            .filter((e: any) => e.segs)
-            .map((e: any) => e.segs.map((s: any) => s.utf8).join(' '))
-            .join(' ');
-          if (text.trim().length > 0) return text;
-        }
-      }
-    } catch (e) {}
-  }
-
-  try {
-    const res = await fetch(`https://youtubetranscript.com/?v=${videoId}`, {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        return data.map((s: any) => s.text).join(' ');
-      }
-    }
-  } catch (e) {}
-
-  return null;
-}
+import { fetchTranscriptForVideo, getVideoDetails, getYouTubeVideoId } from '@/lib/youtube';
 
 /**
  * Endpoint API per la chat AI.
@@ -185,10 +95,13 @@ export async function POST(request: Request) {
 
     // Aggiunta del contesto da video (trascrizione e dettagli)
     if (videoId) {
-      const [transcript, details] = await Promise.all([
-        getTranscript(videoId),
+      const [transcriptData, details] = await Promise.all([
+        fetchTranscriptForVideo(videoId),
         getVideoDetails(videoId)
       ]);
+      const transcript = transcriptData
+        ? transcriptData.transcript.map((s) => s.text).join(' ')
+        : null;
 
       if (transcript) {
         contextData += `VIDEO: ${details?.title || videoId}\nTRASCRIZIONE: ${transcript.substring(0, 15000)}`;
@@ -217,13 +130,11 @@ export async function POST(request: Request) {
     // Selezione del modello (Vision se è presente un'immagine e se configurato)
     const aiModel = imageDataUrl && VISION_AI_MODEL ? VISION_AI_MODEL : DEFAULT_AI_MODEL;
 
-    // Generazione della risposta tramite Groq
-    const aiResponse = removeEmojis(
-      (await generateChatCompletion(messages, aiModel)) || '',
-    );
+    // Generazione della risposta tramite Groq (le emoji dell'AI vengono
+    // mantenute: nessun filtro di rimozione)
+    const aiResponse = (await generateChatCompletion(messages, aiModel)) || '';
 
     const client = getServiceClient();
-    if (!client) return NextResponse.json({ message: 'Server error' }, { status: 500 });
 
     // Salvataggio della cronologia della chat nel database Supabase
     const { error: saveError } = await client

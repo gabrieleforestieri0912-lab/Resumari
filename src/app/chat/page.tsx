@@ -247,6 +247,10 @@ function ChatContent() {
 
   // --- Stato Interfaccia Utente ---
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
+  // Mobile/tablet: la sidebar avvia chiusa e si apre solo come overlay (classi fixed sotto lg).
+  useEffect(() => {
+    if (window.innerWidth < 1024) setIsLeftSidebarOpen(false);
+  }, []);
   const [isHistoryPanelOpen, setIsHistoryPanelOpen] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [historySearch, setHistorySearch] = useState("");
@@ -1804,7 +1808,7 @@ function ChatContent() {
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 300, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
-            className="overflow-hidden h-full shrink-0"
+            className="fixed lg:relative inset-y-0 left-0 z-40 overflow-hidden h-full shrink-0"
           >
             <ChatSidebar
               setIsLeftSidebarOpen={setIsLeftSidebarOpen}
@@ -1825,10 +1829,19 @@ function ChatContent() {
         )}
       </AnimatePresence>
 
+      {/* Mobile: sfondo sfumato sotto la sidebar-overlay (tocca per chiudere) */}
+      {isLeftSidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm lg:hidden"
+          onClick={() => setIsLeftSidebarOpen(false)}
+          aria-hidden
+        />
+      )}
+
       {!isLeftSidebarOpen && (
         <button
           onClick={() => setIsLeftSidebarOpen(true)}
-          className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all"
+          className="fixed top-4 left-4 z-50 p-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all"
           title="Apri menu"
         >
           <PanelLeftClose size={18} className="text-gray-500 dark:text-zinc-400" />
@@ -2015,7 +2028,7 @@ function ChatContent() {
           </div>
         ) : (
           <>
-            <div className="px-4 md:px-8 py-4 border-b border-gray-100 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-10">
+            <div className={`px-4 md:px-8 py-4 border-b border-gray-100 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-10 ${!isLeftSidebarOpen ? "pl-14 md:pl-20" : ""}`}>
               <div className="max-w-4xl mx-auto flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-950 flex items-center justify-center text-purple-600 dark:text-purple-400">
@@ -2090,7 +2103,7 @@ function ChatContent() {
                                 </div>
                               )}
                               <div
-                                className={`flex flex-col gap-1 ${msg.sender === "user" ? "items-end" : "items-start"}`}
+                                className={`flex flex-col gap-1 min-w-0 ${msg.sender === "user" ? "items-end" : "items-start"}`}
                               >
                                 {msg.videoId && (
                                   <div className="mb-3 space-y-2 w-full max-w-md">
@@ -2161,7 +2174,7 @@ function ChatContent() {
 
                                 {msg.text ? (
                                   msg.sender === "user" && msg.cancelled ? (
-                                    <div className="px-5 py-3.5 rounded-2xl text-sm leading-relaxed bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 rounded-br-sm border border-red-100 dark:border-red-900">
+                                    <div className="px-5 py-3.5 rounded-2xl text-sm leading-relaxed break-words bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 rounded-br-sm border border-red-100 dark:border-red-900">
                                       <div>{msg.text}</div>
                                       <div className="text-[10px] text-red-400 dark:text-red-300 font-medium mt-1.5 pt-1.5 border-t border-red-200/50 dark:border-red-800/50 flex items-center gap-1">
                                         <Square size={8} className="fill-current shrink-0" />
@@ -2170,7 +2183,7 @@ function ChatContent() {
                                     </div>
                                   ) : (
                                     <div
-                                      className={`px-5 py-3.5 rounded-2xl text-sm leading-relaxed ${
+                                      className={`px-5 py-3.5 rounded-2xl text-sm leading-relaxed break-words ${
                                         msg.sender === "user"
                                           ? "bg-gray-900 text-white dark:bg-zinc-800 dark:text-white rounded-br-sm"
                                           : "bg-purple-50 dark:bg-purple-950 text-gray-800 dark:text-zinc-200 rounded-bl-sm border border-purple-100 dark:border-purple-900"

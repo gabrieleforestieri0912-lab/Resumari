@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { aiErrorMessage, generateChatCompletion, removeEmojis } from '@/lib/ai';
+import { aiErrorMessage, generateChatCompletion } from '@/lib/ai';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 /**
@@ -44,8 +44,8 @@ export async function POST(request: Request) {
       { role: 'user' as const, content: message },
     ];
 
-    // Generazione della risposta tramite Groq (emoji rimosse come nella chat autenticata)
-    const aiResponse = removeEmojis((await generateChatCompletion(messages)) || '');
+    // Generazione della risposta tramite Groq (emoji dell'AI mantenute)
+    const aiResponse = (await generateChatCompletion(messages)) || '';
 
     return NextResponse.json({ response: aiResponse });
   } catch (error: unknown) {

@@ -981,7 +981,7 @@ export default function ApiKeysPage() {
           <p className="text-sm text-gray-400 dark:text-gray-500 mt-6">
             Ti serve un volume elevato?{" "}
             <Link
-              href="/contact"
+              href="/support"
               className="text-purple-600 dark:text-purple-400 hover:underline font-semibold"
             >
               Contattaci

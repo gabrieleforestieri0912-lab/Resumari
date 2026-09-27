@@ -32,8 +32,11 @@ const nextConfig: NextConfig = {
       { source: '/trascrizioni/:path*', destination: '/videos/:path*', permanent: true },
       { source: '/cruscotto', destination: '/dashboard', permanent: true },
       { source: '/bacheca', destination: '/dashboard', permanent: true },
-      { source: '/contatti', destination: '/contact', permanent: true },
-      { source: '/contatto', destination: '/contact', permanent: true },
+      { source: '/contatti', destination: '/support', permanent: true },
+      { source: '/contatto', destination: '/support', permanent: true },
+      // La pagina /contact è stata rimossa: la pagina di feedback /support
+      // è l'unico canale di contatto (redirect per i link già indicizzati).
+      { source: '/contact', destination: '/support', permanent: true },
       { source: '/accedi', destination: '/login', permanent: true },
       { source: '/registrati', destination: '/signup', permanent: true },
       { source: '/registrazione', destination: '/signup', permanent: true },

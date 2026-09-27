@@ -24,6 +24,10 @@ export default function Videos() {
   const pathname = usePathname();
   const router = useRouter();
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
+  // Mobile/tablet: la sidebar avvia chiusa e si apre solo come overlay (vedi classi fixed).
+  useEffect(() => {
+    if (window.innerWidth < 1024) setIsLeftSidebarOpen(false);
+  }, []);
   const [user, setUser] = useState<any>(null);
   const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -376,7 +380,7 @@ export default function Videos() {
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 300, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
-            className="border-r border-gray-100 dark:border-zinc-800 flex flex-col bg-gray-50/50 dark:bg-zinc-900/50"
+            className="fixed lg:relative inset-y-0 left-0 z-40 border-r border-gray-100 dark:border-zinc-800 flex flex-col bg-gray-50/50 dark:bg-zinc-900/50"
           >
             <div className="p-4 flex flex-col gap-2">
               <div className="flex items-center justify-between mb-2">
@@ -467,25 +471,34 @@ export default function Videos() {
         )}
       </AnimatePresence>
 
+      {/* Mobile: sfondo sfumato sotto la sidebar-overlay (tocca per chiudere) */}
+      {isLeftSidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm lg:hidden"
+          onClick={() => setIsLeftSidebarOpen(false)}
+          aria-hidden
+        />
+      )}
+
       {!isLeftSidebarOpen && (
         <button
           onClick={() => setIsLeftSidebarOpen(true)}
-          className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-700 transition-all"
+          className="fixed top-4 left-4 z-50 p-2.5 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-700 transition-all"
         >
           <PanelLeftClose size={18} className="text-gray-500 dark:text-zinc-400" />
         </button>
       )}
 
       <main className="flex-1 overflow-auto">
-        <header className="h-16 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between px-8">
+        <header className={`h-16 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between px-4 md:px-8 ${!isLeftSidebarOpen ? "pl-14 md:pl-16" : ""}`}>
           <div>
             <h1 className="text-xl font-black text-gray-900 dark:text-zinc-100">Trascrizioni</h1>
-            <p className="text-xs text-gray-500 dark:text-zinc-400">
+            <p className="hidden sm:block text-xs text-gray-500 dark:text-zinc-400">
               Visualizza tutte le trascrizioni dei video analizzati
             </p>
           </div>
         </header>
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           {loading ? (
             <div className="bg-white rounded-2xl p-12 border border-gray-100 shadow-lg shadow-gray-100/50 text-center">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center animate-pulse">
@@ -613,7 +626,7 @@ export default function Videos() {
                   className="w-full text-left bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-gray-100 dark:border-zinc-800 shadow-lg shadow-gray-100/50 dark:shadow-none hover:shadow-xl hover:shadow-purple-500/5 hover:border-purple-200 dark:hover:border-purple-800 transition-all cursor-pointer group"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="w-48 h-28 rounded-xl overflow-hidden bg-gray-100 dark:bg-zinc-800 shrink-0 relative">
+                    <div className="w-28 h-20 sm:w-48 sm:h-28 rounded-xl overflow-hidden bg-gray-100 dark:bg-zinc-800 shrink-0 relative">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={`https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`}

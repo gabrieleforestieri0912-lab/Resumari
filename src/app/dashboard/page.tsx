@@ -132,6 +132,11 @@ export default function Dashboard() {
   const pathname = usePathname();
   const router = useRouter();
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
+  // Su mobile/tablet la sidebar (300px) lascerebbe pochi pixel al contenuto:
+  // avvia chiusa e si apre solo come overlay a tutto schermo (fixed sotto lg).
+  useEffect(() => {
+    if (window.innerWidth < 1024) setIsLeftSidebarOpen(false);
+  }, []);
   const [user, setUser] = useState<any>(null);
   const [data, setData] = useState<any>(null);
   const [transcripts, setTranscripts] = useState<any[]>([]);
@@ -341,7 +346,7 @@ export default function Dashboard() {
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 300, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
-            className="border-r border-gray-100 dark:border-zinc-800 flex flex-col bg-gray-50/50 dark:bg-zinc-900/50 shrink-0"
+            className="fixed lg:relative inset-y-0 left-0 z-40 border-r border-gray-100 dark:border-zinc-800 flex flex-col bg-gray-50/50 dark:bg-zinc-900/50 shrink-0"
           >
             <div className="p-4 flex flex-col gap-2">
               <div className="flex items-center justify-between mb-2">
@@ -437,22 +442,31 @@ export default function Dashboard() {
         )}
       </AnimatePresence>
 
+      {/* Mobile: sfondo sfumato sotto la sidebar-overlay (tocca per chiudere) */}
+      {isLeftSidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm lg:hidden"
+          onClick={() => setIsLeftSidebarOpen(false)}
+          aria-hidden
+        />
+      )}
+
       {!isLeftSidebarOpen && (
         <button
           onClick={() => setIsLeftSidebarOpen(true)}
-          className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all"
+          className="fixed top-4 left-4 z-50 p-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all"
         >
           <PanelLeftClose size={18} className="text-gray-500" />
         </button>
       )}
 
       <main className="flex-1 overflow-auto">
-        <header className="h-16 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between px-6 min-[1920px]:px-10 min-[2560px]:px-12">
+        <header className={`h-16 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between px-6 min-[1920px]:px-10 min-[2560px]:px-12 ${!isLeftSidebarOpen ? "pl-14 min-[1920px]:pl-16 min-[2560px]:pl-16" : ""}`}>
           <div>
             <h1 className="text-xl min-[1920px]:text-2xl font-black text-gray-900 dark:text-zinc-100">
               Dashboard
             </h1>
-            <p className="text-xs min-[1920px]:text-sm text-gray-500 dark:text-zinc-500">
+            <p className="hidden sm:block text-xs min-[1920px]:text-sm text-gray-500 dark:text-zinc-500">
               Panoramica ultrawide della tua attività su Resumari
             </p>
           </div>

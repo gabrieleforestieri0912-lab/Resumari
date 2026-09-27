@@ -165,15 +165,7 @@ export default function Footer() {
                 href="/support"
                 className="transition-all hover:text-[#7b2ff7] hover:pl-1"
               >
-                Supporto
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/contact"
-                className="transition-all hover:text-[#7b2ff7] hover:pl-1"
-              >
-                Contattaci
+                Supporto e Feedback
               </Link>
             </li>
           </ul>

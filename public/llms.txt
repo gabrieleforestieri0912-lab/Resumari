@@ -45,4 +45,4 @@ Resumari espone:
 
 ## Contatti
 
-Per informazioni commerciali o di supporto: https://resumari.vercel.app/support oppure https://resumari.vercel.app/contact.
+Per informazioni commerciali o di supporto: https://resumari.vercel.app/support
