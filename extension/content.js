@@ -25,6 +25,11 @@ const ICON_URL = (() => {
 // annullate in silenzio invece di lanciare eccezioni non catturate.
 let contextDead = ICON_URL === null;
 
+// Versione del content script: serve per diagnosticare in console quale istanza
+// è in esecuzione nella tab (dopo un reload dell'estensione, le tab aperte
+// prima eseguono ancora la vecchia istanza finché non vengono ricaricate).
+const RESUMARI_CONTENT_VERSION = '1.1.2';
+
 // UI Injection
 function injectThumbnailButtons() {
   // Selettori per tutti i contesti YouTube:
@@ -311,12 +316,38 @@ function injectChannelPageButton() {
   }
 }
 
+// Spegne il watcher (observer + debounce): usato quando il contesto muore.
+function stopWatching() {
+  contextDead = true;
+  try { if (debounceTimer) clearTimeout(debounceTimer); } catch {}
+  try { observer.disconnect(); } catch {}
+}
+
+// Verifica (in modo sicuro) che il contesto dell'estensione sia ancora vivo.
+// Le iniezioni correnti non toccano più chrome.* (l'icona è già risolta in
+// ICON_URL), quindi questo è un controllo preventivo: se un reload/update
+// dell'estensione ha revocato il contesto, ci fermiamo qui in silenzio.
+function isExtensionContextAlive() {
+  try {
+    // In un contesto valido restituisce sempre l'ID dell'estensione (stringa);
+    // se il contesto è stato invalidato l'accesso lancia
+    // "Extension context invalidated", catturato qui sotto.
+    return Boolean(chrome.runtime?.id);
+  } catch {
+    return false;
+  }
+}
+
 // Esegue le tre iniezioni in un unico punto protetto: se il contesto
 // dell'estensione è stato invalidato (reload con la tab aperta), l'observer
 // viene scollegato invece di lanciare "Extension context invalidated" a ogni
 // mutation della pagina. Gli altri errori vengono solo loggati.
 function runInjections() {
   if (contextDead) return;
+  if (!isExtensionContextAlive()) {
+    stopWatching();
+    return;
+  }
   try {
     injectThumbnailButtons();
     injectVideoPageButtons();
@@ -324,9 +355,7 @@ function runInjections() {
   } catch (err) {
     const msg = String((err && err.message) || err);
     if (msg.includes('Extension context invalidated')) {
-      contextDead = true;
-      try { if (debounceTimer) clearTimeout(debounceTimer); } catch {}
-      try { observer.disconnect(); } catch {}
+      stopWatching();
       return;
     }
     console.warn('Resumari: errore durante lintestazione dei pulsanti:', err);
@@ -353,4 +382,8 @@ window.addEventListener('yt-navigate-finish', () => {
 });
 
 // Initial run
+console.info(
+  `[Resumari] content script v${RESUMARI_CONTENT_VERSION} attivo ` +
+  `(contesto ${contextDead ? 'NON valido — iniezioni disabilitate' : 'valido'})`
+);
 runInjections();
