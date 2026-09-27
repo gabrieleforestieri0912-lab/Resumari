@@ -8,6 +8,23 @@ const getYouTubeVideoId = (url) => {
 
 const RESUMARI_BASE_URL = 'https://resumari.vercel.app';
 
+// Icona risolta UNA SOLA VOLTA a caricamento, quando il contesto è ancora valido.
+// Dopo un reload/update dell'estensione con la tab aperta, ogni accesso
+// successivo a chrome.runtime lancia "Extension context invalidated" e uccide
+// tutte le iniezioni: memorizzando la stringa qui, non si tocca più
+// chrome.runtime in nessuna chiamata successiva.
+const ICON_URL = (() => {
+  try {
+    return chrome.runtime.getURL('icons/icon128.png');
+  } catch {
+    return null;
+  }
+})();
+
+// true quando il contesto dell'estensione è morto: le iniezioni vengono
+// annullate in silenzio invece di lanciare eccezioni non catturate.
+let contextDead = ICON_URL === null;
+
 // UI Injection
 function injectThumbnailButtons() {
   // Selettori per tutti i contesti YouTube:
@@ -26,7 +43,7 @@ function injectThumbnailButtons() {
     ytd-playlist-panel-video-renderer
   `);
 
-  const iconUrl = chrome.runtime.getURL('icons/icon128.png');
+  const iconUrl = ICON_URL;
 
   renderers.forEach(renderer => {
     // Evita iniezioni duplicate
@@ -91,7 +108,7 @@ function injectVideoPageButtons() {
 
   if (!likeSegment && !shareBtn && !actionsContainer) return;
 
-  const iconUrl = chrome.runtime.getURL('icons/icon128.png');
+  const iconUrl = ICON_URL;
 
   const transcriptBtn = document.createElement('button');
   transcriptBtn.type = 'button';
@@ -130,14 +147,199 @@ function injectVideoPageButtons() {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Bottone "Trascrivi canale" — SOLO pagine di canale, in testata accanto ad
+// "Iscriviti" (mai sotto ai video / nelle griglie).
+// ---------------------------------------------------------------------------
+
+// Pagina canale: /@handle, /channel/UC…, /user/…, /c/… con eventuali sotto-schede
+// (/videos, /shorts, /playlists, /community, /about…). Non include /watch o /shorts/<id>.
+const CHANNEL_PAGE_RE = /^\/(?:@[\w.\-]+|channel\/[\w.\-]+|user\/[\w.\-]+|c\/[\w.\-]+)(?:\/|$)/;
+
+// Etichette localizzate del pulsante Iscriviti (fallback quando il renderer
+// non è raggiungibile tramite selettore).
+const SUBSCRIBE_LABELS = /^(iscriviti|subscribe|abonnieren|s['’]?abonner|suscribirte|subskrybuj|assinar|seguisci|登録|구독)$/i;
+
+function isChannelPage() {
+  return CHANNEL_PAGE_RE.test(window.location.pathname);
+}
+
+// querySelector che attraversa anche le Shadow DOM: i nuovi header/view-model
+// di YouTube nascondono parte del DOM in shadow root.
+function deepQuery(selector, root = document) {
+  const direct = root.querySelector(selector);
+  if (direct) return direct;
+  const all = root.querySelectorAll("*");
+  for (const el of all) {
+    if (el.shadowRoot) {
+      const nested = deepQuery(selector, el.shadowRoot);
+      if (nested) return nested;
+    }
+  }
+  return null;
+}
+
+// Cerca un <button> il cui testo corrisponde a una delle etichette fornite,
+// attraversando le Shadow DOM (fallback per localizzazioni non previste).
+function findButtonByText(labels, root = document) {
+  const buttons = [];
+  const collect = (r) => {
+    r.querySelectorAll("button").forEach((b) => buttons.push(b));
+    r.querySelectorAll("*").forEach((el) => {
+      if (el.shadowRoot) collect(el.shadowRoot);
+    });
+  };
+  collect(root);
+  return buttons.find((b) => labels.test((b.textContent || "").trim())) || null;
+}
+
+// Individua il pulsante Iscriviti nell'header del canale.
+// Ritorna { renderer, nativeBtn, anchor }: `anchor` è l'elemento dopo cui
+// inserire il nostro bottone (subito a fianco di Iscriviti).
+function findChannelSubscribeTarget() {
+  const headerRoot =
+    deepQuery("ytd-c4-tabbed-header-renderer") ||
+    deepQuery("ytd-page-header-renderer") ||
+    deepQuery("yt-page-header-renderer") ||
+    deepQuery("yt-channel-header-form-view-model") ||
+    document;
+
+  // 1) Renderer nativo del pulsante Iscriviti (header vecchio e nuovo)
+  const renderer =
+    deepQuery("ytd-subscribe-button-renderer", headerRoot) ||
+    deepQuery("ytd-subscribe-button-renderer");
+  if (renderer) {
+    const nativeBtn = renderer.querySelector("button") || deepQuery("button", renderer);
+    // Il renderer può esistere ancora non idratato (senza <button>): in tal
+    // caso non si injecta e si riprova al prossimo tick del MutationObserver.
+    if (nativeBtn) return { renderer, nativeBtn, anchor: renderer };
+  }
+
+  // 2) Fallback: button nativo con etichetta "Iscriviti"/"Subscribe"
+  const labelBtn = findButtonByText(SUBSCRIBE_LABELS, headerRoot);
+  if (labelBtn) {
+    return {
+      renderer: labelBtn.closest("ytd-subscribe-button-renderer"),
+      nativeBtn: labelBtn,
+      anchor: labelBtn.closest("yt-button-shape, ytd-button-renderer") || labelBtn,
+    };
+  }
+
+  return null;
+}
+
+// Sceglie il pulsante da cui clonare lo stile nativo:
+// preferisce il pulsante di testo affiancato (es. "Abbonati"/Join, outline),
+// altrimenti lo stesso Iscriviti (filled) — in entrambi i casi lo stile è
+// identico agli altri pulsanti di YouTube, dark e light compresi.
+function pickStyleSource(target) {
+  const { renderer, nativeBtn } = target;
+  const row = (renderer && renderer.parentElement) || nativeBtn.parentElement;
+  if (row) {
+    const candidates = row.querySelectorAll("button, yt-button-shape");
+    for (const node of candidates) {
+      const btn = node.tagName === "BUTTON" ? node : node.querySelector("button");
+      if (!btn || btn === nativeBtn || btn.classList.contains("resumari-channel-btn")) continue;
+      if (renderer && renderer.contains(btn)) continue;
+      const text = (btn.textContent || "").trim();
+      // Solo pulsanti con etichetta breve: esclude campanello e overflow (icon-only)
+      if (text.length >= 3 && text.length <= 24 && !SUBSCRIBE_LABELS.test(text)) {
+        return btn;
+      }
+    }
+  }
+  return nativeBtn;
+}
+
+function injectChannelPageButton() {
+  // Solo pagine canale: fuori da lì il bottone va rimosso (navigazione SPA)
+  if (!isChannelPage()) {
+    document.querySelectorAll(".resumari-channel-btn").forEach((el) => el.remove());
+    return;
+  }
+
+  // Evita iniezioni duplicate
+  if (document.querySelector(".resumari-channel-btn")) return;
+
+  const target = findChannelSubscribeTarget();
+  if (!target || !target.anchor || !target.anchor.parentNode) return;
+
+  const styleSource = pickStyleSource(target);
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  // Classi native di YouTube clonate → stesso aspetto di Iscriviti/Abbonati
+  // (font, altezza, border-radius, tema chiaro/scuro e hover identici)
+  btn.className = `${styleSource.className} resumari-channel-btn`.trim();
+
+  const img = document.createElement("img");
+  img.src = ICON_URL;
+  img.alt = "";
+  img.draggable = false;
+  img.className = "resumari-channel-icon";
+
+  const label = document.createElement("span");
+  label.textContent = "Trascrivi canale";
+
+  btn.appendChild(img);
+  btn.appendChild(label);
+  btn.title = "Trascrivi tutti i video di questo canale con Resumari";
+  btn.setAttribute("aria-label", "Trascrivi il canale con Resumari");
+
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    // Handoff gestito da /videos?channel=...: coda in localStorage che
+    // sopravvive al redirect di login e avvia la trascrizione automatica.
+    const channelUrl = window.location.origin + window.location.pathname;
+    window.open(
+      `${RESUMARI_BASE_URL}/videos?channel=${encodeURIComponent(channelUrl)}`,
+      "_blank"
+    );
+  });
+
+  // Spaziatura identica agli altri pulsanti: se il contenitore non ha gap
+  // (container legacy usano i margin), aggiunge un margine equivalente.
+  const row = target.anchor.parentElement;
+  if (row) {
+    const gap = parseFloat(getComputedStyle(row).columnGap || "0") || 0;
+    if (!gap) btn.style.marginLeft = "8px";
+    row.insertBefore(btn, target.anchor.nextSibling);
+  } else {
+    target.anchor.insertAdjacentElement("afterend", btn);
+  }
+}
+
+// Esegue le tre iniezioni in un unico punto protetto: se il contesto
+// dell'estensione è stato invalidato (reload con la tab aperta), l'observer
+// viene scollegato invece di lanciare "Extension context invalidated" a ogni
+// mutation della pagina. Gli altri errori vengono solo loggati.
+function runInjections() {
+  if (contextDead) return;
+  try {
+    injectThumbnailButtons();
+    injectVideoPageButtons();
+    injectChannelPageButton();
+  } catch (err) {
+    const msg = String((err && err.message) || err);
+    if (msg.includes('Extension context invalidated')) {
+      contextDead = true;
+      try { if (debounceTimer) clearTimeout(debounceTimer); } catch {}
+      try { observer.disconnect(); } catch {}
+      return;
+    }
+    console.warn('Resumari: errore durante lintestazione dei pulsanti:', err);
+  }
+}
+
 // Observer to handle YouTube's SPA dynamic scrolling and page changes
 let debounceTimer = null;
 const observer = new MutationObserver(() => {
   if (debounceTimer) return;
   debounceTimer = setTimeout(() => {
     debounceTimer = null;
-    injectThumbnailButtons();
-    injectVideoPageButtons();
+    runInjections();
   }, 250);
 });
 
@@ -147,12 +349,8 @@ observer.observe(document.body, {
 });
 
 window.addEventListener('yt-navigate-finish', () => {
-  setTimeout(() => {
-    injectThumbnailButtons();
-    injectVideoPageButtons();
-  }, 300);
+  setTimeout(runInjections, 300);
 });
 
 // Initial run
-injectThumbnailButtons();
-injectVideoPageButtons();
+runInjections();

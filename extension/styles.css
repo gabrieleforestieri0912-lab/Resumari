@@ -122,4 +122,32 @@ ytd-inline-preview-player:hover ~ * .resumari-thumb-btn,
     display: block !important;
 }
 
+/* Bottone "Trascrivi canale" — testata della pagina canale, accanto a "Iscriviti".
+   Lo stile esterno (colori, altezza, border-radius, font, hover, tema chiaro/scuro)
+   è clonato in JS dalle classi native di YouTube, così il bottone è identico agli
+   altri due pulsanti della testata (Iscriviti / Abbonati). Qui serve solo il layout
+   interno icona + etichetta, come i pulsanti icon+text nativi (es. Condividi). */
+.resumari-channel-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    cursor: pointer !important;
+    vertical-align: middle !important;
+    user-select: none !important;
+}
+
+.resumari-channel-icon {
+    width: 18px !important;
+    height: 18px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    display: block !important;
+    flex-shrink: 0 !important;
+    pointer-events: none !important;
+}
+
 

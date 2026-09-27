@@ -14,7 +14,8 @@ export default function PendingTranscriptHandler() {
   useEffect(() => {
     try {
       const pendingVideo = localStorage.getItem("resumari_pending_video");
-      if (pendingVideo && pathname !== "/videos") {
+      const pendingChannel = localStorage.getItem("resumari_pending_channel");
+      if ((pendingVideo || pendingChannel) && pathname !== "/videos") {
         router.push("/videos");
       }
     } catch {}
