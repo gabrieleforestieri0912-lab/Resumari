@@ -35,10 +35,11 @@ export async function POST(request: Request) {
     // Configura il prompt di sistema utilizzando il contesto fornito o un default
     let systemPrompt = context || 'Fornisci una risposta chiara e concisa in italiano.';
 
-    // Il renderer della demo interpreta solo paragrafi, elenchi e grassetto:
-    // tabelle e titoli con # verrebbero mostrati come testo grezzo.
+    // Il renderer della demo supporta titoli, paragrafi, elenchi e
+    // grassetto/italic (niente tabelle): l'AI deve usarli sempre per
+    // risposte strutturate e mai muri di testo lineari.
     systemPrompt +=
-      '\nFormatta la risposta in markdown semplice (paragrafi, elenchi puntati, grassetto). Non usare tabelle né titoli con #.' +
+      '\nFormattazione obbligatoria (markdown semplice, niente tabelle): struttura ogni risposta con titoli di varie grandezze (## per le sezioni, ### per i sottotitoli), paragrafi brevi separati da righe vuote, elenchi puntati per i punti chiave e grassetto/italic per evidenziare i concetti importanti.' +
       '\nQuando citi momenti specifici di un video, usa il formato [MM:SS Titolo breve della sezione] (es. [01:23 Introduzione] oppure [00:45 Closure in JavaScript]). Non usare solo il secondaggio nudo, aggiungi sempre un titolo descrittivo di 2-5 parole.';
 
     // Identificazione del video: esplicito dal client o estratto dal testo

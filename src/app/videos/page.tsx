@@ -71,6 +71,10 @@ export default function Videos() {
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
 
+    // Header auth per le API che richiedono l'utente (cookie NextAuth da solo
+    // non basta per chi si è registrato con email/password custom).
+    const bearer: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+
     console.log("Token exists:", !!token);
     console.log("Channel param:", channelParam);
 
@@ -131,7 +135,7 @@ export default function Videos() {
         let failed = false;
         fetch("/api/video", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...bearer },
           body: JSON.stringify({
             videoUrl: `https://youtube.com/watch?v=${pending.videoId}`,
           }),
@@ -268,7 +272,7 @@ export default function Videos() {
                 try {
                   const res = await fetch("/api/video", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: { "Content-Type": "application/json", ...bearer },
                     body: JSON.stringify({
                       videoUrl: `https://youtube.com/watch?v=${video.videoId}`,
                     }),
@@ -482,7 +486,7 @@ export default function Videos() {
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 300, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
-            className="fixed lg:relative inset-y-0 left-0 z-40 border-r border-gray-100 dark:border-zinc-800 flex flex-col bg-gray-50/50 dark:bg-zinc-900/50"
+            className="fixed lg:relative inset-y-0 left-0 z-40 border-r border-gray-100 dark:border-zinc-800 flex flex-col shrink-0 overflow-hidden bg-gray-50/50 dark:bg-zinc-900/50"
           >
             <div className="p-4 flex flex-col gap-2">
               <div className="flex items-center justify-between mb-2">

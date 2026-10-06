@@ -87,13 +87,13 @@ function formatTimestampLinks(text: string, videoId?: string | null): string {
   let result = text.replace(bracketedRegex, (_, time, labelRaw) => {
     const seconds = parseTimeToSeconds(time);
     const label = labelRaw.trim();
-    return `<button type="button" class="timestamp-link inline-flex items-center gap-1.5 px-2 py-1 my-0.5 rounded-lg bg-red-50 border border-red-200 text-red-700 font-bold text-[11px] hover:bg-red-100 transition-colors cursor-pointer align-middle" data-seconds="${seconds}" data-videoid="${videoId}" title="Vai a ${time}${label ? ' — ' + label : ''}"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" class="text-red-500 shrink-0"><path d="m7 4 12 8-12 8V4z"/></svg><span class="font-mono">${time}</span>${label ? `<span class="text-red-600 font-semibold">${label}</span>` : ''}</button>`;
+    return `<button type="button" class="timestamp-link inline-flex items-center gap-1.5 px-2 py-1 my-0.5 rounded-lg bg-red-50 border border-red-200 text-red-700 font-bold text-xs hover:bg-red-100 transition-colors cursor-pointer align-middle" data-seconds="${seconds}" data-videoid="${videoId}" title="Vai a ${time}${label ? ' — ' + label : ''}"><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" class="text-red-500 shrink-0"><path d="m7 4 12 8-12 8V4z"/></svg><span class="font-mono">${time}</span>${label ? `<span class="text-red-600 font-semibold">${label}</span>` : ''}</button>`;
   });
   // Fallback: plain MM:SS not already inside a bracket or button
   const plainRegex = /(?<!\[)(\d{1,2}:\d{2}(?::\d{2})?)(?!\]|[^<]*>)/g;
   result = result.replace(plainRegex, (match) => {
     const seconds = parseTimeToSeconds(match);
-    return `<button type="button" class="timestamp-link inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-red-50 border border-red-200 text-red-700 font-mono font-bold text-[11px] hover:bg-red-100 transition-colors cursor-pointer" data-seconds="${seconds}" data-videoid="${videoId}" title="Vai a ${match}"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" class="text-red-500 shrink-0"><path d="m7 4 12 8-12 8V4z"/></svg>${match}</button>`;
+    return `<button type="button" class="timestamp-link inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-red-50 border border-red-200 text-red-700 font-mono font-bold text-xs hover:bg-red-100 transition-colors cursor-pointer" data-seconds="${seconds}" data-videoid="${videoId}" title="Vai a ${match}"><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" class="text-red-500 shrink-0"><path d="m7 4 12 8-12 8V4z"/></svg>${match}</button>`;
   });
   return result;
 }
@@ -102,18 +102,91 @@ function formatYouTubeLinks(text: string): string {
   if (!text) return text;
   const urlRegex = /(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11}))/g;
   return text.replace(urlRegex, (match, url, videoId) => {
-    return `<button type="button" class="video-link inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 border border-purple-200 text-purple-700 font-bold text-[11px] hover:bg-purple-100 transition-colors cursor-pointer" data-videoid="${videoId}"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" class="shrink-0"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.55 9.38.55 9.38.55s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z"/></svg>Guarda il video</button>`;
+    return `<button type="button" class="video-link inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 border border-purple-200 text-purple-700 font-bold text-xs hover:bg-purple-100 transition-colors cursor-pointer" data-videoid="${videoId}"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor" class="shrink-0"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.55 9.38.55 9.38.55s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z"/></svg>Guarda il video</button>`;
   });
 }
 
-function cleanResponse(text: string): string {
+function inlineFormatting(text: string): string {
   return text
-    .replace(/\n/g, "<br/>")
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*([^*]+)\*/g, "<em>$1</em>")
-    .replace(/^\s*[-]\s+(.+)$/gm, "<li class='ml-3 list-disc'>$1</li>")
-    .replace(/^\s*(\d+)\.\s+(.+)$/gm, "<li class='ml-3 list-decimal'>$2</li>")
-    .replace(/((?:<li[^>]*>.*<\/li>\s*)+)/g, "<ul class='my-1.5 space-y-0.5'>$1</ul>");
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+}
+
+const HEADING_TAGS: Record<number, string> = { 1: "h2", 2: "h3", 3: "h4" };
+const HEADING_CLASSES: Record<number, string> = {
+  1: "text-xl md:text-2xl font-black text-gray-900 dark:text-gray-100 mt-4 mb-2.5 leading-tight",
+  2: "text-lg md:text-xl font-black text-gray-900 dark:text-gray-100 mt-4 mb-2 leading-snug",
+  3: "text-base md:text-lg font-bold text-gray-900 dark:text-gray-100 mt-3 mb-1.5 leading-snug",
+};
+
+/**
+ * Converte il markdown semplice dell'AI in HTML strutturato: titoli di varie
+ * grandezze (#, ##, ###), paragrafi separati, elenchi puntati/numerati,
+ * grassetto e italic. I bottoni timestamp/YouTube iniettati prima passano
+ * invariati (nessun asterisco nei loro attributi).
+ */
+function cleanResponse(text: string): string {
+  const html: string[] = [];
+
+  const flushParagraph = (lines: string[]) => {
+    if (lines.length === 0) return;
+    html.push(
+      `<p class='mb-3 leading-relaxed text-gray-800 dark:text-gray-200'>${inlineFormatting(lines.join("<br/>"))}</p>`,
+    );
+  };
+
+  for (const rawBlock of text.split(/\n{2,}/)) {
+    const lines = rawBlock.split("\n");
+    let para: string[] = [];
+    let i = 0;
+    while (i < lines.length) {
+      const line = lines[i].trim();
+      if (!line) {
+        i++;
+        continue;
+      }
+      // Titoli markdown: # / ## / ###
+      const hMatch = line.match(/^(#{1,3})\s+(.+)$/);
+      if (hMatch) {
+        flushParagraph(para);
+        para = [];
+        const level = hMatch[1].length;
+        html.push(
+          `<${HEADING_TAGS[level]} class='${HEADING_CLASSES[level]}'>${inlineFormatting(hMatch[2].trim())}</${HEADING_TAGS[level]}>`,
+        );
+        i++;
+        continue;
+      }
+      // Elenchi: raggruppa le righe consecutive dello stesso tipo
+      const ordered = /^\s*\d+\.\s+/.test(line);
+      const unordered = /^\s*[-*]\s+/.test(line);
+      if (ordered || unordered) {
+        flushParagraph(para);
+        para = [];
+        const items: string[] = [];
+        while (i < lines.length) {
+          const li = lines[i].trim();
+          const liOrdered = /^\s*\d+\.\s+/.test(li);
+          const liUnordered = /^\s*[-*]\s+/.test(li);
+          if ((ordered && !liOrdered) || (!ordered && !liUnordered)) break;
+          items.push(
+            `<li class='ml-3 ${ordered ? "list-decimal" : "list-disc"} text-gray-800 dark:text-gray-200 leading-relaxed'>${inlineFormatting(li.replace(/^\s*(?:[-*]|\d+\.)\s+/, ""))}</li>`,
+          );
+          i++;
+        }
+        html.push(
+          `<${ordered ? "ol" : "ul"} class='my-2 space-y-1'>${items.join("")}</${ordered ? "ol" : "ul"}>`,
+        );
+        continue;
+      }
+      para.push(line);
+      i++;
+    }
+    flushParagraph(para);
+    para = [];
+  }
+
+  return html.join("");
 }
 
 function YoutubeEmbed({ videoId, startTime }: { videoId: string; startTime?: number | null; onClose?: () => void }) {
@@ -588,7 +661,7 @@ export default function DemoSection() {
                   )}
                 </AnimatePresence>
 
-                <div className="flex-1 md:flex-[0.85] flex flex-col min-w-0 bg-white dark:bg-zinc-900 w-full max-w-full md:max-w-[58%] lg:max-w-[55%] xl:max-w-[52%]">
+                <div className="flex-1 md:flex-[0.85] flex flex-col min-w-0 bg-white dark:bg-zinc-900 w-full max-w-full md:max-w-[62%] lg:max-w-[60%] xl:max-w-none">
                   {messages.length === 0 && !selectedChannel ? (
                     <div className="flex-1" />
                   ) : (
@@ -637,9 +710,9 @@ export default function DemoSection() {
                                 style={{ background: "transparent" }}
                               />
                             )}
-                            <div className="flex flex-col gap-1 max-w-[88%]">
+                            <div className="flex flex-col gap-1.5 max-w-[90%]">
                               <div
-                                className={`px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed ${
+                                className={`px-4 py-3 rounded-2xl text-sm md:text-[15px] leading-relaxed ${
                                   msg.sender === "user"
                                     ? msg.cancelled
                                       ? "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 rounded-br-sm border border-red-100 dark:border-red-900"
@@ -761,14 +834,14 @@ export default function DemoSection() {
             </div>
           </div>
 
-          <div className="hidden xl:block w-[360px] xl:w-[400px] min-[1920px]:w-[420px] min-[2560px]:w-[480px] shrink-0">
+          <div className="hidden xl:block w-[520px] min-[1920px]:w-[600px] min-[2560px]:w-[680px] shrink-0 xl:sticky xl:top-24 self-start">
             <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-200 dark:border-zinc-800 shadow-xl shadow-purple-500/5 overflow-hidden">
-              <div className="p-3 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
-                <span className="text-[10px] font-black text-gray-900 dark:text-gray-100 uppercase tracking-wider">
+              <div className="p-4 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
+                <span className="text-xs font-black text-gray-900 dark:text-gray-100 uppercase tracking-wider">
                   Video in riproduzione
                 </span>
               </div>
-              <div className="p-3">
+              <div className="p-4">
                 {currentVideo ? (
                   <YoutubeEmbed
                     videoId={currentVideo}

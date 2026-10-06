@@ -122,35 +122,22 @@ function parseTimeToSeconds(timeStr: string) {
 }
 
 /**
- * Componente per rendere i timestamp all'interno del testo come link cliccabili
+ * Converte i timestamp nel testo in link markdown con schema `timestamp:` —
+ * sia la forma con titolo `[MM:SS Titolo]` che i secondaggi nudi `MM:SS`.
+ * Il componente `a` personalizzato di ReactMarkdown li rende come bottoni
+ * `.timestamp-link` (stesso handler di seek della preview), così il resto
+ * del markdown (titoli, bold, elenchi) resta intatto e formattato.
+ * Passata unica: evita doppie conversioni annidate.
  */
-function FormatTimestampLinks({ text, videoId }: { text: string; videoId?: string }) {
-  if (!videoId || !text) return <>{text}</>;
-
-  const timestampRegex = /(\d{1,2}:\d{2}(?::\d{2})?)/g;
-  const parts = text.split(timestampRegex);
-
-  return (
-    <>
-      {parts.map((part, i) => {
-        if (timestampRegex.test(part)) {
-          const seconds = parseTimeToSeconds(part);
-          return (
-            <button
-              key={i}
-              type="button"
-              data-seconds={seconds}
-              title={`Vai a ${part}`}
-              className="timestamp-link bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 px-1.5 py-0.5 rounded-md font-mono font-bold hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors cursor-pointer inline-flex items-center gap-1"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-red-500 dark:text-red-400 shrink-0"><path d="m7 4 12 8-12 8V4z" /></svg>
-              {part}
-            </button>
-          );
-        }
-        return part;
-      })}
-    </>
+function linkifyTimestampsForMarkdown(text: string): string {
+  if (!text) return text;
+  return text.replace(
+    /\[(\d{1,2}:\d{2}(?::\d{2})?)([^\]]*?)\]|(\d{1,2}:\d{2}(?::\d{2})?)/g,
+    (match, bracketTime, bracketLabel, bareTime) => {
+      const time = bracketTime || bareTime;
+      const label = bracketTime ? `${bracketTime}${bracketLabel || ""}` : bareTime;
+      return `[${label}](timestamp:${parseTimeToSeconds(time)})`;
+    },
   );
 }
 
@@ -1777,16 +1764,37 @@ function ChatContent() {
         </pre>
       );
     },
-    a: ({ href, children, ...props }: any) => (
-      <a href={href} target="_blank" rel="noopener noreferrer" className="text-purple-600 dark:text-purple-400 underline hover:text-purple-800 dark:hover:text-purple-300" {...props}>{children}</a>
-    ),
-    ul: ({ children, ...props }: any) => <ul className="list-disc pl-5 my-2 space-y-1" {...props}>{children}</ul>,
-    ol: ({ children, ...props }: any) => <ol className="list-decimal pl-5 my-2 space-y-1" {...props}>{children}</ol>,
+    // Link `timestamp:<secondi>` generati da linkifyTimestampsForMarkdown:
+    // bottoni rossi cliccabili che spostano la preview (stesso handler
+    // documentale dei vecchi .timestamp-link). Gli altri link restano anchor.
+    a: ({ href, children, ...props }: any) => {
+      if (href && String(href).startsWith("timestamp:")) {
+        const seconds = parseInt(String(href).slice("timestamp:".length), 10) || 0;
+        return (
+          <button
+            type="button"
+            data-seconds={seconds}
+            title="Vai al momento nel video"
+            className="timestamp-link bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 px-1.5 py-0.5 rounded-md font-mono font-bold hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors cursor-pointer inline-flex items-center gap-1"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-red-500 dark:text-red-400 shrink-0"><path d="m7 4 12 8-12 8V4z" /></svg>
+            {children}
+          </button>
+        );
+      }
+      return (
+        <a href={href} target="_blank" rel="noopener noreferrer" className="text-purple-600 dark:text-purple-400 underline hover:text-purple-800 dark:hover:text-purple-300" {...props}>{children}</a>
+      );
+    },
+    ul: ({ children, ...props }: any) => <ul className="list-disc pl-5 my-2.5 space-y-1.5" {...props}>{children}</ul>,
+    ol: ({ children, ...props }: any) => <ol className="list-decimal pl-5 my-2.5 space-y-1.5" {...props}>{children}</ol>,
     li: ({ children, ...props }: any) => <li className="text-gray-800 dark:text-zinc-200 leading-relaxed" {...props}>{children}</li>,
-    p: ({ children, ...props }: any) => <p className="mb-2 last:mb-0" {...props}>{children}</p>,
-    h1: ({ children, ...props }: any) => <h1 className="text-lg font-bold mt-4 mb-2" {...props}>{children}</h1>,
-    h2: ({ children, ...props }: any) => <h2 className="text-base font-bold mt-3 mb-2" {...props}>{children}</h2>,
-    h3: ({ children, ...props }: any) => <h3 className="text-sm font-bold mt-3 mb-1" {...props}>{children}</h3>,
+    p: ({ children, ...props }: any) => <p className="mb-2.5 last:mb-0 leading-relaxed" {...props}>{children}</p>,
+    h1: ({ children, ...props }: any) => <h1 className="text-xl font-black mt-4 mb-2 text-gray-900 dark:text-zinc-50 leading-tight" {...props}>{children}</h1>,
+    h2: ({ children, ...props }: any) => <h2 className="text-lg font-black mt-4 mb-2 text-gray-900 dark:text-zinc-50 leading-snug" {...props}>{children}</h2>,
+    h3: ({ children, ...props }: any) => <h3 className="text-base font-bold mt-3 mb-1.5 text-gray-900 dark:text-zinc-100 leading-snug" {...props}>{children}</h3>,
+    h4: ({ children, ...props }: any) => <h4 className="text-sm font-bold mt-3 mb-1 text-gray-900 dark:text-zinc-100" {...props}>{children}</h4>,
+    blockquote: ({ children, ...props }: any) => <blockquote className="border-l-4 border-purple-300 dark:border-purple-700 pl-3 my-2.5 italic text-gray-600 dark:text-zinc-400" {...props}>{children}</blockquote>,
     strong: ({ children, ...props }: any) => <strong className="font-bold text-gray-900 dark:text-zinc-100" {...props}>{children}</strong>,
     em: ({ children, ...props }: any) => <em className="italic" {...props}>{children}</em>,
   };
@@ -2105,73 +2113,10 @@ function ChatContent() {
                               <div
                                 className={`flex flex-col gap-1 min-w-0 ${msg.sender === "user" ? "items-end" : "items-start"}`}
                               >
-                                {msg.videoId && (
-                                  <div className="mb-3 space-y-2 w-full max-w-md">
-                                    <div className="aspect-video w-full rounded-xl overflow-hidden shadow-lg border border-gray-100 dark:border-zinc-800">
-                                      <iframe
-                                        width="100%"
-                                        height="100%"
-                                        src={`https://www.youtube.com/embed/${msg.videoId}`}
-                                        title="YouTube video player"
-                                        frameBorder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                        allowFullScreen
-                                      ></iframe>
-                                    </div>
-                                    {msg.videoTitle && (
-                                      <p className="text-xs font-bold text-gray-500 dark:text-zinc-400">
-                                        {msg.videoTitle}
-                                        {msg.videoChannel && (
-                                          <span className="text-gray-400 dark:text-zinc-500">
-                                            {" "}
-                                            • {msg.videoChannel}
-                                          </span>
-                                        )}
-                                      </p>
-                                    )}
-
-                                    {msg.transcript && msg.transcript.length > 0 && (
-                                      <div className="w-full mt-2 rounded-xl bg-gray-50 dark:bg-zinc-900 text-gray-800 dark:text-zinc-200 border border-gray-100 dark:border-zinc-800 shadow-sm overflow-hidden">
-                                        <div className="px-3 py-2 border-b border-gray-100 dark:border-zinc-800 bg-white/50 dark:bg-zinc-800/60 flex items-center justify-between">
-                                          <p className="text-[9px] font-black text-purple-600 uppercase tracking-widest">
-                                            Trascrizione Video
-                                          </p>
-                                          <button
-                                            onClick={() => setCurrentVideoId(msg.videoId)}
-                                            className="text-[9px] font-bold text-purple-600 hover:underline"
-                                          >
-                                            Riproduci
-                                          </button>
-                                        </div>
-                                        <div className="p-3 space-y-1.5 max-h-48 overflow-y-auto text-xs">
-                                          {msg.transcript.slice(0, 100).map((line: any, i: number) => (
-                                            <div
-                                              key={i}
-                                              className="flex gap-2 hover:bg-gray-100/50 dark:hover:bg-zinc-800/60 rounded transition-colors cursor-pointer"
-                                              onClick={() =>
-                                                line.time &&
-                                                setCurrentVideoStartTime(line.time)
-                                              }
-                                            >
-                                              <span className="shrink-0 bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 px-1 rounded font-mono font-bold">
-                                                {formatTimestamp(line.time)}
-                                              </span>
-                                              <span className="text-gray-700 dark:text-zinc-300 leading-relaxed">
-                                                {line.text}
-                                              </span>
-                                            </div>
-                                          ))}
-                                          {msg.transcript.length > 100 && (
-                                            <p className="text-[10px] text-gray-400 dark:text-zinc-500 italic text-center pt-2">
-                                              ... trascrizione troncata per brevità
-                                            </p>
-                                          )}
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-
+                                {/* Niente più embed video sopra ai messaggi: il video
+                                    resta solo nella preview laterale (MediaPanel).
+                                    I timestamp nel testo restano cliccabili e
+                                    spostano la preview al secondaggio. */}
                                 {msg.text ? (
                                   msg.sender === "user" && msg.cancelled ? (
                                     <div className="px-5 py-3.5 rounded-2xl text-sm leading-relaxed break-words bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 rounded-br-sm border border-red-100 dark:border-red-900">
@@ -2189,16 +2134,14 @@ function ChatContent() {
                                           : "bg-purple-50 dark:bg-purple-950 text-gray-800 dark:text-zinc-200 rounded-bl-sm border border-purple-100 dark:border-purple-900"
                                       }`}
                                     >
-                                      {msg.sender === "system" && msg.videoId ? (
-                                        <FormatTimestampLinks text={msg.text} videoId={msg.videoId} />
-                                      ) : (
-                                        <ReactMarkdown
-                                          remarkPlugins={[remarkGfm]}
-                                          components={markdownComponents}
-                                        >
-                                          {msg.text}
-                                        </ReactMarkdown>
-                                      )}
+                                      <ReactMarkdown
+                                        remarkPlugins={[remarkGfm]}
+                                        components={markdownComponents}
+                                      >
+                                        {msg.sender === "system"
+                                          ? linkifyTimestampsForMarkdown(msg.text)
+                                          : msg.text}
+                                      </ReactMarkdown>
                                     </div>
                                   )
                                 ) : null}

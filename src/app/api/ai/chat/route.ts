@@ -85,6 +85,9 @@ export async function POST(request: Request) {
     const videoId = providedVideoId || getYouTubeVideoId(message);
 
     let systemPrompt = "Sei Resumari, un assistente AI esperto in riassunti video e analisi documenti. Rispondi in italiano.";
+    systemPrompt +=
+      "\nFormattazione obbligatoria (markdown): struttura ogni risposta con titoli di varie grandezze (## per le sezioni, ### per i sottotitoli), paragrafi brevi separati da righe vuote, elenchi puntati per i punti chiave e grassetto/italic per evidenziare i concetti importanti. Mai un muro di testo lineare." +
+      "\nQuando citi momenti specifici di un video, usa il formato [MM:SS Titolo breve della sezione] (es. [01:23 Introduzione]).";
     let contextData = "";
 
     // Aggiunta del contesto da documenti

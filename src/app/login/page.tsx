@@ -174,7 +174,15 @@ function LoginForm({ locale, onSwitch }: { locale: string; onSwitch: (delta: num
         }
       }
       setMessage({ text: locale === 'it' ? "Bentornato! Reindirizzamento..." : "Welcome back! Redirecting...", type: "success" });
-      setTimeout(() => router.push("/"), 1500);
+      // Se c'è una trascrizione in coda (link incollato nella sezione
+      // trascrizioni o handoff dell'estensione), torna lì invece che in home,
+      // altrimenti la richiesta resterebbe in attesa senza mai partire.
+      setTimeout(() => {
+        const hasPending =
+          localStorage.getItem("resumari_pending_video") ||
+          localStorage.getItem("resumari_pending_channel");
+        router.push(hasPending ? "/videos" : "/");
+      }, 1500);
     } catch {
       setMessage({ text: locale === 'it' ? "Errore di rete. Riprova più tardi." : "Network error. Please try again later.", type: "error" });
     } finally {
@@ -284,7 +292,13 @@ function SignupForm({ locale, onSwitch }: { locale: string; onSwitch: (delta: nu
       if (response.ok) {
         saveSession(data.token, data.user);
         setMessage({ text: locale === 'it' ? "Account creato! Reindirizzamento..." : "Account created! Redirecting...", type: "success" });
-        setTimeout(() => router.push("/"), 1500);
+        // Come per il login: una trascrizione in coda ha priorità sulla home.
+        setTimeout(() => {
+          const hasPending =
+            localStorage.getItem("resumari_pending_video") ||
+            localStorage.getItem("resumari_pending_channel");
+          router.push(hasPending ? "/videos" : "/");
+        }, 1500);
       } else {
         setMessage({ text: data.message || (locale === 'it' ? "Errore durante la registrazione" : "Error during signup"), type: "error" });
       }
