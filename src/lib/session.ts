@@ -110,9 +110,20 @@ let pendingRestore: Promise<RestoredSession> | null = null;
 
 /**
  * Recupera la sessione dal server (cookie NextAuth) e la riporta nel LocalStorage.
+ * Con timeout: se /api/auth/session si appende (DB lento, rete bloccata), il
+ * restore si chiude comunque invece di tenere le pagine protette in
+ * "caricamento" infinito dopo il login Google.
  */
 async function fetchSessionFromServer(): Promise<RestoredSession> {
-  const res = await fetch("/api/auth/session", { cache: "no-store" });
+  let res: Response;
+  try {
+    res = await fetch("/api/auth/session", {
+      cache: "no-store",
+      signal: AbortSignal.timeout(10000),
+    });
+  } catch {
+    return { token: readStoredToken(), user: readStoredUser() };
+  }
   if (!res.ok) return { token: readStoredToken(), user: null };
 
   const session = await res.json();

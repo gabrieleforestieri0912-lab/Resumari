@@ -66,21 +66,11 @@ export const authOptions = {
         session.customToken = token.customToken;
       }
 
-      // Recupera l'avatar più aggiornato dal database per evitare che l'immagine
-      // rimanga obsoleta fino al prossimo login (dato che il JWT è statico).
-      try {
-        const userId = session.user.id || token?.id;
-        if (userId) {
-          const { data: dbUser } = await getServiceClient()
-            .from(TABLES.USERS)
-            .select('picture')
-            .eq('id', userId)
-            .single();
-          if (dbUser?.picture) session.user.image = dbUser.picture;
-        }
-      } catch (e) {
-        console.error('Error fetching user picture for session:', e);
-      }
+      // NOTA: qui NON si interroga il database (es. per l'avatar aggiornato).
+      // Questo callback gira a ogni /api/auth/session — anche durante il login
+      // Google — e una query lenta appendeva tutto il flusso fino al timeout,
+      // ributtando l'utente al login senza sessione. L'avatar si sincronizza
+      // al login OAuth tramite adapter.updateUser: basta e avanza.
       return session;
     },
     /**

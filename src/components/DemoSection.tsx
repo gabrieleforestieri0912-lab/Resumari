@@ -209,9 +209,17 @@ function YoutubeEmbed({ videoId, startTime }: { videoId: string; startTime?: num
 }
 
 const DEMO_EXAMPLE_VIDEO = "DHjqpvDnNGE";
+// Messaggio di benvenuto reale: niente riassunti inventati. La demo parte con
+// il video di esempio già nel player e invita a incollare un link o a
+// scegliere un canale: le analisi vere arrivano dall'AI via /api/ai/demo.
 const DEMO_EXAMPLE_MESSAGES: Message[] = [
-  { id: 1, text: "Riassumi questo video", sender: "user", time: new Date().toISOString(), videoId: DEMO_EXAMPLE_VIDEO },
-  { id: 2, text: `Certo! Ecco il riassunto di <strong>JavaScript in 100 secondi</strong>:<br/><br/>Il video copre i concetti fondamentali di JS in modo rapido e visivo. Momenti chiave:<br/>[00:00 Introduzione a JavaScript] [00:12 Tipi primitivi e variabili] [00:45 Closure e scope] [01:10 Async/Await e Promise] [01:30 Conclusione]<br/><br/>Guarda: <button type="button" class="video-link inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 border border-purple-200 text-purple-700 font-bold text-[11px] hover:bg-purple-100 transition-colors cursor-pointer" data-videoid="DHjqpvDnNGE"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" class="shrink-0"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.55 9.38.55 9.38.55s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z"/></svg>Guarda il video</button>`, sender: "system", time: new Date().toISOString(), videoId: DEMO_EXAMPLE_VIDEO },
+  {
+    id: 1,
+    text: `Ciao! Sono <strong>Resumari</strong>, il tuo assistente AI per YouTube.<br/><br/><strong>Cosa puoi provare qui:</strong><br/>- Incolla il link di un video per riassumerlo e fargli domande<br/>- Scegli un canale dalla lista e chatta con i suoi contenuti<br/>- Clicca un timestamp nei miei messaggi per saltare al momento nel video`,
+    sender: "system",
+    time: new Date().toISOString(),
+    videoId: null,
+  },
 ];
 
 export default function DemoSection() {

@@ -36,22 +36,20 @@ export default function Hero() {
   const blob2Y = useTransform(scrollYProgress, [0, 1], ["5%", "-5%"]);
   const blob3Y = useTransform(scrollYProgress, [0, 1], ["0%", "8%"]);
 
-  // 48 ID reali e verificati (status 200) da canali tech, educativi e podcast di qualità
+  // 48 ID verificati (oEmbed + thumbnail 200): SOLO contenuti parlati e
+  // produttivi — talk TED/TEDx, interventi famosi, interviste/podcast,
+  // divulgazione tech e scienza, corsi di programmazione. Niente musica.
   const ytThumbs = [
-    "DHjqpvDnNGE", "PkZNo7MFNFg", "eIrMbAQSU34", "YQHsXMglC9A", "dGcsHMXbSOA", "aircAruvnKk", "jNQXAC9IVRw", "fRh_vgS2dFE",
-    "ZXsQAXx_ao0", "2Xc9gXyf2G4", "5MgBikgcWnY", "L0MK7qz13bU", "LXb3EKWsInQ", "QmOF0crdyRU", "Rb0UmrCXxVA", "5qap5aO4i9A",
-    "L_Guz73e6fw", "hT_nvWreIhg", "kJQP7kiw5Fk", "zOjov-2OZ0E", "vLnPwxZdW4Y", "bMknfKXIFA8", "j6Ule7GXaRs", "fJ9rUzIMcZQ",
-    "o-YBDTqX_ZU", "SqcY0GlETPk", "W6NZfCO5SIk", "kqtD5dpn9C8", "rfscVS0vtbw", "Oe421EPjeBE", "8Nd13ARuvVE", "VrQgmNY96wo",
-    "0-S5a0eXPoc", "kUMe1FH4CHE", "CBYhVcO4WgI", "fBNz5xF-Kx4", "8aGhZQkoFbQ", "dQw4w9WgXcQ", "M7lc1UVf-VE", "EwTZ2xpQwpA",
-    "JGwWNGJdvx8", "9bZkp7q19f0", "kXYiU_JCYtU", "7wtfhZwyrcc", "8hly31xKli0", "3JZ_D3ELwOQ", "C0DPdy98e4c", "uelHwf8o7_U",
+    "DHjqpvDnNGE", "8jPQjjsBbIc", "PkZNo7MFNFg", "Ks-_Mh1QhMc", "eIrMbAQSU34", "D9Ihs241zeg", "aircAruvnKk", "H14bBuluwB8", "5MgBikgcWnY", "sNhhvQGsMEc", "QmOF0crdyRU", "ji5_MqicxSo",
+    "L_Guz73e6fw", "UF8uR6Z6KLc", "zOjov-2OZ0E", "IHZwWFHWa-w", "vLnPwxZdW4Y", "rrkrvAUbU9Y", "bMknfKXIFA8", "GXy__kBVq1M", "j6Ule7GXaRs", "c0KYU2j0TM4", "SqcY0GlETPk", "eIho2S0ZahI",
+    "W6NZfCO5SIk", "JTvcpdfGUtQ", "kqtD5dpn9C8", "xoxhDk-hwuo", "rfscVS0vtbw", "fCn8zs912OE", "Oe421EPjeBE", "h6fcK_fRYaI", "VrQgmNY96wo", "WUvTyaaNkzM", "0-S5a0eXPoc", "tIeHLnjs5U8",
+    "kUMe1FH4CHE", "i_LwzRVP7bg", "CBYhVcO4WgI", "HXV3zeQKqGY", "fBNz5xF-Kx4", "RGOj5yH7evk", "8aGhZQkoFbQ", "1Rs2ND1ryYc", "M7lc1UVf-VE", "UB1O30fR-EE", "8hly31xKli0", "hdI2bqOjy3c",
   ];
   const rows = [
-    ytThumbs.slice(0, 8),
-    ytThumbs.slice(8, 16),
-    ytThumbs.slice(16, 24),
-    ytThumbs.slice(24, 32),
-    ytThumbs.slice(32, 40),
-    ytThumbs.slice(40, 48),
+    ytThumbs.slice(0, 12),
+    ytThumbs.slice(12, 24),
+    ytThumbs.slice(24, 36),
+    ytThumbs.slice(36, 48),
   ];
 
   return (
@@ -87,7 +85,7 @@ export default function Hero() {
                 {[...row, ...row, ...row].map((vid, i) => (
                   <div
                     key={`${rowIdx}-${i}-${vid}`}
-                    className="shrink-0 w-[132px] md:w-[156px] lg:w-[172px] aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-zinc-800 shadow-md ring-1 ring-black/10 dark:ring-white/10 opacity-95"
+                    className="shrink-0 w-[180px] md:w-[220px] lg:w-[244px] aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-zinc-800 shadow-md ring-1 ring-black/10 dark:ring-white/10 opacity-95"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -104,8 +102,8 @@ export default function Hero() {
             );
           })}
         </div>
-        {/* Velo leggero per leggibilità — griglia mantenuta ben visibile e in scorrimento orizzontale */}
-        <div className="absolute inset-0 bg-white/55 dark:bg-zinc-950/45 backdrop-blur-[0.5px]" />
+        {/* Velo coprente per leggibilità delle scritte sopra la griglia */}
+        <div className="absolute inset-0 bg-white/75 dark:bg-zinc-950/70 backdrop-blur-[0.5px]" />
       </div>
 
       {/* Blobs decorativi dietro la griglia */}
