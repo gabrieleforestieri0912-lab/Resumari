@@ -58,7 +58,20 @@ export default function Hero() {
     <section ref={sectionRef} className="min-h-screen flex flex-col items-center justify-center text-center px-6 pt-28 pb-16 md:pt-44 md:pb-20 overflow-hidden bg-white dark:bg-zinc-950" style={{ position: 'relative' }}>
       {/* Pannello a griglia con copertine YT — copre TUTTA la hero, brick-wall, scroll orizzontale continuo */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none" aria-hidden>
-        <div className="absolute inset-0 flex flex-col justify-center gap-2 md:gap-3 py-4 opacity-100">
+        {/* Dissolvenza ai bordi del pannello: maschera orizzontale (bordi di
+            uscita/entrata dello scroll) + verticale (stacco sezione). La riga
+            è triplicata per il loop, quindi il punto di cucitura è a -1/3. */}
+        <div
+          className="absolute inset-0 flex flex-col justify-center gap-2 md:gap-3 py-4 opacity-100"
+          style={{
+            WebkitMaskImage:
+              "linear-gradient(to right, transparent, black 7%, black 93%, transparent), linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)",
+            WebkitMaskComposite: "source-in",
+            maskImage:
+              "linear-gradient(to right, transparent, black 7%, black 93%, transparent), linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)",
+            maskComposite: "intersect",
+          }}
+        >
           {rows.map((row, rowIdx) => {
             const isReverse = rowIdx % 2 === 1;
             return (
@@ -68,7 +81,7 @@ export default function Hero() {
                   isReverse ? "animate-hero-scroll-right" : "animate-hero-scroll-left"
                 }`}
                 style={{
-                  animationDuration: `${30 + (rowIdx % 3) * 6}s`,
+                  animationDuration: `${52 + (rowIdx % 3) * 8}s`,
                 }}
               >
                 {[...row, ...row, ...row].map((vid, i) => (

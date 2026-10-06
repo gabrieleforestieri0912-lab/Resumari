@@ -28,9 +28,110 @@ let contextDead = ICON_URL === null;
 // Versione del content script: serve per diagnosticare in console quale istanza
 // è in esecuzione nella tab (dopo un reload dell'estensione, le tab aperte
 // prima eseguono ancora la vecchia istanza finché non vengono ricaricate).
-const RESUMARI_CONTENT_VERSION = '1.1.2';
+const RESUMARI_CONTENT_VERSION = '1.1.5';
+
+// ---------------------------------------------------------------------------
+// Overlay barra di caricamento con progresso — feedback immediato su YouTube
+// quando parte una trascrizione (video singolo o intero canale).
+// La trascrizione vera avviene nella scheda Resumari (web app), dove vive la
+// barra determinata con percentuale: qui si mostra una barra indeterminata
+// con le istruzioni per seguire il progresso, così l'utente non resta senza
+// feedback dopo il click. Puro DOM, nessuna dipendenza da chrome.*.
+// ---------------------------------------------------------------------------
+function showResumariProgressOverlay({ title, subtitle }) {
+  try {
+    if (document.querySelector('.resumari-progress-overlay')) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'resumari-progress-overlay';
+    overlay.setAttribute('role', 'status');
+    overlay.setAttribute('aria-live', 'polite');
+
+    const header = document.createElement('div');
+    header.className = 'resumari-progress-header';
+
+    const logo = document.createElement('img');
+    logo.className = 'resumari-progress-logo';
+    logo.alt = 'Resumari';
+    try { logo.src = ICON_URL; } catch {}
+
+    const texts = document.createElement('div');
+    texts.className = 'resumari-progress-texts';
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'resumari-progress-title';
+    titleEl.textContent = title;
+
+    const subEl = document.createElement('div');
+    subEl.className = 'resumari-progress-subtitle';
+    subEl.textContent = subtitle;
+
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'resumari-progress-close';
+    close.title = 'Chiudi';
+    close.setAttribute('aria-label', 'Chiudi avviso');
+    close.textContent = '✕';
+    close.addEventListener('click', (e) => {
+      e.stopPropagation();
+      overlay.remove();
+    });
+
+    texts.appendChild(titleEl);
+    texts.appendChild(subEl);
+    header.appendChild(logo);
+    header.appendChild(texts);
+    header.appendChild(close);
+
+    const track = document.createElement('div');
+    track.className = 'resumari-progress-track';
+    const fill = document.createElement('div');
+    fill.className = 'resumari-progress-fill';
+    track.appendChild(fill);
+
+    const footer = document.createElement('div');
+    footer.className = 'resumari-progress-footer';
+    footer.textContent = 'Segui il progresso nella scheda Resumari';
+
+    overlay.appendChild(header);
+    overlay.appendChild(track);
+    overlay.appendChild(footer);
+
+    document.documentElement.appendChild(overlay);
+
+    // Auto-dismiss: è solo un avviso di avvio, il progresso reale è in web app.
+    setTimeout(() => {
+      try { overlay.remove(); } catch {}
+    }, 15000);
+  } catch {}
+}
 
 // UI Injection
+// NOTA persistenza preview: il bottone NON va mai iniettato dentro
+// `a#thumbnail`. Quando l'hover attiva l'anteprima, YouTube monta
+// `ytd-inline-preview-player` come sibling dell'anchor (o ne riscrive il
+// contenuto): tutto ciò che sta dentro l'anchor viene coperto dal player
+// (stacking context separato, z-index interno inutile) oppure rimosso dal
+// re-render del template Polymer. L'host stabile è `ytd-thumbnail`
+// (o il parent dell'anchor), che sopravvive alla preview.
+function ensureRelativePosition(el) {
+  if (!el || el === document.documentElement || el === document.body) return;
+  try {
+    if (getComputedStyle(el).position === 'static') {
+      el.style.position = 'relative';
+    }
+  } catch {}
+}
+
+function findThumbHost(anchor) {
+  // Preferisce il container stabile che contiene sia anchor che preview player.
+  const stable = anchor.closest('ytd-thumbnail');
+  if (stable) return stable;
+  // Shorts / layout nuovi: il parent diretto dell'anchor è comunque più
+  // stabile dell'anchor stessa (il cui innerHTML viene riscritto).
+  return anchor.parentElement;
+}
+
 function injectThumbnailButtons() {
   // Selettori per tutti i contesti YouTube:
   // - Video standard: home, search, related, canali, subscriptions
@@ -51,9 +152,6 @@ function injectThumbnailButtons() {
   const iconUrl = ICON_URL;
 
   renderers.forEach(renderer => {
-    // Evita iniezioni duplicate
-    if (renderer.querySelector('.resumari-thumb-btn')) return;
-
     // Cerca il link o il contenitore cliccabile della thumbnail
     const anchor = renderer.querySelector('a#thumbnail, a.ytd-thumbnail, a[href*="/watch"], a[href*="/shorts"]');
     if (!anchor) return;
@@ -62,12 +160,32 @@ function injectThumbnailButtons() {
     const videoId = getYouTubeVideoId(anchor.href);
     if (!videoId) return;
 
+    // Host stabile (sopravvive a preview + re-render): mai l'anchor stessa.
+    const host = findThumbHost(anchor);
+    if (!host) return;
+    ensureRelativePosition(host);
+
+    // Bottone esistente: lo si ricolloca/aggiorna invece di duplicarlo.
+    // Fondamentale perché YouTube ricicla i renderer nello scroll: senza
+    // update il click aprirebbe il video vecchio.
+    const existing = renderer.querySelector('.resumari-thumb-btn');
+    if (existing) {
+      if (existing.dataset.videoId !== videoId) {
+        existing.dataset.videoId = videoId;
+      }
+      if (existing.parentElement !== host) {
+        host.appendChild(existing);
+      }
+      return;
+    }
+
     // Crea il bottone circolare glassmorphic viola glow
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'resumari-thumb-btn';
     btn.title = 'Trascrivi e riassumi con Resumari';
     btn.setAttribute('aria-label', 'Trascrivi con Resumari');
+    btn.dataset.videoId = videoId;
 
     const img = document.createElement('img');
     img.src = iconUrl;
@@ -80,38 +198,46 @@ function injectThumbnailButtons() {
       e.preventDefault();
       e.stopPropagation();
       e.stopImmediatePropagation();
-      window.open(`${RESUMARI_BASE_URL}/chat?video=${videoId}`, '_blank');
+      const id = btn.dataset.videoId;
+      if (!id) return;
+      window.open(`${RESUMARI_BASE_URL}/chat?video=${id}`, '_blank');
+      showResumariProgressOverlay({
+        title: 'Trascrizione video avviata',
+        subtitle: 'Stiamo caricando la trascrizione in Resumari.',
+      });
     });
 
-    // YouTube ha vari container per thumbnail/preview.
-    // Inserendolo dentro anchor (o container thumbnail), assicuriamo che sia posizionato in alto a destra.
-    // Per garantire che sia sopra qualsiasi inline player di preview (ytd-inline-preview-player),
-    // impostiamo z-index elevato e pointer-events attivi.
-    anchor.appendChild(btn);
+    // Inserito nell'host stabile (ytd-thumbnail / parent dell'anchor), NON
+    // dentro l'anchor: resta sopra ytd-inline-preview-player (z-index elevato
+    // + pointer-events attivi da CSS) e non viene cancellato dal re-render.
+    host.appendChild(btn);
   });
 }
 
 function injectVideoPageButtons() {
-  // Previene iniezioni duplicate
-  if (document.querySelector('.resumari-watch-btn')) return;
+  // Solo pagine di visione: in SPA (home, canale, search…) un bottone orfano
+  // di una navigazione precedente va rimosso invece di restare appeso.
+  if (!isWatchPage()) {
+    document.querySelectorAll('.resumari-watch-btn').forEach((el) => {
+      try { el.remove(); } catch {}
+    });
+    return;
+  }
 
   const videoId = getYouTubeVideoId(window.location.href);
   if (!videoId) return;
 
-  // Cerca il gruppo segmentato dei pulsanti Like/Dislike di YouTube
-  const likeSegment = document.querySelector(
-    'ytd-segmented-like-dislike-button-renderer, segmented-like-dislike-button-view-model, #segmented-like-button'
-  );
-
-  // In alternativa cerca il pulsante condividi o la barra delle azioni (#actions-inner #top-level-buttons-computed)
-  const shareBtn = document.querySelector(
-    'ytd-button-renderer:has(yt-icon[icon="share"]), yt-button-view-model:has(yt-icon[icon="share"])'
-  );
-  const actionsContainer = document.querySelector(
-    '#top-row #actions-inner #top-level-buttons-computed, #top-level-buttons-computed, #actions #top-level-buttons'
-  );
-
-  if (!likeSegment && !shareBtn && !actionsContainer) return;
+  // Bottone già presente (navigazione SPA watch→watch senza reload):
+  // aggiorna l'ID — senza questo il click trascriverebbe il video precedente —
+  // e ricollocalo se YouTube ha ricostruito la barra delle azioni.
+  const existing = document.querySelector('.resumari-watch-btn');
+  if (existing) {
+    if (existing.dataset.videoId !== videoId) {
+      existing.dataset.videoId = videoId;
+    }
+    placeWatchButton(existing);
+    return;
+  }
 
   const iconUrl = ICON_URL;
 
@@ -120,6 +246,7 @@ function injectVideoPageButtons() {
   transcriptBtn.className = 'resumari-watch-btn';
   transcriptBtn.title = 'Trascrivi e riassumi questo video con Resumari';
   transcriptBtn.setAttribute('aria-label', 'Trascrivi con Resumari');
+  transcriptBtn.dataset.videoId = videoId;
 
   const img = document.createElement('img');
   img.src = iconUrl;
@@ -135,20 +262,82 @@ function injectVideoPageButtons() {
   transcriptBtn.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    window.open(`${RESUMARI_BASE_URL}/chat?video=${videoId}&action=transcript`, '_blank');
+    // Letto al click (non in closure): immune dallo stale ID dopo le
+    // navigazioni SPA watch→watch.
+    const id = transcriptBtn.dataset.videoId || getYouTubeVideoId(window.location.href);
+    if (!id) return;
+    window.open(`${RESUMARI_BASE_URL}/chat?video=${id}&action=transcript`, '_blank');
+    showResumariProgressOverlay({
+      title: 'Trascrizione video avviata',
+      subtitle: 'Stiamo caricando la trascrizione in Resumari.',
+    });
   });
 
-  // Posizionamento: preferibilmente subito dopo il blocco Like/Dislike (quindi prima di Condividi)
-  if (likeSegment && likeSegment.parentNode) {
-    if (likeSegment.nextSibling) {
-      likeSegment.parentNode.insertBefore(transcriptBtn, likeSegment.nextSibling);
+  placeWatchButton(transcriptBtn);
+}
+
+// Pagina di visione video: /watch, /shorts/<id>, /embed/<id>.
+function isWatchPage() {
+  const path = window.location.pathname || '';
+  return path === '/watch' || path.startsWith('/watch/') ||
+    path.startsWith('/shorts/') || path.startsWith('/embed/');
+}
+
+// querySelector protetto: i selettori con :has() lanciano SyntaxError sui
+// Chromium datati e ucciderebbero l'intera iniezione senza questo guard.
+function safeQuerySelector(selector) {
+  try {
+    return document.querySelector(selector);
+  } catch {
+    return null;
+  }
+}
+
+// Trova il punto di ancoraggio nella barra delle azioni sotto al video.
+function findWatchActionsTarget() {
+  const likeSegment = safeQuerySelector(
+    'ytd-segmented-like-dislike-button-renderer, segmented-like-dislike-button-view-model, #segmented-like-button'
+  );
+  if (likeSegment) return { kind: 'after', node: likeSegment };
+
+  const shareBtn = safeQuerySelector(
+    'ytd-button-renderer:has(yt-icon[icon="share"]), yt-button-view-model:has(yt-icon[icon="share"])'
+  );
+  if (shareBtn) return { kind: 'before', node: shareBtn };
+
+  const actionsContainer = safeQuerySelector(
+    '#top-row #actions-inner #top-level-buttons-computed, #top-level-buttons-computed, #actions #top-level-buttons'
+  );
+  if (actionsContainer) return { kind: 'append', node: actionsContainer };
+
+  return null;
+}
+
+// Posizionamento (o riposizionamento) del bottone watch: subito dopo il blocco
+// Like/Dislike, quindi prima di Condividi. Ritorna false se la barra delle
+// azioni non è ancora stata idratata (si riprova al prossimo tick).
+function placeWatchButton(btn) {
+  const target = findWatchActionsTarget();
+  if (!target || !target.node || !target.node.parentNode) return false;
+
+  // Già al posto giusto: niente spostamenti (evita loop con l'observer).
+  if (btn.parentNode === target.node.parentNode) {
+    if (target.kind === 'after' && btn.previousSibling === target.node) return true;
+    if (target.kind === 'before' && btn.nextSibling === target.node) return true;
+    if (target.kind === 'append' && target.node.lastChild === btn) return true;
+  }
+
+  try {
+    if (target.kind === 'after') {
+      target.node.parentNode.insertBefore(btn, target.node.nextSibling);
+    } else if (target.kind === 'before') {
+      target.node.parentNode.insertBefore(btn, target.node);
     } else {
-      likeSegment.parentNode.appendChild(transcriptBtn);
+      target.node.appendChild(btn);
     }
-  } else if (shareBtn && shareBtn.parentNode) {
-    shareBtn.parentNode.insertBefore(transcriptBtn, shareBtn);
-  } else if (actionsContainer) {
-    actionsContainer.appendChild(transcriptBtn);
+    return true;
+  } catch {
+    return false;
   }
 }
 
@@ -302,6 +491,10 @@ function injectChannelPageButton() {
       `${RESUMARI_BASE_URL}/videos?channel=${encodeURIComponent(channelUrl)}`,
       "_blank"
     );
+    showResumariProgressOverlay({
+      title: 'Trascrizione canale avviata',
+      subtitle: 'Verranno trascritti gli ultimi video del canale.',
+    });
   });
 
   // Spaziatura identica agli altri pulsanti: se il contenitore non ha gap
@@ -341,24 +534,26 @@ function isExtensionContextAlive() {
 // Esegue le tre iniezioni in un unico punto protetto: se il contesto
 // dell'estensione è stato invalidato (reload con la tab aperta), l'observer
 // viene scollegato invece di lanciare "Extension context invalidated" a ogni
-// mutation della pagina. Gli altri errori vengono solo loggati.
+// mutation della pagina. Ogni iniezione è isolata: l'errore di una non blocca
+// le altre (es. selettori non ancora idratati sulla watch page).
 function runInjections() {
   if (contextDead) return;
   if (!isExtensionContextAlive()) {
     stopWatching();
     return;
   }
-  try {
-    injectThumbnailButtons();
-    injectVideoPageButtons();
-    injectChannelPageButton();
-  } catch (err) {
-    const msg = String((err && err.message) || err);
-    if (msg.includes('Extension context invalidated')) {
-      stopWatching();
-      return;
+  const jobs = [injectThumbnailButtons, injectVideoPageButtons, injectChannelPageButton];
+  for (const job of jobs) {
+    try {
+      job();
+    } catch (err) {
+      const msg = String((err && err.message) || err);
+      if (msg.includes('Extension context invalidated')) {
+        stopWatching();
+        return;
+      }
+      console.warn('Resumari: errore durante lintestazione dei pulsanti:', err);
     }
-    console.warn('Resumari: errore durante lintestazione dei pulsanti:', err);
   }
 }
 
@@ -374,7 +569,9 @@ const observer = new MutationObserver(() => {
 
 observer.observe(document.body, {
   childList: true,
-  subtree: true
+  subtree: true,
+  attributes: true,
+  attributeFilter: ['href', 'src']
 });
 
 window.addEventListener('yt-navigate-finish', () => {

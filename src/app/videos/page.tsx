@@ -6,6 +6,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { clearSession, useSessionRestored } from "@/lib/session";
+import TranscriptionProgress, {
+  type TranscriptionProgressState,
+} from "@/components/TranscriptionProgress";
 import {
   MessageSquare,
   Sparkles,
@@ -32,6 +35,9 @@ export default function Videos() {
   const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState("");
+  // Progresso della trascrizione in corso (video singolo o intero canale):
+  // alimenta la barra di caricamento con percentuale e conteggio.
+  const [progress, setProgress] = useState<TranscriptionProgressState | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<any>(null);
   const serverFetchedRef = useRef(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
@@ -117,6 +123,12 @@ export default function Videos() {
       if (pending.action === "transcribe_full") {
         setLoading(true);
         setLoadingText("Caricamento trascrizione...");
+        setProgress({
+          variant: "video",
+          phase: "fetching",
+          message: "Caricamento trascrizione...",
+        });
+        let failed = false;
         fetch("/api/video", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -131,7 +143,10 @@ export default function Videos() {
               // Pool mensile del piano esaurito: la trascrizione non parte e
               // l'utente vede il limite reale del suo piano.
               localStorage.removeItem("resumari_pending_video");
-              setLoadingText(data.message || "Crediti esauriti. Passa a un piano superiore.");
+              failed = true;
+              const msg = data.message || "Crediti esauriti. Passa a un piano superiore.";
+              setLoadingText(msg);
+              setProgress({ variant: "video", phase: "error", error: msg });
             } else if (data.videoId) {
               console.log("Transcript available:", data.transcript?.length);
 
@@ -156,21 +171,40 @@ export default function Videos() {
               ]);
               saveTranscript(videoData);
               localStorage.removeItem("resumari_pending_video");
+              setProgress({
+                variant: "video",
+                phase: "done",
+                message: "Trascrizione completata",
+              });
             } else {
               // No transcript / clear failure: drop the pending marker so the
               // request is not retried on every page load.
               console.log("No video ID in response, message:", data.message);
               localStorage.removeItem("resumari_pending_video");
-              setLoadingText(
-                "Errore: " + (data.message || "Video non trovato"),
-              );
+              failed = true;
+              const msg = "Errore: " + (data.message || "Video non trovato");
+              setLoadingText(msg);
+              setProgress({ variant: "video", phase: "error", error: msg });
             }
           })
           .catch((err) => {
             console.error("Fetch error:", err);
+            failed = true;
             setLoadingText("Errore di connessione");
+            setProgress({
+              variant: "video",
+              phase: "error",
+              error: "Errore di connessione",
+            });
           })
-          .finally(() => setLoading(false));
+          .finally(() => {
+            // In caso di errore la barra resta visibile con lo stato di errore,
+            // altrimenti si chiude e si mostra il video trascritto.
+            if (!failed) {
+              setLoading(false);
+              setProgress(null);
+            }
+          });
       }
     }
 
@@ -180,6 +214,14 @@ export default function Videos() {
       if (pending.action === "transcribe_all") {
         setLoading(true);
         setLoadingText("Raccolta video dal canale...");
+        setProgress({
+          variant: "channel",
+          phase: "fetching",
+          current: 0,
+          total: 0,
+          message: "Raccolta video dal canale...",
+        });
+        let failed = false;
 
         fetch("/api/channel-videos", {
           method: "POST",
@@ -191,17 +233,37 @@ export default function Videos() {
             if (data.error === "insufficient_credits") {
               // Limite del piano raggiunto prima di iniziare la raccolta.
               localStorage.removeItem("resumari_pending_channel");
-              setLoadingText(data.message || "Crediti esauriti. Passa a un piano superiore.");
+              failed = true;
+              const msg = data.message || "Crediti esauriti. Passa a un piano superiore.";
+              setLoadingText(msg);
+              setProgress({ variant: "channel", phase: "error", error: msg });
               return;
             }
             if (data.videos && data.videos.length > 0) {
               const channelVideos: any[] = [];
+              const total = Math.min(data.videos.length, 10);
+              setProgress({
+                variant: "channel",
+                phase: "transcribing",
+                current: 0,
+                total,
+                message: `Trascrizione 1 di ${total}...`,
+                currentTitle: data.videos[0]?.title,
+              });
 
-              for (let i = 0; i < Math.min(data.videos.length, 10); i++) {
+              for (let i = 0; i < total; i++) {
                 const video = data.videos[i];
                 setLoadingText(
-                  `Trascrizione ${i + 1} di ${Math.min(data.videos.length, 10)}...`,
+                  `Trascrizione ${i + 1} di ${total}...`,
                 );
+                setProgress({
+                  variant: "channel",
+                  phase: "transcribing",
+                  current: i,
+                  total,
+                  currentTitle: video.title,
+                  message: `Trascrizione ${i + 1} di ${total}...`,
+                });
 
                 try {
                   const res = await fetch("/api/video", {
@@ -217,9 +279,18 @@ export default function Videos() {
                     // Crediti finiti a metà raccolta: si ferma il ciclo sul video
                     // che ha sbattuto contro il limite del piano.
                     localStorage.removeItem("resumari_pending_channel");
-                    setLoadingText(
-                      videoData.message || "Crediti esauriti. Passa a un piano superiore.",
-                    );
+                    failed = true;
+                    const msg =
+                      videoData.message || "Crediti esauriti. Passa a un piano superiore.";
+                    setLoadingText(msg);
+                    setProgress({
+                      variant: "channel",
+                      phase: "error",
+                      current: i,
+                      total,
+                      currentTitle: video.title,
+                      error: msg,
+                    });
                     break;
                   }
 
@@ -242,17 +313,48 @@ export default function Videos() {
                 } catch (e) {
                   console.error("Error transcribing video:", video.videoId);
                 }
+
+                setProgress({
+                  variant: "channel",
+                  phase: "transcribing",
+                  current: i + 1,
+                  total,
+                  currentTitle: video.title,
+                  message: `Trascrizione ${i + 1} di ${total} completata`,
+                });
               }
 
               setVideos(channelVideos);
               localStorage.removeItem("resumari_pending_channel");
+              if (!failed) {
+                setProgress({
+                  variant: "channel",
+                  phase: "done",
+                  current: total,
+                  total,
+                  message: "Trascrizione canale completata",
+                });
+              }
             }
           })
           .catch((err) => {
             console.error("Errore canale:", err);
+            failed = true;
             setLoadingText("Errore di connessione");
+            setProgress({
+              variant: "channel",
+              phase: "error",
+              error: "Errore di connessione",
+            });
           })
-          .finally(() => setLoading(false));
+          .finally(() => {
+            // In caso di errore la barra resta visibile con lo stato di errore,
+            // altrimenti si chiude e si mostra la lista dei video trascritti.
+            if (!failed) {
+              setLoading(false);
+              setProgress(null);
+            }
+          });
       }
     }
 
@@ -500,17 +602,21 @@ export default function Videos() {
         </header>
         <div className="p-4 md:p-8">
           {loading ? (
-            <div className="bg-white rounded-2xl p-12 border border-gray-100 shadow-lg shadow-gray-100/50 text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center animate-pulse">
-                <FileText size={32} className="text-purple-600 dark:text-purple-400" />
+            progress ? (
+              <TranscriptionProgress progress={progress} />
+            ) : (
+              <div className="bg-white rounded-2xl p-12 border border-gray-100 shadow-lg shadow-gray-100/50 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center animate-pulse">
+                  <FileText size={32} className="text-purple-600 dark:text-purple-400" />
+                </div>
+                <h3 className="text-lg font-black text-gray-900 dark:text-zinc-100 mb-2">
+                  Caricamento...
+                </h3>
+                <p className="text-gray-500 dark:text-zinc-400 text-sm">
+                  {loadingText || "Sto elaborando la richiesta"}
+                </p>
               </div>
-              <h3 className="text-lg font-black text-gray-900 dark:text-zinc-100 mb-2">
-                Caricamento...
-              </h3>
-              <p className="text-gray-500 dark:text-zinc-400 text-sm">
-                {loadingText || "Sto elaborando la richiesta"}
-              </p>
-            </div>
+            )
           ) : selectedVideo ? (
             <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-lg">
               <div className="p-6 border-b border-gray-100">

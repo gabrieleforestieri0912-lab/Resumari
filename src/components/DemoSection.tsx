@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "./ToastProvider";
 import { AUTH_STATE_EVENT_NAME, type AuthStateDetail } from "@/lib/auth-sync";
+import { extractYouTubeVideoId } from "@/lib/youtube-ids";
 import {
   Send,
   Sparkles,
@@ -154,7 +155,7 @@ export default function DemoSection() {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const [messageQueue, setMessageQueue] = useState<{ text: string; context: string }[]>([]);
+  const [messageQueue, setMessageQueue] = useState<{ text: string; context: string; videoId?: string | null }[]>([]);
   const [isProcessingQueue, setIsProcessingQueue] = useState(false);
   const [likedMessages, setLikedMessages] = useState<Set<number>>(new Set());
   const [dislikedMessages, setDislikedMessages] = useState<Set<number>>(new Set());
@@ -232,13 +233,15 @@ export default function DemoSection() {
     ]);
   }, []);
 
-  const processQueueItem = useCallback(async (item: { text: string; context: string }) => {
+  const processQueueItem = useCallback(async (item: { text: string; context: string; videoId?: string | null }) => {
     setIsProcessingQueue(true);
     setLoading(true);
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
     let startedTyping = false;
+    // Il video incollato nel messaggio ha priorità su quello già in riproduzione.
+    const activeVideoId = item.videoId || currentVideo || undefined;
 
     try {
       const response = await fetch("/api/ai/demo", {
@@ -247,21 +250,26 @@ export default function DemoSection() {
         body: JSON.stringify({
           message: item.text,
           context: item.context,
-          videoId: currentVideo || undefined,
+          videoId: activeVideoId,
         }),
         signal: controller.signal,
       });
 
       const data = await response.json();
+      // Il backend conferma il video analizzato: lo si mostra nel player.
+      if (data.videoId) {
+        setCurrentVideo(data.videoId);
+        setVideoStartTime(null);
+      }
       if (response.ok) {
         let raw = data.response || data.message || "";
         raw = formatYouTubeLinks(raw);
-        raw = formatTimestampLinks(raw, currentVideo);
+        raw = formatTimestampLinks(raw, data.videoId || activeVideoId || null);
         raw = cleanResponse(raw);
         const fullText = String(raw).replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu, "");
         const msgId = Date.now() + Math.random();
         const now = new Date().toISOString();
-        setMessages((prev) => [...prev, { id: msgId, text: "", sender: "system" as const, time: now, videoId: currentVideo }]);
+        setMessages((prev) => [...prev, { id: msgId, text: "", sender: "system" as const, time: now, videoId: data.videoId || activeVideoId || null }]);
         startedTyping = true;
         setLoading(false);
         const words = fullText.match(/\S+\s*/g) || [fullText];
@@ -347,13 +355,22 @@ export default function DemoSection() {
 
     setInput("");
 
+    // Se l'utente incolla un link YouTube, il video va in riproduzione e il
+    // suo ID viene passato al backend, che ne scarica trascrizione/dettagli:
+    // senza questo l'AI non aveva alcun contenuto da analizzare.
+    const pastedVideoId = extractYouTubeVideoId(text);
+    if (pastedVideoId) {
+      setCurrentVideo(pastedVideoId);
+      setVideoStartTime(null);
+    }
+
     const ch = selectedChannel ? channelData[selectedChannel.id] : null;
     const context = ch
       ? `Stai chattando con il canale YouTube "${ch.channelTitle}". Descrizione: "${(ch.channelDescription || "").slice(0, 1000)}". Rispondi SEMPRE in italiano come se fossi il canale stesso. Parla del tuo stile, dei tuoi video più popolari, degli argomenti che tratti. Includi link ai video YouTube (formato: https://youtube.com/watch?v=VIDEOID) quando parli di un video specifico e timestamp (formato minuti:secondi) per i momenti chiave.`
       : "Fornisci una risposta chiara e concisa in italiano.";
 
-    addMessage(text, "user");
-    setMessageQueue((prev) => [...prev, { text, context }]);
+    addMessage(text, "user", pastedVideoId ? { videoId: pastedVideoId } : {});
+    setMessageQueue((prev) => [...prev, { text, context, videoId: pastedVideoId }]);
   };
 
   const handleCancel = () => {
@@ -719,7 +736,7 @@ export default function DemoSection() {
                         placeholder={
                           userMsgCount >= DEMO_MESSAGE_LIMIT
                             ? "Limite raggiunto — registrati per continuare"
-                            : "Chiedi qualcosa sul canale..."
+                            : "Chiedi qualcosa o incolla un link video YouTube..."
                         }
                         disabled={userMsgCount >= DEMO_MESSAGE_LIMIT}
                         className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl pl-5 pr-14 py-3.5 text-sm font-medium text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/15 focus:border-purple-300 dark:focus:border-purple-700 transition-all disabled:opacity-50"

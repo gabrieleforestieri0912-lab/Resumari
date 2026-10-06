@@ -62,20 +62,20 @@ a, button { cursor: pointer; }
 
 @keyframes hero-scroll-left {
   0% { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-50%, 0, 0); }
+  100% { transform: translate3d(-33.3333%, 0, 0); }
 }
 
 @keyframes hero-scroll-right {
-  0% { transform: translate3d(-50%, 0, 0); }
+  0% { transform: translate3d(-33.3333%, 0, 0); }
   100% { transform: translate3d(0, 0, 0); }
 }
 
 .animate-hero-scroll-left {
-  animation: hero-scroll-left 35s linear infinite;
+  animation: hero-scroll-left 60s linear infinite;
 }
 
 .animate-hero-scroll-right {
-  animation: hero-scroll-right 35s linear infinite;
+  animation: hero-scroll-right 60s linear infinite;
 }
 
 
