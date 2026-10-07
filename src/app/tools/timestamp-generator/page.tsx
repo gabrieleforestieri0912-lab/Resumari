@@ -76,9 +76,16 @@ export default function TimestampGeneratorPage() {
 
   const validation = useMemo(() => {
     const errors: string[] = [];
+    if (chapters.length < 3) {
+      errors.push("YouTube richiede almeno 3 capitoli per mostrare i chapters");
+    }
     const sorted = chapters
       .map((c, i) => ({ ...c, seconds: timestampToSeconds(c.timestamp), index: i }))
       .sort((a, b) => a.seconds - b.seconds);
+
+    if (sorted.length > 0 && sorted[0].seconds !== 0) {
+      errors.push("Il primo capitolo deve partire da 0:00 (requisito YouTube)");
+    }
 
     for (let i = 0; i < sorted.length; i++) {
       if (i > 0 && sorted[i].seconds === sorted[i - 1].seconds) {

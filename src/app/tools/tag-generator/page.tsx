@@ -21,15 +21,27 @@ const tagSuggestions: Record<string, string[]> = {
 function generateTags(topic: string, niche: string): string[] {
   const words = topic.toLowerCase().split(/\s+/).filter(Boolean);
   const base = tagSuggestions[niche] || tagSuggestions.entertainment;
-  const tags = new Set<string>();
 
-  words.forEach((w) => tags.add(w));
-  words.forEach((w) => base.forEach((b) => tags.add(`${w} ${b}`)));
-  base.forEach((b) => tags.add(b));
-  tags.add(topic.toLowerCase());
-  tags.add(`${topic.toLowerCase()} youtube`);
+  // Candidati in ordine di rilevanza: prima il topic, poi combinazioni,
+  // poi suggerimenti di nicchia. Ci fermiamo a 500 caratteri (limite YouTube).
+  const candidates = new Set<string>();
+  candidates.add(topic.toLowerCase());
+  words.forEach((w) => candidates.add(w));
+  words.forEach((w) => base.forEach((b) => {
+    if (b !== w) candidates.add(`${w} ${b}`);
+  }));
+  candidates.add(`${topic.toLowerCase()} youtube`);
+  base.forEach((b) => candidates.add(b));
 
-  return Array.from(tags);
+  const picked: string[] = [];
+  let length = 0;
+  for (const c of candidates) {
+    const add = (picked.length > 0 ? 2 : 0) + c.length;
+    if (length + add > TAG_LIMIT) continue;
+    picked.push(c);
+    length += add;
+  }
+  return picked;
 }
 
 export default function TagGeneratorPage() {
@@ -165,10 +177,10 @@ export default function TagGeneratorPage() {
                 <div
                   className={`h-full rounded-full transition-all ${
                     remaining < 0
-                      ? "bg-red-50 dark:bg-red-950/400"
+                      ? "bg-red-500"
                       : remaining < 50
-                      ? "bg-amber-50 dark:bg-amber-950/400"
-                      : "bg-green-50 dark:bg-green-950/400"
+                      ? "bg-amber-500"
+                      : "bg-green-500"
                   }`}
                   style={{
                     width: `${Math.min(

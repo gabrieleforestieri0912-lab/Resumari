@@ -34,10 +34,10 @@ export default function TitleCounterPage() {
           : "border-gray-300 dark:border-zinc-700",
       barColor:
         len > TITLE_LIMIT
-          ? "bg-red-50 dark:bg-red-950/400"
+          ? "bg-red-500"
           : len > 70
-          ? "bg-amber-50 dark:bg-amber-950/400"
-          : "bg-green-50 dark:bg-green-950/400",
+          ? "bg-amber-500"
+          : "bg-green-500",
     };
   }, [title]);
 
@@ -55,10 +55,10 @@ export default function TitleCounterPage() {
           : "text-green-500",
       barColor:
         len > DESC_LIMIT
-          ? "bg-red-50 dark:bg-red-950/400"
+          ? "bg-red-500"
           : len > 4000
-          ? "bg-amber-50 dark:bg-amber-950/400"
-          : "bg-blue-50 dark:bg-blue-950/400",
+          ? "bg-amber-500"
+          : "bg-green-500",
     };
   }, [description]);
 

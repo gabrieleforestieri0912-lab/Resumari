@@ -13,18 +13,34 @@ interface ValidationIssue {
   message: string;
 }
 
+function normalizeInput(input: string): string {
+  let text = input.replace(/^\uFEFF/, "").trim();
+  // Supporta VTT: rimuove header WEBVTT e blocchi NOTE/STYLE/REGION,
+  // poi la struttura è identica a SRT per la validazione.
+  if (/^WEBVTT/i.test(text)) {
+    text = text.replace(/^WEBVTT.*\n/, "");
+    text = text.replace(/^NOTE(?: .*)?\n(?:.*\n)*?\n/gm, "");
+    text = text.replace(/^(STYLE|REGION)(?: .*)?\n(?:.*\n)*?\n/gm, "");
+  }
+  return text.trim();
+}
+
 function parseSRT(srt: string) {
-  const blocks = srt.trim().split(/\n\s*\n/);
+  const blocks = normalizeInput(srt).split(/\n\s*\n/);
   return blocks.map((block, i) => {
     const lines = block.trim().split("\n");
-    const timeMatch = lines[1]?.match(
+    // In VTT le cue possono avere un identificativo sulla prima riga:
+    // il timecode è la prima riga che contiene "-->".
+    const timeLine = lines.find((l) => l.includes("-->")) ?? lines[1] ?? "";
+    const timeMatch = timeLine.match(
       /(\d{2}:\d{2}:\d{2}[,\.]\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}[,\.]\d{3})/
     );
+    const textStart = lines.indexOf(timeLine) + 1;
     return {
       index: i + 1,
       start: timeMatch?.[1]?.replace(",", ".") || "",
       end: timeMatch?.[2]?.replace(",", ".") || "",
-      text: lines.slice(2).join("\n").trim(),
+      text: lines.slice(textStart >= 0 ? textStart : 2).join("\n").trim(),
     };
   });
 }
@@ -150,12 +166,12 @@ export default function SubtitleValidatorPage() {
 
           <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 mb-8">
             <label className="block text-sm font-bold text-gray-700 dark:text-zinc-300 mb-2">
-              Contenuto SRT
+              Contenuto SRT o VTT
             </label>
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={`Incolla il contenuto SRT qui...\n\nEsempio:\n1\n00:00:01,000 --> 00:00:04,000\nCiao, benvenuti nel mio video`}
+              placeholder={`Incolla il contenuto SRT o VTT qui...\n\nEsempio:\n1\n00:00:01,000 --> 00:00:04,000\nCiao, benvenuti nel mio video`}
               rows={12}
               className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-zinc-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-sm font-mono resize-y"
             />

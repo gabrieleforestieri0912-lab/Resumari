@@ -41,17 +41,11 @@ export default function EarningsCalculatorPage() {
     const perVideo = (v / 1000) * cpm;
     const total = perVideo * vc;
 
+    // Stima mensile: stessi views × numero video × 4 settimane.
     const monthlyV = v * vc * 4;
     const monthlyEarnings = (monthlyV / 1000) * cpm;
 
-    const yppMilestones = [
-      { subs: 1000, label: "YPP Silver (1K iscritti)" },
-      { subs: 10000, label: "YPP Gold (10K iscritti)" },
-      { subs: 100000, label: "YPP Diamond (100K iscritti)" },
-      { subs: 1000000, label: "YPP Play Button (1M iscritti)" },
-    ];
-
-    return { cpm, perVideo, total, monthlyEarnings, yppMilestones };
+    return { cpm, perVideo, total, monthlyEarnings };
   }, [views, niche, customCpm, videoCount]);
 
   return (
@@ -167,36 +161,26 @@ export default function EarningsCalculatorPage() {
           </div>
 
           <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6">
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-3">
               <Award size={18} className="text-purple-500" />
               <span className="text-sm font-bold text-gray-700 dark:text-zinc-300">
-                Tracker Traguardi YPP
+                Come leggere la stima
               </span>
             </div>
-            <div className="space-y-3">
-              {result.yppMilestones.map((m) => (
-                <div key={m.subs} className="flex items-center gap-4">
-                  <div className="flex-1">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="font-semibold text-gray-700 dark:text-zinc-300">
-                        {m.label}
-                      </span>
-                      <span className="font-bold text-purple-600">
-                        ${(m.subs * 0.01).toFixed(0)}/mese stim.
-                      </span>
-                    </div>
-                    <div className="h-2 rounded-full bg-gray-100 dark:bg-zinc-800 overflow-hidden">
-                      <div
-                        className="h-full bg-purple-50 dark:bg-purple-950/40 rounded-full transition-all"
-                        style={{
-                          width: `${Math.min((m.subs / 1000000) * 100, 100)}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <ul className="text-sm text-gray-500 dark:text-zinc-400 space-y-2 leading-relaxed">
+              <li>
+                <strong className="text-gray-700 dark:text-zinc-300">Mensile stimato</strong> = stessi views
+                × {videoCount} video × 4 settimane.
+              </li>
+              <li>
+                Il CPM è una media di nicchia: il valore reale varia per stagione,
+                pubblico e formato annunci.
+              </li>
+              <li>
+                Per entrare nello YouTube Partner Program servono 1.000 iscritti + 4.000 ore
+                di watch time (oppure 10M di views Shorts in 90 giorni).
+              </li>
+            </ul>
           </div>
         </div>
         <ToolExtraSections slug="earnings-calculator" />

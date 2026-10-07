@@ -24,9 +24,9 @@ export const toolsExtra: Record<string, ToolExtraData> = {
   },
   "thumbnail-downloader": {
     slug: "thumbnail-downloader",
-    whatIs: "Scarica qualsiasi thumbnail YouTube in 5 risoluzioni, da 120x90 a 1280x720. Basta incollare URL o ID video.",
-    howTo: ["Incolla URL YouTube o ID di 11 caratteri", "Clicca Cerca per generare le 5 qualità", "Scarica con un click la risoluzione desiderata"],
-    keyFeatures: ["5 qualità: default, mq, hq, sd, maxres", "Riconosce tutti i formati URL YouTube", "Download diretto senza watermark", "Anteprima con fallback se maxres non disponibile"],
+    whatIs: "Scarica la thumbnail di qualsiasi video YouTube fino a Full HD 1280x720. Basta incollare URL o ID video.",
+    howTo: ["Incolla URL YouTube o ID di 11 caratteri", "Clicca Cerca per generare le qualità disponibili", "Scarica o apri a dimensione intera la risoluzione desiderata"],
+    keyFeatures: ["4 qualità: MQ 320px, HQ 480px, SD 640px, HD 1280px", "Riconosce tutti i formati URL YouTube (video, Shorts, live)", "Rileva quali qualità esistono davvero per quel video", "Download diretto o apertura a dimensione intera"],
     whoUses: [{ role: "Creator", desc: "recupera thumbnail per A/B test" }, { role: "Designer", desc: "moodboard e copertine" }, { role: "Social manager", desc: "post e anteprime" }],
     related: [{ href: "/tools/title-counter", title: "Title Counter" }, { href: "/tools/tag-generator", title: "Tag Generator" }, { href: "/tools/earnings-calculator", title: "Earnings Calculator" }],
     faqs: [
