@@ -264,12 +264,36 @@ export default function DemoSection() {
     }
   }, []);
 
+  const stickToBottomRef = useRef(true);
+  const BOTTOM_THRESHOLD_PX = 80;
+
+  const isNearBottom = () => {
+    const el = messagesContainerRef.current;
+    if (!el) return true;
+    return el.scrollHeight - el.scrollTop - el.clientHeight <= BOTTOM_THRESHOLD_PX;
+  };
+
+  const onMessagesWheel = (e: { deltaY: number }) => {
+    if (e.deltaY < 0) stickToBottomRef.current = false;
+  };
+
+  const onMessagesTouchMove = () => {
+    if (!isNearBottom()) stickToBottomRef.current = false;
+  };
+
+  const handleMessagesScroll = () => {
+    stickToBottomRef.current = isNearBottom();
+  };
+
   useEffect(() => {
-    // Scorre solo la lista dei messaggi: usare scrollIntoView farebbe scorrere
-    // anche la pagina, spostando la view sulla sezione demo ad ogni messaggio.
+    if (!stickToBottomRef.current) return;
+    // Solo la lista messaggi: scrollIntoView sposterebbe tutta la sezione demo.
     const container = messagesContainerRef.current;
     if (!container) return;
-    container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: loading ? "auto" : "smooth",
+    });
   }, [messages, loading]);
 
   const fetchChannels = useCallback((token: string | null) => {
@@ -450,6 +474,7 @@ export default function DemoSection() {
       ? `Stai chattando con il canale YouTube "${ch.channelTitle}". Descrizione: "${(ch.channelDescription || "").slice(0, 1000)}". Rispondi SEMPRE in italiano come se fossi il canale stesso. Parla del tuo stile, dei tuoi video più popolari, degli argomenti che tratti. Includi link ai video YouTube (formato: https://youtube.com/watch?v=VIDEOID) quando parli di un video specifico e timestamp (formato minuti:secondi) per i momenti chiave.`
       : "Fornisci una risposta chiara e concisa in italiano.";
 
+    stickToBottomRef.current = true;
     addMessage(text, "user", pastedVideoId ? { videoId: pastedVideoId } : {});
     setMessageQueue((prev) => [...prev, { text, context, videoId: pastedVideoId }]);
   };
@@ -700,7 +725,13 @@ export default function DemoSection() {
                         </div>
                       )}
 
-                      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3 relative">
+                      <div
+                        ref={messagesContainerRef}
+                        onScroll={handleMessagesScroll}
+                        onWheel={onMessagesWheel}
+                        onTouchMove={onMessagesTouchMove}
+                        className="flex-1 overflow-y-auto p-4 space-y-3 relative"
+                      >
                         {messages.map((msg) => (
                           <motion.div
                             key={msg.id}

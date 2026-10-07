@@ -59,8 +59,7 @@ export async function POST(request: Request) {
         if (image.size > 10 * 1024 * 1024) {
           return NextResponse.json({ message: 'L’immagine non può superare 10 MB.' }, { status: 400 });
         }
-        // Groq non espone più modelli vision (llama-3.2-11b-vision-preview è stato
-        // ritirato): senza GROQ_VISION_MODEL l'analisi immagini non è disponibile.
+        // Senza XKIRO_VISION_MODEL / VISION_AI_MODEL l'analisi immagini è disabilitata.
         if (!VISION_AI_MODEL) {
           return NextResponse.json(
             { message: "L'analisi delle immagini non è disponibile in questo momento: invia la domanda come testo." },
@@ -133,7 +132,7 @@ export async function POST(request: Request) {
     // Selezione del modello (Vision se è presente un'immagine e se configurato)
     const aiModel = imageDataUrl && VISION_AI_MODEL ? VISION_AI_MODEL : DEFAULT_AI_MODEL;
 
-    // Generazione della risposta tramite Groq (le emoji dell'AI vengono
+    // Generazione della risposta tramite xKiro (le emoji dell'AI vengono
     // mantenute: nessun filtro di rimozione)
     const aiResponse = (await generateChatCompletion(messages, aiModel)) || '';
 

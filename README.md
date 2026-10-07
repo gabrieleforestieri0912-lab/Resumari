@@ -58,9 +58,11 @@ Tutte le variabili sono documentate in [`.env.example`](.env.example). Le essenz
 - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY`
 - `JWT_SECRET` / `NEXTAUTH_SECRET` / `NEXTAUTH_URL`
 - `YOUTUBE_API_KEY`
-- `GROQ_API_KEY`
-- `GROQ_MODEL` (opzionale) — modello Groq per chat, demo e suggerimenti; default `openai/gpt-oss-120b`
-- `GROQ_VISION_MODEL` (opzionale) — modello per l'analisi immagini; se assente l'analisi immagini è disabilitata
+- `XKIRO_API_KEY` — provider chat/vision (gateway OpenAI-compatible)
+- `XKIRO_MODEL` (opzionale) — default `openai/gpt-5.6-sol` (formato `vendor/model`)
+- `XKIRO_VISION_MODEL` (opzionale) — default = `XKIRO_MODEL`
+- `XKIRO_BASE_URL` (opzionale) — default `https://api.xkiro.com/v1`
+- `GROQ_API_KEY` — solo trascrizione audio (xKiro non offre STT)
 - `GROQ_TRANSCRIPTION_MODEL` (opzionale) — default `whisper-large-v3-turbo`
 - `RESEND_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `GOOGLE_CLIENT_ID/SECRET`
 

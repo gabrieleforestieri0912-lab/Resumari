@@ -4,8 +4,6 @@ import { motion } from "framer-motion";
 import { Check, Star, Zap, Sparkles, Building2, Gem, LucideIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
-import AddToChromeButton from "./AddToChromeButton";
-
 const getToken = (): string | null => {
   return typeof window !== "undefined" ? localStorage.getItem("token") : null;
 };
@@ -311,18 +309,6 @@ export default function Pricing() {
           );
         })}
       </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="mt-20 flex flex-col items-center justify-center gap-4"
-      >
-        <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
-          Preferisci lavorare direttamente su YouTube?
-        </p>
-        <AddToChromeButton variant="section" />
-      </motion.div>
 
       <div className="mt-12 text-center">
         <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">

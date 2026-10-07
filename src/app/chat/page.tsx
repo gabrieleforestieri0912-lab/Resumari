@@ -426,7 +426,9 @@ function ChatContent() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const accountMenuRef = useRef<HTMLDivElement>(null);
-  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+  // Ref (non state): durante lo streaming i messaggi si aggiornano spesso e
+  // uno state causerebbe race con lo scroll programmatico.
+  const stickToBottomRef = useRef(true);
 
   const userInitial = user?.name
     ? user.name.charAt(0).toUpperCase()
@@ -456,29 +458,42 @@ function ChatContent() {
     router.push("/");
   };
 
-  /**
-   * Gestisce lo scroll automatico verso il basso quando arrivano nuovi messaggi
-   */
-  const handleScroll = () => {
-    if (!scrollContainerRef.current) return;
-    const { scrollTop, scrollHeight, clientHeight } =
-      scrollContainerRef.current;
-    const isAtBottom = scrollHeight - scrollTop <= clientHeight + 100;
-    setShouldAutoScroll(isAtBottom);
+  const BOTTOM_THRESHOLD_PX = 80;
+
+  const isNearBottom = () => {
+    const el = scrollContainerRef.current;
+    if (!el) return true;
+    return el.scrollHeight - el.scrollTop - el.clientHeight <= BOTTOM_THRESHOLD_PX;
   };
 
-  const scrollToBottom = () => {
-    if (!shouldAutoScroll) return;
-    // Scorre solo il contenitore dei messaggi: scrollIntoView farebbe scorrere
-    // anche gli antenati (la pagina), spostando la view fuori dalla chat.
+  /** Distacco immediato quando l'utente scrolla verso i messaggi precedenti. */
+  const onMessagesWheel = (e: { deltaY: number }) => {
+    if (e.deltaY < 0) stickToBottomRef.current = false;
+  };
+
+  const onMessagesTouchMove = () => {
+    if (!isNearBottom()) stickToBottomRef.current = false;
+  };
+
+  const handleScroll = () => {
+    stickToBottomRef.current = isNearBottom();
+  };
+
+  const scrollToBottomIfStuck = useCallback(() => {
+    if (!stickToBottomRef.current) return;
+    // Solo il contenitore messaggi: scrollIntoView sposterebbe anche la pagina.
     const container = scrollContainerRef.current;
     if (!container) return;
-    container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
-  };
+    // "auto" in generazione: lo smooth combatte lo scroll manuale dell'utente.
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: isTyping ? "auto" : "smooth",
+    });
+  }, [isTyping]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, isTyping, scrollToBottom]);
+    scrollToBottomIfStuck();
+  }, [messages, isTyping, scrollToBottomIfStuck]);
 
   // Sincronizzazione LocalStorage per le chat e i messaggi
   useEffect(() => {
@@ -551,6 +566,10 @@ function ChatContent() {
   /**
    * Carica i messaggi della chat attiva selezionata
    */
+  useEffect(() => {
+    stickToBottomRef.current = true;
+  }, [activeChatId]);
+
   useEffect(() => {
     const loadMessages = () => {
       if (!activeChatId) {
@@ -1209,6 +1228,7 @@ function ChatContent() {
    * Invia un messaggio testuale gestendo la creazione di nuove chat e l'estrazione video
    */
   const handleSendWithText = async (text: string, chatIdOverride?: any) => {
+    stickToBottomRef.current = true;
     const userMsgText = text;
     const videoId = getYouTubeVideoId(userMsgText);
 
@@ -1304,6 +1324,7 @@ function ChatContent() {
       addToast?.(creditsBlocked, "error");
       return;
     }
+    stickToBottomRef.current = true;
     const imageForMessage = attachedImage;
     const userMsgText = input.trim() || "Analizza questa immagine";
 
@@ -2065,7 +2086,9 @@ function ChatContent() {
             <div
               ref={scrollContainerRef}
               onScroll={handleScroll}
-              className={`flex-1 ${messages.length === 0 ? "overflow-hidden" : "overflow-y-auto"} px-4 md:px-8 py-6 space-y-6 scroll-smooth custom-scrollbar relative`}
+              onWheel={onMessagesWheel}
+              onTouchMove={onMessagesTouchMove}
+              className={`flex-1 ${messages.length === 0 ? "overflow-hidden" : "overflow-y-auto"} px-4 md:px-8 py-6 space-y-6 custom-scrollbar relative`}
             >
               <AnimatePresence>
                 {
