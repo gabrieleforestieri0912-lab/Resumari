@@ -1,5 +1,8 @@
 import { Upload, Scissors } from "lucide-react";
-import { RefObject, SVGProps, useMemo, useState } from "react";
+import { RefObject, SVGProps, useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+// Dopo un'interazione manuale con la lista, l'auto-scroll resta in pausa per questo tempo.
+const MANUAL_SCROLL_PAUSE_MS = 4000;
 
 const Youtube = ({ size = 24, className = "", ...props }: SVGProps<SVGSVGElement> & { size?: number }) => (
   <svg
@@ -73,6 +76,89 @@ export default function MediaPanel({
       .map((b) => ({ time: b.time, text: b.text, isKeyPoint: false }));
   }, [fullTranscript, segmentSeconds]);
 
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const listContainerRef = useRef<HTMLDivElement>(null);
+  const segmentRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const manualScrollUntilRef = useRef(0);
+  const [playerTime, setPlayerTime] = useState<number | null>(null);
+
+  useEffect(() => {
+    setPlayerTime(null);
+  }, [currentVideoId]);
+
+  // Il player YouTube (enablejsapi=1) invia "infoDelivery" con currentTime solo
+  // dopo un messaggio "listening"; lo si ripete finché il player non risponde.
+  const subscribeToPlayer = useCallback(() => {
+    let attempts = 0;
+    const timer = window.setInterval(() => {
+      const win = iframeRef.current?.contentWindow;
+      if (!win || attempts++ >= 20) {
+        window.clearInterval(timer);
+        return;
+      }
+      win.postMessage(JSON.stringify({ event: "listening", id: 1, channel: "widget" }), "*");
+    }, 250);
+    return timer;
+  }, []);
+
+  const subscribeTimerRef = useRef<number | null>(null);
+
+  const handleIframeLoad = useCallback(() => {
+    if (subscribeTimerRef.current) window.clearInterval(subscribeTimerRef.current);
+    subscribeTimerRef.current = subscribeToPlayer();
+  }, [subscribeToPlayer]);
+
+  useEffect(() => {
+    function onMessage(e: MessageEvent) {
+      const win = iframeRef.current?.contentWindow;
+      if (!win || e.source !== win) return;
+      if (typeof e.data !== "string") return;
+      let data: { event?: string; info?: { currentTime?: unknown } | null };
+      try {
+        data = JSON.parse(e.data);
+      } catch {
+        return;
+      }
+      if (data.event === "onReady" || data.event === "initialDelivery" || data.event === "infoDelivery") {
+        if (subscribeTimerRef.current) {
+          window.clearInterval(subscribeTimerRef.current);
+          subscribeTimerRef.current = null;
+        }
+      }
+      const t = data.info?.currentTime;
+      if (typeof t === "number" && Number.isFinite(t)) setPlayerTime(t);
+    }
+    window.addEventListener("message", onMessage);
+    return () => {
+      window.removeEventListener("message", onMessage);
+      if (subscribeTimerRef.current) window.clearInterval(subscribeTimerRef.current);
+    };
+  }, []);
+
+  const activeIndex = useMemo(() => {
+    if (playerTime === null || !groupedTranscript?.length) return -1;
+    let idx = -1;
+    for (let i = 0; i < groupedTranscript.length; i++) {
+      if (groupedTranscript[i].time <= playerTime) idx = i;
+      else break;
+    }
+    return idx;
+  }, [playerTime, groupedTranscript]);
+
+  const markManualScroll = useCallback(() => {
+    manualScrollUntilRef.current = performance.now() + MANUAL_SCROLL_PAUSE_MS;
+  }, []);
+
+  // Scorre solo il contenitore della trascrizione (non la pagina né l'aside).
+  useEffect(() => {
+    if (activeIndex < 0 || performance.now() < manualScrollUntilRef.current) return;
+    const container = listContainerRef.current;
+    const el = segmentRefs.current[activeIndex];
+    if (!container || !el) return;
+    const target = el.offsetTop - container.clientHeight / 2 + el.offsetHeight / 2;
+    container.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
+  }, [activeIndex]);
+
   function formatSegmentLabel(totalSeconds: number) {
     const m = Math.floor(totalSeconds / 60);
     const s = totalSeconds % 60;
@@ -87,6 +173,8 @@ export default function MediaPanel({
             {currentVideoId ? (
               <iframe
                 key={currentVideoId}
+                ref={iframeRef}
+                onLoad={handleIframeLoad}
                 width="100%"
                 height="100%"
                 src={`https://www.youtube.com/embed/${currentVideoId}?${currentVideoStartTime ? `start=${Math.floor(currentVideoStartTime)}&` : ""}autoplay=1&enablejsapi=1&rel=0`}
@@ -171,26 +259,50 @@ export default function MediaPanel({
                   </div>
                 </div>
               </div>
-              <div className="p-4 space-y-2 max-h-100 overflow-y-auto">
-                {groupedTranscript?.map((line, i) => (
-                    <div key={i} className="flex gap-2 text-xs">
+              <div
+                ref={listContainerRef}
+                onWheel={markManualScroll}
+                onTouchMove={markManualScroll}
+                onPointerDown={markManualScroll}
+                className="relative p-4 space-y-1 max-h-100 overflow-y-auto"
+              >
+                {groupedTranscript?.map((line, i) => {
+                  const isActive = i === activeIndex;
+                  return (
+                    <div
+                      key={i}
+                      ref={(el) => {
+                        segmentRefs.current[i] = el;
+                      }}
+                      aria-current={isActive ? "true" : undefined}
+                      className={`flex gap-2 text-xs px-1.5 py-1 -mx-1.5 rounded-lg transition-colors ${
+                        isActive ? "bg-purple-50 dark:bg-purple-950/50 ring-1 ring-purple-200 dark:ring-purple-800" : ""
+                      }`}
+                    >
                       <button
-                        onClick={() => handleSeekTo(line.time)}
-                        className="shrink-0 bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 px-1 rounded font-mono font-bold hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors"
+                        onClick={() => {
+                          manualScrollUntilRef.current = 0;
+                          setPlayerTime(line.time);
+                          handleSeekTo(line.time);
+                        }}
+                        className="shrink-0 h-fit bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 px-1 rounded font-mono font-bold hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors"
                       >
                         {formatTimestamp(line.time)}
                       </button>
                       <span
                         className={
-                          line.isKeyPoint
-                            ? "font-bold text-gray-900 dark:text-zinc-100"
-                            : "text-gray-600 dark:text-zinc-400"
+                          isActive
+                            ? "font-semibold text-gray-900 dark:text-zinc-100"
+                            : line.isKeyPoint
+                              ? "font-bold text-gray-900 dark:text-zinc-100"
+                              : "text-gray-600 dark:text-zinc-400"
                         }
                       >
                         {line.text}
                       </span>
                     </div>
-                  ))}
+                  );
+                })}
               </div>
             </div>
           )}

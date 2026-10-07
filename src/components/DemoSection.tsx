@@ -842,7 +842,7 @@ export default function DemoSection() {
             </div>
           </div>
 
-          <div className="hidden xl:block w-[520px] min-[1920px]:w-[600px] min-[2560px]:w-[680px] shrink-0 xl:sticky xl:top-24 self-start">
+          <div className="hidden xl:block w-[520px] min-[1920px]:w-[600px] min-[2560px]:w-[680px] shrink-0 self-start">
             <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-200 dark:border-zinc-800 shadow-xl shadow-purple-500/5 overflow-hidden">
               <div className="p-4 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
                 <span className="text-xs font-black text-gray-900 dark:text-gray-100 uppercase tracking-wider">
