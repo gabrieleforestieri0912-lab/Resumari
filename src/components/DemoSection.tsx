@@ -571,7 +571,7 @@ export default function DemoSection() {
 
   return (
     <section className="w-full px-4 md:px-6 min-[1920px]:px-10 min-[2560px]:px-16 py-12 md:py-16 min-[1920px]:py-20 relative" id="demo">
-      <div className="max-w-[1360px] lg:max-w-[1420px] xl:max-w-[1480px] min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] mx-auto relative">
+      <div className="max-w-[1100px] lg:max-w-[1200px] xl:max-w-[1480px] min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] mx-auto relative">
         <div className="text-center mb-8 min-[1920px]:mb-10">
           <div className="w-16 h-1 bg-gradient-to-r from-purple-600 to-red-500 rounded-full mb-4 mx-auto" />
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-wider">
@@ -592,15 +592,15 @@ export default function DemoSection() {
               Prova la demo
             </div>
             <div className={`bg-white dark:bg-zinc-900 rounded-2xl min-[1920px]:rounded-3xl border shadow-xl overflow-hidden transition-all duration-500 ${selectedChannel ? "border-purple-200 dark:border-purple-800 shadow-purple-500/15 shadow-2xl" : "border-gray-200 dark:border-zinc-800 shadow-purple-500/5"}`}>
-              <div className="flex h-[620px] lg:h-[640px] xl:h-[660px] min-[1920px]:h-[680px] min-[2560px]:h-[740px] max-h-[78vh] min-[1920px]:max-h-[720px] relative">
+              <div className="flex h-[550px] md:h-[620px] lg:h-[640px] xl:h-[660px] min-[1920px]:h-[680px] min-[2560px]:h-[740px] max-h-[78vh] min-[1920px]:max-h-[720px] relative">
                 <AnimatePresence>
                   {sidebarOpen && (
                     <motion.aside
                       initial={{ width: 0, opacity: 0 }}
-                      animate={{ width: 280, opacity: 1 }}
+                      animate={{ width: 260, opacity: 1 }}
                       exit={{ width: 0, opacity: 0 }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
-                      className="hidden md:flex flex-col shrink-0 border-r border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-950/60 overflow-hidden relative lg:!w-[310px] xl:!w-[335px] min-[1920px]:!w-[350px]"
+                      className="hidden md:flex flex-col shrink-0 border-r border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-950/60 overflow-hidden relative md:!w-[260px] lg:!w-[310px] xl:!w-[335px] min-[1920px]:!w-[350px]"
                     >
                       <div className="absolute right-0 top-0 bottom-0 w-px bg-gradient-to-b from-purple-400/30 via-purple-600/40 to-red-400/30 pointer-events-none" />
                       <div className="p-3 border-b border-gray-100 dark:border-zinc-800">
@@ -694,7 +694,7 @@ export default function DemoSection() {
                   )}
                 </AnimatePresence>
 
-                <div className="flex-1 md:flex-[0.85] flex flex-col min-w-0 bg-white dark:bg-zinc-900 w-full max-w-full md:max-w-[62%] lg:max-w-[60%] xl:max-w-none">
+                <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-zinc-900 w-full max-w-full">
                   {messages.length === 0 && !selectedChannel ? (
                     <div className="flex-1" />
                   ) : (
@@ -873,7 +873,7 @@ export default function DemoSection() {
             </div>
           </div>
 
-          <div className="hidden xl:block w-[520px] min-[1920px]:w-[600px] min-[2560px]:w-[680px] shrink-0 self-start">
+          <div className="hidden 2xl:block w-[520px] min-[1920px]:w-[600px] min-[2560px]:w-[680px] shrink-0 self-start">
             <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-200 dark:border-zinc-800 shadow-xl shadow-purple-500/5 overflow-hidden">
               <div className="p-4 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
                 <span className="text-xs font-black text-gray-900 dark:text-gray-100 uppercase tracking-wider">
