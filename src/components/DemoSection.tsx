@@ -597,27 +597,27 @@ export default function DemoSection() {
                   {sidebarOpen && (
                     <motion.aside
                       initial={{ width: 0, opacity: 0 }}
-                      animate={{ width: 260, opacity: 1 }}
+                      animate={{ width: 200, opacity: 1 }}
                       exit={{ width: 0, opacity: 0 }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
-                      className="hidden md:flex flex-col shrink-0 border-r border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-950/60 overflow-hidden relative md:!w-[260px] lg:!w-[310px] xl:!w-[335px] min-[1920px]:!w-[350px]"
+                      className="hidden md:flex flex-col shrink-0 border-r border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-950/60 overflow-hidden relative md:!w-[200px] lg:!w-[220px] xl:!w-[240px] min-[1920px]:!w-[260px]"
                     >
                       <div className="absolute right-0 top-0 bottom-0 w-px bg-gradient-to-b from-purple-400/30 via-purple-600/40 to-red-400/30 pointer-events-none" />
-                      <div className="p-3 border-b border-gray-100 dark:border-zinc-800">
+                      <div className="p-2 border-b border-gray-100 dark:border-zinc-800">
                         <div className="flex items-center">
                           <span className="text-[10px] font-black text-gray-900 dark:text-gray-100 uppercase tracking-wider">
-                            Conversazioni
+                            Canali
                           </span>
                         </div>
                       </div>
-                      <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
+                      <div className="flex-1 overflow-y-auto p-1.5 space-y-0.5">
                         {channels.map((ch) => {
                           const cd = channelData[ch.id];
                           return (
                             <button
                               key={ch.id}
                               onClick={() => handleChannelClick(ch)}
-                              className={`w-full flex items-center gap-2.5 p-2.5 rounded-xl text-left transition-all duration-200 ${
+                              className={`w-full flex items-center gap-2 p-2 rounded-xl text-left transition-all duration-200 ${
                                 selectedChannel?.id === ch.id
                                   ? "bg-white dark:bg-zinc-800 shadow-sm border border-purple-200 dark:border-purple-700"
                                   : "hover:bg-white dark:hover:bg-zinc-800 hover:shadow-sm border border-transparent"
@@ -627,21 +627,21 @@ export default function DemoSection() {
                                 <Image
                                   src={cd.channelThumbnail}
                                   alt={ch.name}
-                                  width={40}
-                                  height={40}
+                                  width={32}
+                                  height={32}
                                   unoptimized
-                                  className="w-10 h-10 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
+                                  className="w-8 h-8 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
                                 />
                               ) : (
-                                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 flex items-center justify-center text-gray-500 dark:text-zinc-400 text-sm font-bold shrink-0">
+                                <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 flex items-center justify-center text-gray-500 dark:text-zinc-400 text-xs font-bold shrink-0">
                                   {ch.name[0]}
                                 </div>
                               )}
                               <div className="min-w-0">
-                                <p className="text-[13px] font-bold text-gray-900 dark:text-gray-100 truncate leading-tight">
+                                <p className="text-[12px] font-bold text-gray-900 dark:text-gray-100 truncate leading-tight">
                                   {ch.name}
                                 </p>
-                                <p className="text-[11px] font-semibold text-gray-600 dark:text-zinc-300 truncate leading-tight">
+                                <p className="text-[10px] font-semibold text-gray-600 dark:text-zinc-300 truncate leading-tight">
                                   {ch.desc}
                                 </p>
                               </div>
@@ -656,7 +656,7 @@ export default function DemoSection() {
                                 <button
                                   key={ch.id}
                                   onClick={() => handleChannelClick(ch)}
-                                  className={`w-full flex items-center gap-2.5 p-2.5 rounded-xl text-left transition-all duration-200 ${
+                                  className={`w-full flex items-center gap-2 p-2 rounded-xl text-left transition-all duration-200 ${
                                     selectedChannel?.id === ch.id
                                       ? "bg-white dark:bg-zinc-800 shadow-sm border border-purple-200 dark:border-purple-700"
                                       : "hover:bg-white dark:hover:bg-zinc-800 hover:shadow-sm border border-transparent"
@@ -666,21 +666,21 @@ export default function DemoSection() {
                                     <Image
                                       src={cd.channelThumbnail}
                                       alt={ch.name}
-                                      width={40}
-                                      height={40}
+                                      width={32}
+                                      height={32}
                                       unoptimized
-                                      className="w-10 h-10 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
+                                      className="w-8 h-8 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
                                     />
                                   ) : (
-                                    <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 flex items-center justify-center text-gray-500 dark:text-zinc-400 text-sm font-bold shrink-0">
+                                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 flex items-center justify-center text-gray-500 dark:text-zinc-400 text-xs font-bold shrink-0">
                                       {ch.name[0]}
                                     </div>
                                   )}
                                   <div className="min-w-0">
-                                    <p className="text-[13px] font-bold text-gray-900 dark:text-gray-100 truncate leading-tight">
+                                    <p className="text-[12px] font-bold text-gray-900 dark:text-gray-100 truncate leading-tight">
                                       {ch.name}
                                     </p>
-                                    <p className="text-[10px] text-gray-400 truncate leading-tight">
+                                    <p className="text-[10px] font-semibold text-gray-600 dark:text-zinc-300 truncate leading-tight">
                                       {ch.desc}
                                     </p>
                                   </div>
@@ -758,7 +758,7 @@ export default function DemoSection() {
                                       : "bg-gray-900 dark:bg-purple-600 text-white rounded-br-sm"
                                     : msg.cancelled
                                       ? "bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 rounded-bl-sm border border-orange-100 dark:border-orange-900"
-                                      : "bg-purple-50 dark:bg-purple-950/50 text-gray-800 dark:text-gray-200 rounded-bl-sm border border-purple-100 dark:border-purple-900"
+                                      : "bg-gray-50/50 dark:bg-zinc-950/60 text-gray-800 dark:text-gray-200 rounded-bl-sm border border-gray-100 dark:border-zinc-800"
                                 }`}
                               >
                                 {msg.sender === "user" ? (
@@ -826,10 +826,10 @@ export default function DemoSection() {
                               className="w-6 h-6 shrink-0 rounded-full object-cover bg-transparent"
                               style={{ background: "transparent" }}
                             />
-                            <div className="bg-purple-50 dark:bg-purple-950/50 px-3.5 py-2.5 rounded-2xl rounded-bl-sm border border-purple-100 dark:border-purple-900 flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                              <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                              <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" />
+                            <div className="bg-gray-50/50 dark:bg-zinc-950/60 px-3.5 py-2.5 rounded-2xl rounded-bl-sm border border-gray-100 dark:border-zinc-800 flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" />
                             </div>
                           </div>
                         )}
