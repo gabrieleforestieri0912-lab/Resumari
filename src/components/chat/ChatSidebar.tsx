@@ -25,6 +25,7 @@ interface User {
   name?: string;
   email?: string;
   picture?: string;
+  credits?: number;
 }
 
 interface ChatSidebarProps {
@@ -181,7 +182,27 @@ export default function ChatSidebar({
         </div>
       </div>
 
-      <div className="p-4 border-t border-gray-100 dark:border-zinc-800" ref={accountMenuRef}>
+      <div className="p-4 border-t border-gray-100 dark:border-zinc-800 space-y-3" ref={accountMenuRef}>
+        {/* Account Status */}
+        <div className="px-3 py-2 rounded-xl bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">
+              Crediti
+            </span>
+            <span className="text-xs font-black text-purple-600 dark:text-purple-400">
+              {user?.credits ?? "∞"}
+            </span>
+          </div>
+        </div>
+
+        {/* Subscription Link */}
+        <Link
+          href="/#pricing"
+          className="flex items-center gap-3 px-4 py-3 rounded-xl bg-linear-to-r from-purple-600 to-red-600 text-white font-bold text-sm shadow-lg shadow-purple-500/25 hover:scale-[1.02] transition-all"
+        >
+          <CreditCard size={18} />
+          Abbonamenti
+        </Link>
         <div className="relative">
           <button
             onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
@@ -224,14 +245,6 @@ export default function ChatSidebar({
               >
                 <Settings size={16} className="text-gray-500 dark:text-zinc-400" />
                 Impostazioni
-              </Link>
-              <Link
-                href="/#pricing"
-                onClick={() => setIsAccountMenuOpen(false)}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
-              >
-                <CreditCard size={16} className="text-gray-500 dark:text-zinc-400" />
-                Pricing
               </Link>
               <button
                 onClick={() => {
