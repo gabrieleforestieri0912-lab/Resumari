@@ -252,10 +252,10 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="lg:hidden absolute top-16 left-0 right-0 bg-white dark:bg-zinc-900 border-b border-gray-100 dark:border-zinc-800 shadow-xl p-4 space-y-2"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="lg:hidden absolute top-16 right-0 w-64 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-xl rounded-2xl p-4 space-y-2"
             ref={mobileMenuRef}
           >
             {navLinks.map((item) => (
