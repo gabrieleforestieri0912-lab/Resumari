@@ -921,8 +921,11 @@ export default function DemoSection() {
               Inizia a Usare Resumari
             </span>
           </Link>
-          <p className="mt-6 text-gray-500 font-bold text-xs tracking-tight">
-            Nessuna carta di credito richiesta. Iscriviti gratis.
+          <p className="mt-4 text-gray-400 font-bold text-xs tracking-tight">
+            Accesso istantaneo
+          </p>
+          <p className="mt-2 text-gray-500 font-bold text-xs tracking-tight">
+            10 messaggi gratuiti nella chat
           </p>
         </motion.div>
       </div>
