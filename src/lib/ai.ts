@@ -13,7 +13,20 @@ const XKIRO_BASE_URL =
 
 // Model ID con prefisso vendor obbligatorio (es. openai/gpt-5.6-sol).
 export const DEFAULT_AI_MODEL =
-  process.env.XKIRO_MODEL || process.env.GROQ_MODEL || 'openai/gpt-5.6-sol';
+  process.env.XKIRO_MODEL || process.env.GROQ_MODEL || 'openai/gpt-4o';
+
+/**
+ * Assicura che il modello abbia il prefisso vendor (es. 'openai/gpt-4o').
+ * Se manca il prefisso, lancia un errore descrittivo.
+ */
+function validateModelPrefix(model: string): string {
+  if (!model.includes('/')) {
+    throw new Error(
+      `Il modello configurato "${model}" non è valido. xKiro richiede il prefisso del vendor (es. "openai/gpt-4o" o "anthropic/claude-3").`
+    );
+  }
+  return model;
+}
 
 // Vision: con xKiro i modelli chat spesso accettano image_url; default = modello chat.
 export const VISION_AI_MODEL =
@@ -89,7 +102,7 @@ export function aiErrorMessage(
     return TRANSCRIPTION_CONFIG_ERROR;
   }
   if (/model_not_found|does not exist|decommissioned|unknown model|invalid model|not_found/i.test(message)) {
-    return 'Il modello AI configurato non è disponibile: aggiorna XKIRO_MODEL con un modello attivo (formato vendor/model).';
+    return 'Il modello AI configurato non è disponibile. Assicurati di usare il formato "vendor/modello" (es. openai/gpt-4o) nella variabile XKIRO_MODEL.';
   }
   if (/invalid api key|unauthorized|401|authentication_error/i.test(message)) {
     return 'Chiave API xKiro non valida: controlla la variabile XKIRO_API_KEY.';
@@ -105,8 +118,9 @@ export async function generateChatCompletion(
   model: string = DEFAULT_AI_MODEL,
 ) {
   try {
+    const validatedModel = validateModelPrefix(model);
     const response = await getXkiro().chat.completions.create({
-      model,
+      model: validatedModel,
       messages: messages as OpenAI.Chat.ChatCompletionMessageParam[],
       temperature: 0.7,
     });

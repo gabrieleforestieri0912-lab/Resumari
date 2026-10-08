@@ -122,7 +122,7 @@ export default function Hero() {
         {/* Title */}
         <motion.h1
           variants={itemVariants}
-          className="text-6xl md:text-8xl font-black leading-[1.1] text-gray-900 dark:text-gray-100 tracking-tight"
+          className="text-6xl md:text-7xl lg:text-8xl font-black leading-[1.1] text-gray-900 dark:text-gray-100 tracking-tight"
         >
           Smettila di rincorrere il tempo.{" "}
           <span className="relative inline-block">
@@ -143,7 +143,7 @@ export default function Hero() {
         {/* Subtitle */}
         <motion.p
           variants={itemVariants}
-          className="mt-8 text-lg md:text-xl text-gray-900 dark:text-gray-100 max-w-3xl leading-relaxed font-semibold tracking-tight"
+          className="mt-8 text-xl md:text-2xl text-gray-900 dark:text-gray-100 max-w-3xl leading-relaxed font-semibold tracking-tight"
         >
           Basta subire il <u>sovraccarico di informazioni</u>. La nostra IA distilla i
           <u>concetti chiave</u> da <u>video YouTube</u> e <u>documenti infiniti</u>, consegnandoti
