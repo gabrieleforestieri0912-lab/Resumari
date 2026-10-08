@@ -2,6 +2,7 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  allowedDevOrigins: ['127.0.0.1'],
   // Pin the Turbopack workspace root explicitly.
   // This project lives inside a folder with many sibling projects
   // (C:\Users\Utente\Documents\Progetti\Web), and Turbopack's automatic
