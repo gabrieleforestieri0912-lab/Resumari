@@ -256,6 +256,7 @@ export default function DemoSection() {
   const [likedMessages, setLikedMessages] = useState<Set<number>>(new Set());
   const [dislikedMessages, setDislikedMessages] = useState<Set<number>>(new Set());
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+  const [showFloatingBadge, setShowFloatingBadge] = useState(false);
   const addToast = useToast();
 
   const fetchSuggestions = useCallback(async (channelName?: string) => {
@@ -345,6 +346,23 @@ export default function DemoSection() {
     window.addEventListener(AUTH_STATE_EVENT_NAME, handleAuthChange);
     return () => window.removeEventListener(AUTH_STATE_EVENT_NAME, handleAuthChange);
   }, [fetchChannels]);
+
+  // Il badge "Prova la demo" segue lo scroll: compare fisso all'angolo del
+  // viewport quando la sezione demo esce dalla vista e riporta alla demo.
+  useEffect(() => {
+    const el = document.getElementById("demo");
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowFloatingBadge(!entry.isIntersecting),
+      { threshold: 0.08 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const scrollToDemo = useCallback(() => {
+    document.getElementById("demo")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   const addMessage = useCallback((text: string, sender: "user" | "system", extra: Partial<Message> = {}) => {
     setMessages((prev) => [
@@ -603,7 +621,8 @@ export default function DemoSection() {
 
         <div className="flex gap-4 min-[1920px]:gap-6 min-[2560px]:gap-8 items-start">
           <div className="flex-1 min-w-0 relative">
-            <div className="absolute -top-3.5 left-4 md:left-6 z-20 bg-gradient-to-r from-purple-600 to-red-600 text-white text-[11px] font-black tracking-wider uppercase px-4 py-1 shadow-lg shadow-purple-500/25 rounded-full -rotate-6 pointer-events-none select-none">
+            {/* Etichetta inchiodata proprio all'angolo superiore sinistro della card. */}
+            <div className="absolute left-0 top-0 z-20 bg-gradient-to-r from-purple-600 to-red-600 text-white text-[11px] font-black tracking-wider uppercase px-4 py-1.5 shadow-lg shadow-purple-500/25 rounded-tl-2xl min-[1920px]:rounded-tl-3xl rounded-br-xl pointer-events-none select-none">
               Prova la demo
             </div>
             <div className={`bg-white dark:bg-zinc-900 rounded-2xl min-[1920px]:rounded-3xl border shadow-xl overflow-hidden transition-all duration-500 ${selectedChannel ? "border-purple-200 dark:border-purple-800 shadow-purple-500/15 shadow-2xl" : "border-gray-200 dark:border-zinc-800 shadow-purple-500/5"}`}>
@@ -1000,6 +1019,24 @@ export default function DemoSection() {
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Etichetta che segue lo scroll: fissa all'angolo del viewport quando
+          la demo non è visibile, cliccandola si torna alla demo. */}
+      <AnimatePresence>
+        {showFloatingBadge && (
+          <motion.button
+            type="button"
+            onClick={scrollToDemo}
+            initial={{ opacity: 0, x: -16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ duration: 0.2 }}
+            className="fixed left-0 top-24 md:top-28 z-40 bg-gradient-to-r from-purple-600 to-red-600 text-white text-[11px] font-black tracking-wider uppercase pl-4 pr-5 py-2 shadow-xl shadow-purple-500/30 rounded-r-full hover:pr-6 transition-all cursor-pointer"
+          >
+            Prova la demo
+          </motion.button>
         )}
       </AnimatePresence>
     </section>
