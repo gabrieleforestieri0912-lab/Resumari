@@ -189,6 +189,21 @@ function cleanResponse(text: string): string {
   return html.join("");
 }
 
+/**
+ * Indicatore "registrazione" mostrato sul pulsante di invio mentre l'AI
+ * genera: pallino rosso con onde che si espandono, il segnaleuniversale
+ * di attività in corso.
+ */
+function RecordingIndicator() {
+  return (
+    <span className="relative flex h-3.5 w-3.5 items-center justify-center" aria-hidden="true">
+      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/70" />
+      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/40 [animation-delay:0.3s]" />
+      <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white" />
+    </span>
+  );
+}
+
 function YoutubeEmbed({ videoId, startTime }: { videoId: string; startTime?: number | null; onClose?: () => void }) {
   const src = startTime
     ? `https://www.youtube.com/embed/${videoId}?start=${startTime}&autoplay=1`
@@ -570,9 +585,9 @@ export default function DemoSection() {
   };
 
   return (
-    <section className="w-full px-4 md:px-6 min-[1920px]:px-10 min-[2560px]:px-16 py-12 md:py-16 min-[1920px]:py-20 relative" id="demo">
-      <div className="max-w-[1100px] lg:max-w-[1200px] xl:max-w-[1480px] min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] mx-auto relative">
-        <div className="text-center mb-8 min-[1920px]:mb-10">
+      <section className="w-full px-4 md:px-6 min-[1920px]:px-10 min-[2560px]:px-16 py-8 md:py-10 min-[1920px]:py-20 relative" id="demo">
+      <div className="max-w-[1100px] lg:max-w-[1160px] xl:max-w-[1280px] min-[1920px]:max-w-[1680px] min-[2560px]:max-w-[1920px] mx-auto relative">
+        <div className="text-center mb-5 md:mb-6 min-[1920px]:mb-10">
           <div className="w-16 h-1 bg-gradient-to-r from-purple-600 to-red-500 rounded-full mb-4 mx-auto" />
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-wider">
             <Sparkles size={14} />
@@ -592,7 +607,9 @@ export default function DemoSection() {
               Prova la demo
             </div>
             <div className={`bg-white dark:bg-zinc-900 rounded-2xl min-[1920px]:rounded-3xl border shadow-xl overflow-hidden transition-all duration-500 ${selectedChannel ? "border-purple-200 dark:border-purple-800 shadow-purple-500/15 shadow-2xl" : "border-gray-200 dark:border-zinc-800 shadow-purple-500/5"}`}>
-              <div className="flex h-[550px] md:h-[620px] lg:h-[640px] xl:h-[660px] min-[1920px]:h-[680px] min-[2560px]:h-[740px] max-h-[78vh] min-[1920px]:max-h-[720px] relative">
+              {/* Altezze compatte su laptop (fino a 1536px): la demo deve stare
+                  nello schermo senza spingere il player sotto il fold. */}
+              <div className="flex h-[460px] md:h-[520px] lg:h-[560px] xl:h-[600px] min-[1920px]:h-[680px] min-[2560px]:h-[740px] max-h-[78vh] min-[1920px]:max-h-[720px] relative">
                 <AnimatePresence>
                   {sidebarOpen && (
                     <motion.aside
@@ -855,16 +872,22 @@ export default function DemoSection() {
                       />
                       <button
                         onClick={loading ? handleCancel : handleSend}
-                        disabled={!input.trim() || userMsgCount >= DEMO_MESSAGE_LIMIT}
+                        // Durante la generazione l'input è vuoto: senza questa
+                        // eccezione il pulsante era disabled e l'utente non
+                        // poteva più annullare la richiesta.
+                        disabled={loading ? false : !input.trim() || userMsgCount >= DEMO_MESSAGE_LIMIT}
+                        aria-busy={loading}
+                        aria-label={loading ? "Generazione in corso, clicca per annullare" : "Invia messaggio"}
+                        title={loading ? "Generazione in corso — clicca per annullare" : "Invia"}
                         className={`absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center transition-all ${
-                          input.trim() && userMsgCount < DEMO_MESSAGE_LIMIT
-                            ? loading
-                              ? "bg-red-500 text-white shadow-lg animate-pulse"
-                              : "bg-gray-900 text-white hover:scale-105 active:scale-95 shadow-lg"
-                            : "bg-gray-200 text-gray-400"
+                          loading
+                            ? "bg-red-500 text-white shadow-lg shadow-red-500/30"
+                            : input.trim() && userMsgCount < DEMO_MESSAGE_LIMIT
+                              ? "bg-gray-900 text-white hover:scale-105 active:scale-95 shadow-lg"
+                              : "bg-gray-200 text-gray-400"
                         }`}
                       >
-                        {loading ? <Square size={13} className="fill-current" /> : <Send size={15} />}
+                        {loading ? <RecordingIndicator /> : <Send size={15} />}
                       </button>
                     </div>
                   </div>
