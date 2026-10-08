@@ -29,6 +29,19 @@ describe('aiErrorMessage', () => {
     expect(aiErrorMessage(new Error('quota exceeded for model'))).toMatch(/Riprova tra qualche istante/)
   })
 
+  it('riconosce modello premium non coperto dal piano Free (403 xKiro)', () => {
+    expect(
+      aiErrorMessage(new Error('This premium model requires an active paid plan or real deposited balance.')),
+    ).toMatch(/piano xKiro a pagamento/)
+    expect(aiErrorMessage(new Error('This is a paid model. The Free plan only allows free models'))).toMatch(
+      /piano xKiro a pagamento/,
+    )
+    expect(aiErrorMessage(new Error('permission_denied'))).toMatch(/piano Free/)
+    expect(
+      aiErrorMessage(new Error('403 This premium model requires an active paid plan or real deposited balance')),
+    ).toMatch(/qwen\/qwen3.8-max:free/)
+  })
+
   it('fallback generico per errori sconosciuti o vuoti', () => {
     expect(aiErrorMessage(new Error('boom'))).toBe('Errore durante l\'elaborazione')
     expect(aiErrorMessage(undefined)).toBe('Errore durante l\'elaborazione')

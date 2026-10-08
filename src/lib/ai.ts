@@ -11,9 +11,11 @@ import { Groq } from 'groq-sdk';
 const XKIRO_BASE_URL =
   process.env.XKIRO_BASE_URL || 'https://api.xkiro.com/v1';
 
-// Model ID con prefisso vendor obbligatorio (es. openai/gpt-5.6-sol).
+// Model ID con prefisso vendor obbligatorio (es. qwen/qwen3.8-max:free).
+// Il default è un modello free: con una chiave xKiro senza abbonamento
+// paid tutti i modelli premium rispondono 403 permission_denied.
 export const DEFAULT_AI_MODEL =
-  process.env.XKIRO_MODEL || process.env.GROQ_MODEL || 'openai/gpt-4o';
+  process.env.XKIRO_MODEL || process.env.GROQ_MODEL || 'qwen/qwen3.8-max:free';
 
 /**
  * Assicura che il modello abbia il prefisso vendor (es. 'openai/gpt-4o').
@@ -22,7 +24,7 @@ export const DEFAULT_AI_MODEL =
 function validateModelPrefix(model: string): string {
   if (!model.includes('/')) {
     throw new Error(
-      `Il modello configurato "${model}" non è valido. xKiro richiede il prefisso del vendor (es. "openai/gpt-4o" o "anthropic/claude-3").`
+      `Il modello configurato "${model}" non è valido. xKiro richiede il prefisso del vendor (es. "qwen/qwen3.8-max:free" o "openai/gpt-5.6-sol").`
     );
   }
   return model;
@@ -101,8 +103,11 @@ export function aiErrorMessage(
   if (message.includes(TRANSCRIPTION_CONFIG_ERROR)) {
     return TRANSCRIPTION_CONFIG_ERROR;
   }
+  if (/premium model|paying customers only|paid model|deposited balance|permission_denied|top up your wallet/i.test(message)) {
+    return 'Il modello AI configurato richiede un piano xKiro a pagamento o saldo nel wallet, mentre la chiave API è su piano Free. Imposta XKIRO_MODEL (e XKIRO_VISION_MODEL) su un modello gratuito, ad esempio "qwen/qwen3.8-max:free".';
+  }
   if (/model_not_found|does not exist|decommissioned|unknown model|invalid model|not_found/i.test(message)) {
-    return 'Il modello AI configurato non è disponibile. Assicurati di usare il formato "vendor/modello" (es. openai/gpt-4o) nella variabile XKIRO_MODEL.';
+    return 'Il modello AI configurato non è disponibile. Assicurati di usare il formato "vendor/modello" (es. qwen/qwen3.8-max:free) nella variabile XKIRO_MODEL.';
   }
   if (/invalid api key|unauthorized|401|authentication_error/i.test(message)) {
     return 'Chiave API xKiro non valida: controlla la variabile XKIRO_API_KEY.';
