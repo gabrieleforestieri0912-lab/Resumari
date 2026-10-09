@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, useRef, useEffect, useCallback, Suspense } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/components/LanguageContext";
 import { useToast } from "@/components/ToastProvider";
 import { clearSession, useSessionRestored } from "@/lib/session";
+import { alignTimestampsInMarkdown, type TimedSegment } from "@/lib/timestamps";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import MediaPanel from "@/components/chat/MediaPanel";
@@ -122,17 +123,21 @@ function parseTimeToSeconds(timeStr: string) {
 }
 
 /**
- * Converte i timestamp nel testo in link markdown con schema `timestamp:` —
- * sia la forma con titolo `[MM:SS Titolo]` che i secondaggi nudi `MM:SS`.
- * Il componente `a` personalizzato di ReactMarkdown li rende come bottoni
- * `.timestamp-link` (stesso handler di seek della preview), così il resto
- * del markdown (titoli, bold, elenchi) resta intatto e formattato.
- * Passata unica: evita doppie conversioni annidate.
+ * Prepara il testo di un messaggio AI per il rendering.
+ *
+ * I timestamp che il modello scrive sono quasi sempre inventati (i secondi non
+ * erano nel contesto), quindi prima vengono riallineati alla trascrizione reale
+ * del video: il tempo mostrato è quello in cui il video dice davvero quel
+ * contenuto, e i timestamp non verificabili vengono tolti invece di produrre
+ * link che portano nel posto sbagliato. Poi i timestamp superstiti diventano
+ * link markdown con schema `timestamp:` e il componente `a` di ReactMarkdown li
+ * rende come bottoni `.timestamp-link`.
  */
-function linkifyTimestampsForMarkdown(text: string): string {
+function linkifyTimestampsForMarkdown(text: string, transcript?: TimedSegment[] | null): string {
   if (!text) return text;
-  return text.replace(
-    /\[(\d{1,2}:\d{2}(?::\d{2})?)([^\]]*?)\]|(\d{1,2}:\d{2}(?::\d{2})?)/g,
+  const aligned = alignTimestampsInMarkdown(text, transcript ?? null);
+  return aligned.replace(
+    /\[(\d{1,3}:\d{2}(?::\d{2})?)([^\]]*?)\]|(\d{1,3}:\d{2}(?::\d{2})?)/g,
     (match, bracketTime, bracketLabel, bareTime) => {
       const time = bracketTime || bareTime;
       const label = bracketTime ? `${bracketTime}${bracketLabel || ""}` : bareTime;
@@ -220,6 +225,18 @@ function ChatContent() {
 
   // --- Stato della Conversazione Attiva ---
   const [messages, setMessages] = useState<any[]>([]);
+
+  /**
+   * Trascrizione con tempi del video attualmente aperto (stessa fonte usata da
+   * MediaPanel per la lista a lato). È il riferimento con cui vengono
+   * riallineati i timestamp citati dall'AI: il modello li inventa, qui vengono
+   * ricalcolati sul testo realmente detto nel video.
+   */
+  const videoTranscript = useMemo<TimedSegment[] | null>(() => {
+    const found = messages.find((m: { transcript?: unknown }) => Array.isArray(m.transcript));
+    const transcript = found?.transcript as TimedSegment[] | undefined;
+    return transcript && transcript.length > 0 ? transcript : null;
+  }, [messages]);
   const [input, setInput] = useState("");
   const [attachedImage, setAttachedImage] = useState<File | null>(null);
   const [attachedImagePreview, setAttachedImagePreview] = useState<string | null>(null);
@@ -2162,7 +2179,7 @@ function ChatContent() {
                                         components={markdownComponents}
                                       >
                                         {msg.sender === "system"
-                                          ? linkifyTimestampsForMarkdown(msg.text)
+                                          ? linkifyTimestampsForMarkdown(msg.text, videoTranscript)
                                           : msg.text}
                                       </ReactMarkdown>
                                     </div>

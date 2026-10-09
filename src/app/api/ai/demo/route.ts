@@ -3,6 +3,7 @@ import { aiErrorMessage, generateChatCompletion } from '@/lib/ai';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
 import { extractYouTubeVideoId } from '@/lib/youtube-ids';
 import { fetchTranscriptForVideo, getVideoDetails } from '@/lib/youtube';
+import { buildTimedTranscript, TS_PROMPT_RULES, type TimedSegment } from '@/lib/timestamps';
 
 /**
  * Endpoint di test/demo per l'interazione con l'AI.
@@ -41,7 +42,8 @@ export async function POST(request: Request) {
     systemPrompt +=
       '\nFormattazione obbligatoria (markdown semplice, niente tabelle): struttura ogni risposta con titoli di varie grandezze (## per le sezioni, ### per i sottotitoli), paragrafi brevi separati da righe vuote, elenchi puntati per i punti chiave e grassetto/italic per evidenziare i concetti importanti.' +
       '\nQuando citi momenti specifici di un video, usa il formato [MM:SS Titolo breve della sezione] (es. [01:23 Introduzione] oppure [00:45 Closure in JavaScript]). Non usare solo il secondaggio nudo, aggiungi sempre un titolo descrittivo di 2-5 parole.' +
-      ' Genera i timestamp come UNICO blocco (un elenco puntato dedicato ai momenti chiave), non sparsi né costruiti pezzo per pezzo. Scrivili solo come testo [MM:SS Titolo], mai come HTML: il frontend li trasforma in link cliccabili.';
+      ' Genera i timestamp come UNICO blocco (un elenco puntato dedicato ai momenti chiave), non sparsi né costruiti pezzo per pezzo. Scrivili solo come testo [MM:SS Titolo], mai come HTML: il frontend li trasforma in link cliccabili.' +
+      TS_PROMPT_RULES;
 
     // Identificazione del video: esplicito dal client o estratto dal testo
     // (stesso pattern della chat: senza trascrizione l'AI non può analizzare
@@ -52,18 +54,21 @@ export async function POST(request: Request) {
     // quindi niente auth/crediti — solo rate limit per IP (sopra).
     let contextData = '';
     let videoTitle: string | null = null;
+    // Trascrizione con tempi reali: inviata al modello (che non deve inventare
+    // i timestamp) e restituita al client, che la usa per riallineare i tempi
+    // citati nella risposta.
+    let timedSegments: TimedSegment[] = [];
     if (videoId) {
       const [transcriptData, details] = await Promise.all([
         fetchTranscriptForVideo(videoId),
         getVideoDetails(videoId),
       ]);
-      const transcript = transcriptData
-        ? transcriptData.transcript.map((s) => s.text).join(' ')
-        : null;
+      const timed = buildTimedTranscript(transcriptData?.transcript);
 
-      if (transcript) {
+      if (timed.text) {
+        timedSegments = timed.segments;
         videoTitle = details?.title || videoId;
-        contextData += `VIDEO: ${details?.title || videoId} (canale: ${details?.channelTitle || 'sconosciuto'})\nTRASCRIZIONE: ${transcript.substring(0, 15000)}`;
+        contextData += `VIDEO: ${details?.title || videoId} (canale: ${details?.channelTitle || 'sconosciuto'})\nTRASCRIZIONE (ogni riga è preceduta dal suo tempo reale):\n${timed.text}`;
         systemPrompt += '\nAnalizza la trascrizione del video fornita per rispondere o riassumere.';
       } else if (details) {
         videoTitle = details.title;
@@ -90,7 +95,13 @@ export async function POST(request: Request) {
     // Generazione della risposta tramite Groq (emoji dell'AI mantenute)
     const aiResponse = (await generateChatCompletion(messages)) || '';
 
-    return NextResponse.json({ response: aiResponse, videoId: videoId || undefined, videoTitle });
+    return NextResponse.json({
+      response: aiResponse,
+      videoId: videoId || undefined,
+      videoTitle,
+      // Trascrizione usata dal client per verificare i timestamp della risposta.
+      transcript: timedSegments.length > 0 ? timedSegments : undefined,
+    });
   } catch (error: unknown) {
     console.error('Demo AI Error:', error);
     // Distingue chiave/modello/quota: senza questo tutte le cause diventavano

@@ -10,6 +10,7 @@ import {
 import { getAuthenticatedUser } from '@/lib/auth';
 import { hasEnoughCredits, deductCredits, CREDIT_COSTS, creditsExhaustedMessage } from '@/lib/credits';
 import { fetchTranscriptForVideo, getVideoDetails, getYouTubeVideoId } from '@/lib/youtube';
+import { buildTimedTranscript, TS_PROMPT_RULES } from '@/lib/timestamps';
 
 /**
  * Endpoint API per la chat AI.
@@ -86,8 +87,7 @@ export async function POST(request: Request) {
     let systemPrompt = "Sei Resumari, un assistente AI esperto in riassunti video e analisi documenti. Rispondi in italiano.";
     systemPrompt +=
       "\nFormattazione obbligatoria (markdown): struttura ogni risposta con titoli di varie grandezze (## per le sezioni, ### per i sottotitoli), paragrafi brevi separati da righe vuote, elenchi puntati per i punti chiave e grassetto/italic per evidenziare i concetti importanti. Mai un muro di testo lineare." +
-      "\nQuando citi momenti specifici di un video, usa il formato [MM:SS Titolo breve della sezione] (es. [01:23 Introduzione]).";
-    let contextData = "";
+      "\nQuando citi momenti specifici di un video, usa il formato [MM:SS Titolo breve della sezione] (es. [01:23 Introduzione]).";    let contextData = "";
 
     // Aggiunta del contesto da documenti
     if (documentContext) {
@@ -95,19 +95,19 @@ export async function POST(request: Request) {
       systemPrompt += "\nAnalizza il testo del documento fornito come contesto per rispondere alla domanda.";
     }
 
-    // Aggiunta del contesto da video (trascrizione e dettagli)
+    // Aggiunta del contesto da video (trascrizione con tempi reali e dettagli)
     if (videoId) {
       const [transcriptData, details] = await Promise.all([
         fetchTranscriptForVideo(videoId),
         getVideoDetails(videoId)
       ]);
-      const transcript = transcriptData
-        ? transcriptData.transcript.map((s) => s.text).join(' ')
-        : null;
+      // I tempi viaggiano con il testo: senza secondi nel contesto il modello
+      // se li inventa, e il link porta nel punto sbagliato del video.
+      const timed = buildTimedTranscript(transcriptData?.transcript);
 
-      if (transcript) {
-        contextData += `VIDEO: ${details?.title || videoId}\nTRASCRIZIONE: ${transcript.substring(0, 15000)}`;
-        systemPrompt += "\nAnalizza la trascrizione del video fornita per rispondere o riassumere.";
+      if (timed.text) {
+        contextData += `VIDEO: ${details?.title || videoId}\nTRASCRIZIONE (ogni riga è preceduta dal suo tempo reale):\n${timed.text}`;
+        systemPrompt += "\nAnalizza la trascrizione del video fornita per rispondere o riassumere." + TS_PROMPT_RULES;
       } else if (details) {
         contextData += `TITOLO: ${details.title}\nDESCRIZIONE: ${details.description}`;
         systemPrompt += "\nTrascrizione non disponibile, usa titolo e descrizione del video.";

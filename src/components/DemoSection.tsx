@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "./ToastProvider";
 import { AUTH_STATE_EVENT_NAME, type AuthStateDetail } from "@/lib/auth-sync";
 import { extractYouTubeVideoId } from "@/lib/youtube-ids";
+import { alignTimestampsInMarkdown } from "@/lib/timestamps";
 import {
   Send,
   Sparkles,
@@ -387,6 +388,10 @@ export default function DemoSection() {
       }
       if (response.ok) {
         let raw = data.response || data.message || "";
+        // I timestamp arrivano dal modello inventati: prima di renderizzarli
+        // vengono riallineati alla trascrizione reale restituita dal backend.
+        // Quello che non si verifica viene rimosso, non mostrato.
+        raw = alignTimestampsInMarkdown(raw, data.transcript ?? null);
         raw = formatYouTubeLinks(raw);
         raw = formatTimestampLinks(raw, data.videoId || activeVideoId || null);
         raw = cleanResponse(raw);
@@ -479,7 +484,10 @@ export default function DemoSection() {
 
     const ch = selectedChannel ? channelData[selectedChannel.id] : null;
     const context = ch
-      ? `Stai chattando con il canale YouTube "${ch.channelTitle}". Descrizione: "${(ch.channelDescription || "").slice(0, 1000)}". Rispondi SEMPRE in italiano come se fossi il canale stesso. Parla del tuo stile, dei tuoi video più popolari, degli argomenti che tratti. Includi link ai video YouTube (formato: https://youtube.com/watch?v=VIDEOID) quando parli di un video specifico e timestamp (formato minuti:secondi) per i momenti chiave.`
+      // Nella modalità canale non c'è un video analizzato: senza una
+      // trascrizione con i tempi reali, i timestamp sarebbero inventati e
+      // porterebbero al secondo sbagliato, quindi non se ne chiedono.
+      ? `Stai chattando con il canale YouTube "${ch.channelTitle}". Descrizione: "${(ch.channelDescription || "").slice(0, 1000)}". Rispondi SEMPRE in italiano come se fossi il canale stesso. Parla del tuo stile, dei tuoi video più popolari, degli argomenti che tratti. Includi link ai video YouTube (formato: https://youtube.com/watch?v=VIDEOID) quando parli di un video specifico. Non scrivere timestamp: per questa modalità non sono verificabili.`
       : "Fornisci una risposta chiara e concisa in italiano.";
 
     stickToBottomRef.current = true;

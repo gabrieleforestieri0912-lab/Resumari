@@ -51,7 +51,14 @@ describe('POST /api/ai/demo', () => {
     expect(messages[0].content).toMatch(/italiano/i)
   })
 
-  it('link video nel messaggio: inietta la trascrizione nel contesto', async () => {
+  it('link video nel messaggio: inietta la trascrizione con i tempi reali', async () => {
+    ytMocks.fetchTranscriptForVideo.mockResolvedValue({
+      transcript: [
+        { text: 'primo argomento', time: 0, duration: 5 },
+        { text: 'secondo argomento', time: 90, duration: 5 },
+      ],
+      language: 'it',
+    })
     const res = await POST(
       mockPostRequest({ message: `Riassumi https://www.youtube.com/watch?v=${VID}` }, { 'x-forwarded-for': ip() }),
     )
@@ -61,8 +68,22 @@ describe('POST /api/ai/demo', () => {
     const [messages] = aiMocks.generateChatCompletion.mock.calls[0]
     const userContent = messages[1].content
     expect(userContent).toMatch(/TRASCRIZIONE/)
-    expect(userContent).toMatch(/ciao mondo/)
+    expect(userContent).toMatch(/primo argomento/)
     expect(userContent).toMatch(/Titolo video/)
+    // I temi viaggiano con il testo: senza secondi il modello se li inventa.
+    expect(userContent).toMatch(/\[0:00]/)
+    expect(userContent).toMatch(/\[1:30]/)
+    // Il prompt dice esplicitamente di non inventare tempi.
+    expect(messages[0].content).toMatch(/SOLO tempi che compaiono/)
+    // Il client riceve la trascrizione per riallineare i timestamp citati.
+    expect(body.transcript).toHaveLength(2)
+    expect(body.transcript[1]).toMatchObject({ time: 90 })
+  })
+
+  it('senza video la risposta non include una trascrizione', async () => {
+    const res = await POST(mockPostRequest({ message: 'ciao' }, { 'x-forwarded-for': ip() }))
+    const body = await res.json()
+    expect(body.transcript).toBeUndefined()
   })
 
   it('videoId esplicito senza trascrizione ma con dettagli: usa titolo/descrizione', async () => {
