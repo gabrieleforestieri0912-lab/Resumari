@@ -25,13 +25,14 @@ function supabaseKeyRole(key: string): string {
  */
 async function tableStatus(table: string): Promise<string> {
   try {
-    const { error } = await getServiceClient().from(table).select('*', { head: true, count: 'exact' }).limit(1);
+    const { error } = await getServiceClient().from(table).select('*').limit(1);
     if (!error) return 'ok';
     const code = error.code || '';
-    if (code === '42P01' || /does not exist|not found/i.test(error.message)) return 'missing';
-    return `error:${code || 'unknown'}`;
+    const message = error.message || '';
+    if (code === '42P01' || /does not exist|not found/i.test(message)) return 'missing';
+    return `error:${code || message.slice(0, 80) || 'unknown'}`;
   } catch (err) {
-    return `error:${err instanceof Error ? err.message.slice(0, 60) : 'unknown'}`;
+    return `error:${err instanceof Error ? err.message.slice(0, 80) : 'unknown'}`;
   }
 }
 
