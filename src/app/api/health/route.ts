@@ -32,7 +32,10 @@ async function tableStatus(table: string): Promise<string> {
     if (code === '42P01' || /does not exist|not found/i.test(message)) return 'missing';
     return `error:${code || message.slice(0, 80) || 'unknown'}`;
   } catch (err) {
-    return `error:${err instanceof Error ? err.message.slice(0, 80) : 'unknown'}`;
+    // `fetch failed` da solo non dice nulla: la causa (ENOTFOUND, ECONNREFUSED,
+    // timeout del progetto Supabase) è in `cause`.
+    const cause = (err as { cause?: { code?: string; message?: string } })?.cause;
+    return `error:${cause?.code || cause?.message || (err instanceof Error ? err.message.slice(0, 60) : 'unknown')}`;
   }
 }
 
@@ -66,6 +69,11 @@ export async function GET() {
   // anon key le scritture falliscono silenziosamente (RLS) e i crediti non
   // vengono mai scalati.
   checks.supabase_key_role = supabaseKeyRole(process.env.SUPABASE_SERVICE_ROLE_KEY || '');
+  try {
+    checks.supabase_host = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || '').host || 'missing';
+  } catch {
+    checks.supabase_host = 'invalid';
+  }
 
   // Tabelle necessarie: senza `rate_limits` il rate limit delle API key decade
   // alla sola memoria, senza `mcp_jobs` i job MCP non sopravvivono al recycle.
