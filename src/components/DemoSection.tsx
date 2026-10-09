@@ -604,9 +604,17 @@ export default function DemoSection() {
 
         <div className="flex gap-4 min-[1920px]:gap-6 min-[2560px]:gap-8 items-start">
           <div className="flex-1 min-w-0 relative">
-            {/* Etichetta diagonale a 45° inchiodata all'angolo superiore
-                sinistro della card: l'unico richiamo "prova la demo". */}
-            <div className="absolute -left-3 -top-3 z-20 -rotate-45 origin-top-left pointer-events-none select-none">
+            {/* Etichetta diagonale a 45° ancorata all'angolo superiore sinistro
+                della card: l'unico richiamo "prova la demo".
+
+                Posizionamento: ruotando di -45° attorno all'angolo alto-sinistro
+                dell'etichetta, la sua linea centrale passa per l'angolo della
+                card solo se il riquadro è spostato di -(altezza/2)·cos(45°).
+                Con altezza 23px (text-[11px] leading-none + py-1.5) sono ~8px:
+                con i -12px precedenti l'etichetta restava 4px sopra l'angolo.
+                I -6px la centrano sull'angolo tenendo conto del raggio della
+                card, senza farla sporgere più in alto. */}
+            <div className="absolute left-[-6px] top-[-6px] z-20 -rotate-45 origin-top-left pointer-events-none select-none">
               <div className="bg-gradient-to-r from-purple-600 to-red-600 text-white text-[11px] font-black tracking-wider uppercase leading-none px-5 py-1.5 rounded-md shadow-lg shadow-purple-500/30">
                 Prova la demo
               </div>
