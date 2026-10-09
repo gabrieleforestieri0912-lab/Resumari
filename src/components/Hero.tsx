@@ -158,13 +158,26 @@ export default function Hero() {
           <Link
             href="/chat"
             aria-label="Inizia ora a riassumere i tuoi video gratuitamente"
-            className="group flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl text-white font-black text-base bg-linear-to-r from-purple-600 to-red-600 hover:from-purple-700 hover:to-red-700 transition-all transform hover:-translate-y-1 hover:shadow-2xl active:scale-95 shadow-xl shadow-purple-500/25"
+            className="group flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl bg-gray-950 dark:bg-black text-white font-black text-base transition-all transform hover:-translate-y-1 hover:shadow-2xl active:scale-95 shadow-xl shadow-gray-950/20"
           >
             Prova Gratis
             <ArrowRight
               size={18}
               className="group-hover:translate-x-1 transition-transform"
             />
+          </Link>
+          <Link
+            href="#demo"
+            aria-label="Guarda la demo di Resumari"
+            className="group rounded-2xl bg-linear-to-r from-purple-600 to-red-600 p-[2px] transition-all transform hover:-translate-y-1 hover:shadow-2xl active:scale-95 shadow-xl shadow-purple-500/25"
+          >
+            <span className="flex items-center justify-center gap-2 px-7 py-[12px] rounded-[14px] bg-white text-gray-950 font-black text-base">
+              Guarda la demo
+              <ArrowRight
+                size={18}
+                className="group-hover:translate-x-1 transition-transform"
+              />
+            </span>
           </Link>
           <AddToChromeButton variant="hero" />
         </motion.div>
