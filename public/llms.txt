@@ -9,7 +9,7 @@ Resumari aiuta professionisti, studenti e creator a risparmiare ore di visione e
 - **Nome**: Resumari
 - **Categoria**: strumento AI per produttività, riassunti video e analisi contenuti
 - **Lingua principale**: italiano (it-IT)
-- **Prezzi**: piano gratuito (10 crediti omaggio) e piani a pagamento (Standard €7.99, Pro Pack €19.99, Business €39.99 al mese)
+- **Prezzi**: piano gratuito (10 crediti omaggio) e piani a pagamento (Standard €4.99, Pro Pack €7.99, Business €9.99 al mese)
 - **Integrazioni**: estensione Chrome, server MCP (streamable HTTP), API REST pubblica
 
 ## Pagine principali
@@ -40,8 +40,11 @@ Resumari aiuta professionisti, studenti e creator a risparmiare ore di visione e
 
 Resumari espone:
 
-- Un **server MCP** (Streamable HTTP) all'endpoint `https://resumari.vercel.app/api/mcp` per consentire ad agenti AI come ChatGPT e Claude di trascrivere e riassumere video.
-- Una **API REST** con autenticazione tramite chiave API (`X-API-Key`), endpoint `POST https://resumari.vercel.app/api/v1/transcript` per la trascrizione video.
+- Un **server MCP** (Streamable HTTP) all'endpoint `https://resumari.vercel.app/api/mcp`, che espone i tool `youtube.transcribe` e `youtube.get_transcript_job`. Richiede autenticazione: chiave API (`X-API-Key`) oppure OAuth (authorization code + PKCE S256, metadati su `/.well-known/oauth-protected-resource`). Ogni trascrizione riuscita addebita 2 crediti.
+- Una **API REST** con autenticazione tramite chiave API (`X-API-Key`):
+  - `POST https://resumari.vercel.app/api/v1/transcript` con `{ "video_id": "..." }` o `{ "video_url": "..." }`: trascrizione di un singolo video, 2 crediti.
+  - `POST https://resumari.vercel.app/api/v1/transcript/bulk` con `{ "url": "..." }` (video, playlist o canale): flusso SSE con un evento per video, 2 crediti per video riuscito. Il batch è limitato ai crediti disponibili e l'evento `metadata` riporta `skippedForCredits`.
+- Limite di frequenza: 30 richieste al minuto per chiave.
 
 ## Contatti
 

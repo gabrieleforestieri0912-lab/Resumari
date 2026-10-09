@@ -23,6 +23,12 @@ export default function AuthPage() {
     if (urlMode === 'signup') setView('register');
   }
 
+  // Destinazione richiesta da una pagina precedente (es. il flusso OAuth di
+  // MCP rimanda a /login?callbackUrl=...). Si accettano solo path interni:
+  // un callbackUrl esterno trasformerebbe il login in un open redirect.
+  const rawCallbackUrl = searchParams.get('callbackUrl');
+  const callbackUrl = rawCallbackUrl && /^\/(?!\/)/.test(rawCallbackUrl) ? rawCallbackUrl : undefined;
+
   useEffect(() => {
     document.title = view === 'login' ? "Accedi | Resumari" : "Registrati | Resumari";
   }, [view]);
@@ -70,7 +76,7 @@ export default function AuthPage() {
             transition={{ duration: 0.35, ease: [0.77, 0, 0.175, 1] }}
             className="w-full md:w-1/2 flex items-center justify-center p-6 min-h-[50vh] md:min-h-screen"
           >
-            <FormPanel view={view} onSwitch={switchView} locale={locale} />
+            <FormPanel view={view} onSwitch={switchView} locale={locale} callbackUrl={callbackUrl} />
           </motion.div>
         </AnimatePresence>
 

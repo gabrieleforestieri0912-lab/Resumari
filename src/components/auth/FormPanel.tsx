@@ -7,6 +7,12 @@ interface FormPanelProps {
   view: 'login' | 'register';
   onSwitch: () => void;
   locale: string;
+  /**
+   * Destinazione dopo il login (usata dal flusso OAuth di MCP: l'authorize
+   * endpoint rimanda a /login?callbackUrl=... e senza questo la richiesta
+   * OAuth moriva qui).
+   */
+  callbackUrl?: string;
 }
 
 const content = {
@@ -20,7 +26,7 @@ const content = {
   },
 };
 
-export default function FormPanel({ view, onSwitch, locale }: FormPanelProps) {
+export default function FormPanel({ view, onSwitch, locale, callbackUrl }: FormPanelProps) {
   const t = content[view];
 
   return (
@@ -34,9 +40,9 @@ export default function FormPanel({ view, onSwitch, locale }: FormPanelProps) {
         </p>
       </div>
       {view === 'login' ? (
-        <LoginForm locale={locale} onSwitch={onSwitch} />
+        <LoginForm locale={locale} onSwitch={onSwitch} callbackUrl={callbackUrl} />
       ) : (
-        <RegisterForm locale={locale} onSwitch={onSwitch} />
+        <RegisterForm locale={locale} onSwitch={onSwitch} callbackUrl={callbackUrl} />
       )}
     </div>
   );

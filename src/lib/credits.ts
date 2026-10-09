@@ -3,18 +3,24 @@ import { getPlanLimit } from '@/lib/plans'
 
 // Catalogo dei piani (limiti, nomi, utilizzo) in `@/lib/plans`, così anche i
 // componenti client mostrano gli stessi limiti applicati qui lato server.
-export { PLAN_LIMITS, PLAN_NAMES, getPlanLimit, getPlanName, isPaidPlan, getCreditsUsage, creditsExhaustedMessage } from '@/lib/plans'
+// `CREDIT_COSTS` vive nello stesso modulo perché la pagina /api-keys è client
+// e deve mostrare gli stessi costi che il server applica.
+export {
+  PLAN_LIMITS,
+  PLAN_NAMES,
+  CREDIT_COSTS,
+  getPlanLimit,
+  getPlanName,
+  isPaidPlan,
+  getCreditsUsage,
+  creditsExhaustedMessage,
+} from '@/lib/plans'
 
 // Credits are consumed by transcriptions and AI chat, and are reset to the full
 // pool at every subscription renewal (see the `invoice.paid` handler in
 // /api/webhooks/stripe).
 
-// Credits charged per operation type.
-export const CREDIT_COSTS = {
-  transcription: 1, // /api/video and /api/video/transcribe
-  transcriptionApi: 2, // /api/v1/transcript (public API)
-  chat: 1, // /api/ai/chat
-} as const
+import { CREDIT_COSTS } from '@/lib/plans'
 
 export function hasEnoughCredits(
   user: { credits?: number; plan?: string } | null | undefined,

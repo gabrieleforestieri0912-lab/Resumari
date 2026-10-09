@@ -13,7 +13,19 @@ export const PLAN_LIMITS: Record<string, number> = {
   standard: 1000,
   pro: 2500,
   business: 6000,
-};
+}
+
+/**
+ * Crediti addebitati per operazione.
+ * Vive qui (e non in `@/lib/credits`, che importa il client Supabase) perché la
+ * pagina /api-keys è un componente client e deve mostrare gli stessi costi
+ * che il server applica.
+ */
+export const CREDIT_COSTS = {
+  transcription: 1, // /api/video e /api/video/transcribe
+  transcriptionApi: 2, // /api/v1/transcript, /api/v1/transcript/bulk, MCP
+  chat: 1, // /api/ai/chat
+} as const
 
 // Nomi mostrati nell'account e nelle email.
 export const PLAN_NAMES: Record<string, string> = {

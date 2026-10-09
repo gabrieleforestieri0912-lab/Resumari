@@ -6,8 +6,29 @@ const { aiMocks } = vi.hoisted(() => ({
 }))
 vi.mock('@/lib/ai', () => aiMocks)
 
+// Il health check verifica anche che le tabelle esistano: qui il client
+// Supabase è simulato, altrimenti farebbe richieste di rete vere.
+vi.mock('@/lib/supabase', () => ({
+  TABLES: {
+    USERS: 'users',
+    API_KEYS: 'api_keys',
+    RATE_LIMITS: 'rate_limits',
+    MCP_JOBS: 'mcp_jobs',
+  },
+  getServiceClient: () => ({
+    from: () => ({
+      select: () => ({ limit: () => Promise.resolve({ data: [], error: null }) }),
+    }),
+  }),
+}))
+
 import { POST } from '@/app/api/ai/suggestions/route'
 import { GET as healthGET } from '@/app/api/health/route'
+
+// JWT con claim role=service_role (il health check lo decodifica).
+const SERVICE_ROLE_KEY = `${Buffer.from('{"alg":"HS256"}').toString('base64url')}.${Buffer.from(
+  '{"role":"service_role"}',
+).toString('base64url')}.sig`
 
 describe('POST /api/ai/suggestions', () => {
   it('ritorna i suggerimenti parsati e puliti', async () => {
@@ -39,13 +60,27 @@ describe('POST /api/ai/suggestions', () => {
 describe('GET /api/health', () => {
   it('200 con tutte le env critiche presenti', async () => {
     vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://x.supabase.co')
-    vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'k')
+    vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', SERVICE_ROLE_KEY)
     vi.stubEnv('JWT_SECRET', 's')
     const res = await healthGET()
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.status).toBe('ok')
     expect(body.env_JWT_SECRET).toBe('set')
+    expect(body.supabase_key_role).toBe('service_role')
+    expect(body.db_api_keys).toBe('ok')
+    vi.unstubAllEnvs()
+  })
+
+  it('degraded quando la chiave non è una service role', async () => {
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://x.supabase.co')
+    vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'anon-key')
+    vi.stubEnv('JWT_SECRET', 's')
+    const res = await healthGET()
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.status).toBe('degraded')
+    expect(body.supabase_key_role).not.toBe('service_role')
     vi.unstubAllEnvs()
   })
 

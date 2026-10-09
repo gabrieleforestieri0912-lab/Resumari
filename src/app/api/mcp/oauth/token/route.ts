@@ -1,64 +1,59 @@
 import { NextResponse } from 'next/server'
-import jwt from 'jsonwebtoken'
-import { findUserByEmail } from '@/lib/db'
+import { isAllowedRedirectUri, signAccessToken, verifyAuthCode, verifyPkce } from '@/lib/mcp-oauth'
 
-const JWT_SECRET = process.env.JWT_SECRET || ''
-
+/**
+ * Endpoint di scambio del codice di autorizzazione in token d'accesso.
+ *
+ * Sono supportati solo `authorization_code` con PKCE S256: il vecchio grant
+ * `client_credentials` (dove il `client_id` veniva trattato come email e
+ * bastava conoscere un'email registrata per ottenere un token) è stato
+ * rimosso perché era un bypass di autenticazione.
+ */
 export async function POST(request: Request) {
+  let body: Record<string, unknown>
   try {
-    const body = await request.json()
-    const { grant_type, code, client_id, client_assertion } = body
-
-    if (grant_type === 'authorization_code' && code) {
-      const userId = await validateAuthCode(code)
-      if (!userId) {
-        return NextResponse.json({ error: 'invalid_grant' }, { status: 400 })
-      }
-
-      const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' })
-      return NextResponse.json({
-        access_token: token,
-        token_type: 'Bearer',
-        expires_in: 604800,
-      })
-    }
-
-    if (grant_type === 'client_credentials') {
-      const user = await findUserByEmail(client_id || '')
-      if (!user) {
-        return NextResponse.json({ error: 'invalid_client' }, { status: 401 })
-      }
-
-      const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' })
-      return NextResponse.json({
-        access_token: token,
-        token_type: 'Bearer',
-        expires_in: 604800,
-      })
-    }
-
-    return NextResponse.json({ error: 'unsupported_grant_type' }, { status: 400 })
+    body = await request.json()
   } catch {
     return NextResponse.json({ error: 'invalid_request' }, { status: 400 })
   }
-}
 
-const authCodes = new Map<string, { userId: string; expires: number }>()
+  const grantType = body.grant_type
+  const code = typeof body.code === 'string' ? body.code : ''
+  const redirectUri = typeof body.redirect_uri === 'string' ? body.redirect_uri : ''
+  const codeVerifier = typeof body.code_verifier === 'string' ? body.code_verifier : ''
+  const clientId = typeof body.client_id === 'string' ? body.client_id : undefined
 
-export function createAuthCode(userId: string): string {
-  const crypto = require('crypto')
-  const code = crypto.randomBytes(16).toString('hex')
-  authCodes.set(code, { userId, expires: Date.now() + 60000 })
-  return code
-}
-
-async function validateAuthCode(code: string): Promise<string | null> {
-  const entry = authCodes.get(code)
-  if (!entry) return null
-  if (Date.now() > entry.expires) {
-    authCodes.delete(code)
-    return null
+  if (grantType !== 'authorization_code') {
+    return NextResponse.json({ error: 'unsupported_grant_type' }, { status: 400 })
   }
-  authCodes.delete(code)
-  return entry.userId
+
+  if (!code || !redirectUri || !codeVerifier) {
+    return NextResponse.json({ error: 'invalid_request' }, { status: 400 })
+  }
+
+  try {
+    const issuer = new URL(request.url).origin
+    if (!isAllowedRedirectUri(redirectUri, issuer)) {
+      return NextResponse.json({ error: 'invalid_grant' }, { status: 400 })
+    }
+
+    const payload = verifyAuthCode(code, { redirectUri, clientId })
+
+    if (!verifyPkce(payload.codeChallenge, codeVerifier)) {
+      return NextResponse.json({ error: 'invalid_grant', error_description: 'code_verifier non valido' }, { status: 400 })
+    }
+
+    const accessToken = signAccessToken({ userId: payload.userId, email: payload.email, clientId })
+
+    return NextResponse.json({
+      access_token: accessToken,
+      token_type: 'Bearer',
+      expires_in: 7 * 24 * 3600,
+      scope: 'mcp:read',
+    })
+  } catch {
+    // Codice scaduto, firmato con un altro segreto o PKCE non corrispondente:
+    // stessa risposta per ogni caso, senza distinguere i dettagli.
+    return NextResponse.json({ error: 'invalid_grant' }, { status: 400 })
+  }
 }

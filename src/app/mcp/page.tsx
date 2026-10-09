@@ -166,7 +166,7 @@ const jobResponseExample = `{
     "text": "# How Transformers Work\\n\\n..."
   },
   "usage": {
-    "credits_used": 12
+    "credits_used": 2
   }
 }`;
 
@@ -330,8 +330,10 @@ export default function McpPage() {
             Configura il tuo client MCP
           </h2>
           <p className="text-gray-500 dark:text-gray-400 text-center mb-10 max-w-xl mx-auto">
-            Resumari usa OAuth. Il client apre una schermata di consenso nel
-            browser, poi salva e aggiorna il token per richieste future.
+            Il server richiede autenticazione: OAuth (authorization code + PKCE)
+            per i client che la supportano, chiave API Resumari
+            (&quot;X-API-Key&quot;) per gli altri. Ogni chiamata addebita 2 crediti
+            dall&apos;account che ha autorizzato la connessione.
           </p>
 
           <div className="space-y-4">
@@ -440,7 +442,9 @@ export default function McpPage() {
                   3
                 </span>
                 <span>
-                  Usa OAuth per l&apos;autorizzazione dell&apos;account.
+                  Usa OAuth per l&apos;autorizzazione dell&apos;account, oppure
+                  imposta l&apos;header X-API-Key con una chiave della pagina
+                  /api-keys.
                 </span>
               </li>
             </ol>
@@ -458,9 +462,9 @@ export default function McpPage() {
             Vedi &quot;Auth: Unsupported&quot;?
           </h2>
           <p className="text-gray-500 dark:text-gray-400 text-center mb-8">
-            Verifica che i metadati della risorsa protetta usino l&apos;URL
-            HTTPS canonico, che OAuth Server e Dynamic Client Registration siano
-            abilitati, poi rimuovi e riaggiungi il server MCP dopo il deploy.
+            Verifica che i metadati della risorsa protetta e dell&apos;authorization
+            server siano accessibili all&apos;URL HTTPS canonico, poi rimuovi e
+            riaggiungi il server MCP dopo il deploy.
           </p>
           <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm p-6">
             <p className="text-xs font-bold text-gray-400 uppercase mb-3">
@@ -469,7 +473,9 @@ export default function McpPage() {
             <div className="space-y-2">
               {[
                 "Verifica che l'URL del server sia HTTPS (non HTTP).",
-                "Assicurati che .well-known/oauth-authorization-server sia accessibile.",
+                "Apri /.well-known/oauth-protected-resource: deve elencare l'authorization server.",
+                "Apri /.well-known/oauth-authorization-server: deve rispondere con issuer, authorization_endpoint e token_endpoint.",
+                "Se il client non supporta OAuth, usa una chiave API dalla pagina /api-keys nell'header X-API-Key.",
                 "Rimuovi e riaggiungi il server MCP dopo il deploy.",
               ].map((tip, i) => (
                 <p

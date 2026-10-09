@@ -85,15 +85,45 @@ CREATE TABLE IF NOT EXISTS public.messages (
 -- -----------------------------------------------------------------------------
 -- 5. TABELLA CHIAVI API (api_keys)
 -- -----------------------------------------------------------------------------
+-- Applicare anche supabase/migrations/migration-api-keys.sql: questa sezione
+-- è lo schema di riferimento, la migration allinea le installazioni esistenti.
 CREATE TABLE IF NOT EXISTS public.api_keys (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     key_prefix TEXT NOT NULL,
-    key_hash TEXT NOT NULL,
+    key_hash TEXT NOT NULL UNIQUE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     last_used_at TIMESTAMPTZ,
     revoked BOOLEAN DEFAULT FALSE
+);
+
+-- -----------------------------------------------------------------------------
+-- 5b. TABELLA RATE LIMIT (rate_limits)
+-- -----------------------------------------------------------------------------
+-- Contatore richieste usato dal rate limit di API key (30/min per chiave) e
+-- dalla registrazione. Scritta solo dal service role.
+CREATE TABLE IF NOT EXISTS public.rate_limits (
+    id BIGSERIAL PRIMARY KEY,
+    key TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- -----------------------------------------------------------------------------
+-- 5c. TABELLA JOB MCP (mcp_jobs)
+-- -----------------------------------------------------------------------------
+-- Snapshot dei job di trascrizione esposti dal server MCP: senza questa tabella
+-- un job avviato su un'istanza serverless non è recuperabile dalla successiva.
+CREATE TABLE IF NOT EXISTS public.mcp_jobs (
+    job_id TEXT PRIMARY KEY,
+    video_id TEXT NOT NULL,
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
+    status TEXT NOT NULL DEFAULT 'processing',
+    result JSONB,
+    error TEXT,
+    credits_charged INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- -----------------------------------------------------------------------------
@@ -159,6 +189,11 @@ CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
 CREATE INDEX IF NOT EXISTS idx_chats_user_id ON public.chats(user_id);
 CREATE INDEX IF NOT EXISTS idx_chats_chat_id ON public.chats(chat_id);
 CREATE INDEX IF NOT EXISTS idx_api_keys_hash ON public.api_keys(key_hash);
+CREATE INDEX IF NOT EXISTS idx_api_keys_user_id ON public.api_keys(user_id);
+CREATE INDEX IF NOT EXISTS idx_rate_limits_key ON public.rate_limits(key);
+CREATE INDEX IF NOT EXISTS idx_rate_limits_created_at ON public.rate_limits(created_at);
+CREATE INDEX IF NOT EXISTS idx_mcp_jobs_status ON public.mcp_jobs(status);
+CREATE INDEX IF NOT EXISTS idx_mcp_jobs_user_id ON public.mcp_jobs(user_id);
 CREATE INDEX IF NOT EXISTS idx_transcripts_video_id ON public.transcripts(video_id);
 CREATE INDEX IF NOT EXISTS idx_transcripts_user_id ON public.transcripts(user_id);
 CREATE INDEX IF NOT EXISTS idx_verification_codes_email ON public.verification_codes(email);

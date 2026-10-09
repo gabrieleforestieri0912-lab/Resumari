@@ -43,7 +43,20 @@ incorporate al momento della build):
   (e l'URI di callback di NextAuth) alle **Authorized redirect URIs**.
 - **Resend**: verifica il dominio `resumari.vercel.app` (record DNS SPF/DKIM) così le email da
   `noreply@resumari.com` non finiscono in spam.
-- **Supabase**: applica le migration (`supabase/migrations/migration-api-keys.sql`, `supabase/migrations/migration-transcripts.sql`) e verifica le policy RLS.
+- **Supabase**: applica **tutte** le migration in `supabase/migrations/`, nell'ordine:
+  `migration-api-keys.sql`, `migration-rate-limits.sql`, `migration-transcripts.sql`, `migration-mcp-jobs.sql`.
+  `migration-api-keys.sql` e `migration-rate-limits.sql` sono obbligatorie per API key e rate limit,
+  `migration-mcp-jobs.sql` per i job del server MCP. Tutte abilitano RLS: le tabelle sono
+  gestite solo dal service role.
+- **Verifica dopo il deploy**: apri `https://<dominio>/api/health` e controlla
+  - `status: ok` (con `degraded` il DB non è raggiungibile o la chiave non è `service_role`);
+  - `supabase_host` = il progetto Supabase **reale**;
+  - `supabase_key_role: service_role`;
+  - `db_users`, `db_api_keys`, `db_rate_limits`, `db_mcp_jobs` = `ok` (le migration sono applicate).
 - **SEO**: la sitemap è in `public/sitemap.xml` e referenziata dal `robots.txt`; registra
   il dominio nella **Google Search Console** e invia la sitemap.
+- **MCP**: `https://<dominio>/.well-known/oauth-protected-resource` e
+  `https://<dominio>/.well-known/oauth-authorization-server` devono rispondere 200; l'`issuer`
+  restituito deve coincidere con il dominio pubblico. Se i client MCP non autenticano, quasi
+  sempre il problema è qui o in `NEXT_PUBLIC_APP_URL`.
 

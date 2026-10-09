@@ -65,6 +65,20 @@ Tutte le variabili sono documentate in [`.env.example`](.env.example). Le essenz
 - `GROQ_API_KEY` — solo trascrizione audio (xKiro non offre STT)
 - `GROQ_TRANSCRIPTION_MODEL` (opzionale) — default `whisper-large-v3-turbo`
 - `RESEND_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `GOOGLE_CLIENT_ID/SECRET`
+- `NEXT_PUBLIC_APP_URL` — dominio pubblico: deve combaciare con l'host del sito, altrimenti
+  l'issuer OAuth non corrisponde e i client MCP non si autenticano
+- `SUPPORT_EMAIL` — obbligatoria in produzione (senza questa il codice ricade su un indirizzo personale)
+- `MCP_OAUTH_REDIRECT_URIS` (opzionale) — callback OAuth remoti autorizzati, separati da virgole
+
+### API key, API REST e MCP
+
+- Le chiavi API si creano dalla pagina `/api-keys` (max 3 chiavi attive per account).
+- `POST /api/v1/transcript` e `POST /api/v1/transcript/bulk` usano l'header `X-API-Key`.
+- `POST /api/mcp` accetta `X-API-Key` oppure `Authorization: Bearer <token OAuth>`
+  (authorization code + PKCE S256; metadati in `/.well-known/oauth-protected-resource`).
+- Ogni trascrizione riuscita addebita 2 crediti, su tutti e tre i canali.
+- Senza database (o con una `SUPABASE_SERVICE_ROLE_KEY` sbagliata) login, crediti, API key e
+  MCP non funzionano: `/api/health` segnala `status: degraded` e il motivo.
 
 ## Script
 

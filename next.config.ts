@@ -20,6 +20,16 @@ const nextConfig: NextConfig = {
         source: '/.well-known/oauth-authorization-server',
         destination: '/api/mcp/oauth/config',
       },
+      {
+        // Richiesto dalla specifica MCP: senza questo documento i client non
+        // trovano l'authorization server e la connessione resta non autenticata.
+        source: '/.well-known/oauth-protected-resource',
+        destination: '/api/mcp/oauth/protected-resource',
+      },
+      {
+        source: '/.well-known/oauth-protected-resource/api/mcp',
+        destination: '/api/mcp/oauth/protected-resource',
+      },
     ]
   },
   // Routes solo in inglese: redirect alias italiani -> inglesi

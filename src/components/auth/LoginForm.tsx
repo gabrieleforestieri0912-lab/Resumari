@@ -100,7 +100,7 @@ function ForgotPasswordModal({ show, onClose, locale }: { show: boolean; onClose
   );
 }
 
-export default function LoginForm({ locale, onSwitch }: { locale: string; onSwitch: () => void }) {
+export default function LoginForm({ locale, onSwitch, callbackUrl }: { locale: string; onSwitch: () => void; callbackUrl?: string }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState({ text: "", type: "" });
@@ -144,7 +144,7 @@ export default function LoginForm({ locale, onSwitch }: { locale: string; onSwit
         }
       }
       setMessage({ text: locale === 'it' ? "Bentornato! Reindirizzamento..." : "Welcome back! Redirecting...", type: "success" });
-      setTimeout(() => router.push("/"), 1500);
+      setTimeout(() => router.push(callbackUrl || "/"), 1500);
     } catch {
       setMessage({ text: locale === 'it' ? "Errore di rete. Riprova più tardi." : "Network error. Please try again later.", type: "error" });
     } finally {
@@ -153,7 +153,7 @@ export default function LoginForm({ locale, onSwitch }: { locale: string; onSwit
   };
 
   const handleGoogleLogin = async () => {
-    await signIn("google", { callbackUrl: "/" });
+    await signIn("google", { callbackUrl: callbackUrl || "/" });
   };
 
   return (

@@ -13,7 +13,7 @@ import {
   EyeOff,
 } from "lucide-react";
 
-export default function RegisterForm({ locale, onSwitch }: { locale: string; onSwitch: () => void }) {
+export default function RegisterForm({ locale, onSwitch, callbackUrl }: { locale: string; onSwitch: () => void; callbackUrl?: string }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,7 +44,7 @@ export default function RegisterForm({ locale, onSwitch }: { locale: string; onS
       if (response.ok) {
         saveSession(data.token, data.user);
         setMessage({ text: locale === 'it' ? "Account creato! Reindirizzamento..." : "Account created! Redirecting...", type: "success" });
-        setTimeout(() => router.push("/"), 1500);
+        setTimeout(() => router.push(callbackUrl || "/"), 1500);
       } else {
         setMessage({ text: data.message || (locale === 'it' ? "Errore durante la registrazione" : "Error during signup"), type: "error" });
       }
@@ -56,7 +56,7 @@ export default function RegisterForm({ locale, onSwitch }: { locale: string; onS
   };
 
   const handleGoogleLogin = async () => {
-    await signIn("google", { callbackUrl: "/" });
+    await signIn("google", { callbackUrl: callbackUrl || "/" });
   };
 
   return (

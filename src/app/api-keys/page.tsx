@@ -5,6 +5,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSessionRestored } from "@/lib/session";
+import { getPlanLimit, PLAN_LIMITS, PLAN_PRICES, CREDIT_COSTS } from "@/lib/plans";
+import { MAX_API_KEYS_PER_USER } from "@/lib/api-keys";
+
+// Numeri mostrati in pagina: presi dal catalogo condiviso con il server, così
+// non possono divergere da limiti e prezzi effettivamente applicati.
+const FREE_PLAN_CREDITS = PLAN_LIMITS.free;
+const STANDARD_PLAN_CREDITS = PLAN_LIMITS.standard;
+const STANDARD_PLAN_PRICE = PLAN_PRICES.standard.monthly;
+const API_CREDIT_COST = CREDIT_COSTS.transcriptionApi;
 import {
   Key,
   Copy,
@@ -150,7 +159,7 @@ const comparisons = [
   {
     name: "Resumari API",
     tag: "Pay-as-you-go, nessun abbonamento",
-    credits: "25 crediti gratis",
+    credits: `${FREE_PLAN_CREDITS} crediti gratis`,
   },
   {
     name: "youtube-transcript-api",
@@ -169,7 +178,7 @@ const comparisons = [
 const faqs = [
   {
     q: "Come funziona il pricing?",
-    a: "Ogni richiesta API costa 2 crediti. I crediti non scadono mai. Puoi acquistare pacchetti a partire da €4,99 per 100 crediti. Gli account gratuiti ricevono 25 crediti di prova.",
+    a: `Ogni richiesta API costa ${API_CREDIT_COST} crediti. I crediti non scadono mai. Il piano Standard parte da ${STANDARD_PLAN_PRICE.toFixed(2).replace(".", ",")}€ per ${STANDARD_PLAN_CREDITS} crediti. Gli account gratuiti ricevono ${FREE_PLAN_CREDITS} crediti di prova.`,
   },
   {
     q: "Cosa include la risposta API?",
@@ -296,6 +305,12 @@ export default function ApiKeysPage() {
     setTimeout(() => setCopiedKey(null), 2000);
   }
 
+  // Chiavi attive (le revocate restano visibili ma non contano nel limite).
+  const activeKeyCount = keys.filter((k) => !k.revoked).length;
+  // I crediti gratuiti vengono dal catalogo piani (`@/lib/plans`), non da un
+  // numero scritto a mano: era 25 qui e 10 nel piano reale.
+  const displayCredits = credits > 0 ? credits : getPlanLimit(user?.plan);
+
   if (!user) return null;
 
   return (
@@ -327,41 +342,61 @@ export default function ApiKeysPage() {
           </p>
 
           {/* API Key Generator */}
-          <div className="max-w-lg mx-auto bg-gray-50 dark:bg-zinc-900 rounded-3xl p-8 border border-gray-100 dark:border-zinc-800 shadow-sm">
+          <div
+            id="api-key-section"
+            className="max-w-lg mx-auto bg-gray-50 dark:bg-zinc-900 rounded-3xl p-8 border border-gray-100 dark:border-zinc-800 shadow-sm"
+          >
             <div className="flex items-center gap-3 mb-4">
               <Key size={20} className="text-purple-600" />
               <h2 className="text-lg font-black text-gray-900 dark:text-gray-100">
-                Ottieni la tua API Key — {credits > 0 ? credits : 25} crediti
+                Ottieni la tua API Key — {displayCredits} crediti
                 gratis
               </h2>
             </div>
 
             <div className="space-y-3">
-              {keys
-                .filter((k) => !k.revoked)
-                .map((key) => (
+              {keys.map((key) => (
                   <div
                     key={key.id}
-                    className="flex items-center justify-between bg-white dark:bg-zinc-800 rounded-xl px-4 py-3 border border-gray-200 dark:border-zinc-700"
+                    className={`flex items-center justify-between rounded-xl px-4 py-3 border ${key.revoked ? "bg-gray-100/60 dark:bg-zinc-900/60 border-gray-200 dark:border-zinc-800 opacity-70" : "bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700"}`}
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase">
+                      <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase flex items-center gap-2">
                         {key.name}
+                        {key.revoked && (
+                          <span className="px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-950/50 text-red-600 dark:text-red-400 text-[10px] font-black">
+                            Revocata
+                          </span>
+                        )}
                       </p>
-                      <p className="text-sm font-mono text-gray-600 dark:text-gray-300 truncate">
+                      <p className="text-sm font-mono text-gray-600 dark:text-zinc-300 truncate">
                         {key.key_prefix}
                       </p>
+                      <p className="text-[11px] text-gray-400 dark:text-zinc-500 mt-0.5">
+                        {key.last_used_at
+                          ? `Ultimo utilizzo: ${new Date(key.last_used_at).toLocaleString("it-IT")}`
+                          : "Mai usata"}
+                      </p>
                     </div>
-                    <button
-                      onClick={() => revokeKey(key.id)}
-                      className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-300 dark:hover:bg-red-500/10 rounded-lg transition-all"
-                      title="Revoca"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    {!key.revoked && (
+                      <button
+                        onClick={() => revokeKey(key.id)}
+                        className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-300 dark:hover:bg-red-500/10 rounded-lg transition-all"
+                        title="Revoca"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
                   </div>
-                ))}
+              ))}
             </div>
+
+            {activeKeyCount >= MAX_API_KEYS_PER_USER && (
+              <p className="mt-3 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                Hai raggiunto il limite di {MAX_API_KEYS_PER_USER} chiavi
+                attive: revocane una per generarne un&apos;altra.
+              </p>
+            )}
 
             {newlyCreatedKey && (
               <div className="mt-4 bg-yellow-50 dark:bg-yellow-950/40 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4">
@@ -454,7 +489,7 @@ export default function ApiKeysPage() {
                 step: "1",
                 icon: Users,
                 title: "Crea un account",
-                desc: "Registrati su Resumari. Gli account gratuiti ricevono 25 crediti per testare l'API — senza carta di credito.",
+                desc: `Registrati su Resumari. Gli account gratuiti ricevono ${FREE_PLAN_CREDITS} crediti per testare l'API — senza carta di credito.`,
               },
               {
                 step: "2",
@@ -806,7 +841,7 @@ export default function ApiKeysPage() {
               {
                 icon: Clock,
                 title: "Crediti che non scadono mai",
-                desc: "Compra un pacchetto di crediti e usalo per settimane o mesi invece di impegnarti in un abbonamento ricorrente. I pacchetti partono da €4,99 per 100 crediti.",
+                desc: `Compra un piano e usalo per settimane o mesi invece di impegnarti in un abbonamento ricorrente. Il piano Standard parte da ${STANDARD_PLAN_PRICE.toFixed(2).replace(".", ",")}€ per ${STANDARD_PLAN_CREDITS} crediti.`,
               },
               {
                 icon: Terminal,
@@ -826,7 +861,7 @@ export default function ApiKeysPage() {
               {
                 icon: Key,
                 title: "API Key in pochi secondi",
-                desc: "Genera fino a 3 chiavi API dalla tua dashboard. Traccia l'utilizzo per chiave. Revoca istantaneamente. Nessuna approvazione o attesa.",
+                desc: `Genera fino a ${MAX_API_KEYS_PER_USER} chiavi API dalla tua dashboard. Traccia l'utilizzo per chiave (ultimo accesso). Revoca istantaneamente. Nessuna approvazione o attesa.`,
               },
             ].map((item, i) => (
               <div
@@ -861,7 +896,7 @@ export default function ApiKeysPage() {
                 num: "1",
                 icon: Users,
                 title: "Crea un account",
-                desc: "Registrati su Resumari. Gli account gratuiti ricevono 25 crediti per testare l'API — senza carta di credito.",
+                desc: `Registrati su Resumari. Gli account gratuiti ricevono ${FREE_PLAN_CREDITS} crediti per testare l'API — senza carta di credito.`,
               },
               {
                 num: "2",
@@ -969,7 +1004,7 @@ export default function ApiKeysPage() {
               }
               className="px-8 py-4 bg-gray-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-bold rounded-2xl hover:bg-black dark:hover:bg-white transition-all shadow-xl shadow-gray-200 dark:shadow-none"
             >
-              25 crediti gratis. Nessuna carta di credito.
+              {FREE_PLAN_CREDITS} crediti gratis. Nessuna carta di credito.
             </button>
             <Link
               href="/#pricing"

@@ -1,6 +1,8 @@
 import crypto from 'crypto'
+import jwt from 'jsonwebtoken'
 import { findApiKeyByKeyHash, touchApiKey, findUserById } from '@/lib/db'
 import type { User } from '@/lib/types'
+import { verifyAccessToken } from '@/lib/mcp-oauth'
 
 // Configurazione del rate limit specifico per le chiamate via API Key.
 // Doppio backend come in `@/lib/rate-limit`: Supabase (`rate_limits`,
@@ -9,6 +11,17 @@ const RATE_LIMIT_WINDOW = 60 * 1000
 const MAX_PER_MINUTE = 30
 // Store in-memory per il tracciamento delle richieste per chiave API
 const memoryStore = new Map<string, number[]>()
+
+/**
+ * Verifica un JWT firmato con `JWT_SECRET` (token di sessione web).
+ * `mcp-oauth` espone solo la verifica dei token OAuth: qui serve quella
+ * generica, quindi si usa direttamente jsonwebtoken.
+ */
+function verifyJwt(token: string): unknown {
+  const secret = process.env.JWT_SECRET
+  if (!secret) throw new Error('JWT_SECRET non configurata')
+  return jwt.verify(token, secret)
+}
 
 function memoryCheckRateLimit(keyId: string): { allowed: boolean; remaining: number } {
   const now = Date.now()
@@ -102,6 +115,64 @@ export async function authenticateApiKey(request: Request): Promise<ApiAuthResul
 
   // Aggiorna l'ultimo utilizzo della chiave (fire-and-forget: non blocca la risposta)
   void touchApiKey(keyRecord.id).catch(() => {})
+
+  return {
+    authenticated: true,
+    user: user as User & { id: string },
+    creditsRemaining: user.credits,
+    rateLimitRemaining: rl.remaining,
+  }
+}
+
+/**
+ * Autenticazione per gli endpoint che accettano sia una chiave API sia un
+ * token OAuth (usato dal server MCP).
+ *
+ * `X-API-Key: rsm_live_...` → come `authenticateApiKey`.
+ * `Authorization: Bearer ...` → token emesso da `/api/mcp/oauth/token`.
+ *   Lo stesso header `Bearer` è usato dal web con il JWT di sessione, quindi
+ *   si accettano anche quelli: sono firmati con lo stesso `JWT_SECRET`.
+ *
+ * Il rate limit è applicato in entrambi i casi, con chiave per utente.
+ */
+export async function authenticateApiRequest(request: Request): Promise<ApiAuthResult> {
+  if (request.headers.get('x-api-key')) {
+    return authenticateApiKey(request)
+  }
+
+  const authHeader = request.headers.get('authorization')
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : ''
+  if (!token) {
+    return { authenticated: false, error: 'missing_api_key', status: 401 }
+  }
+
+  let userId: string | undefined
+  try {
+    // Token OAuth MCP.
+    userId = verifyAccessToken(token).userId
+  } catch {
+    // JWT di sessione emesso da /api/auth/register e /api/auth/login.
+    try {
+      const payload = verifyJwt(token) as { userId?: string; id?: string }
+      userId = payload.userId || payload.id
+    } catch {
+      return { authenticated: false, error: 'invalid_token', status: 401 }
+    }
+  }
+
+  if (!userId) {
+    return { authenticated: false, error: 'invalid_token', status: 401 }
+  }
+
+  const rl = (await supabaseCheckRateLimit(`user:${userId}`)) || memoryCheckRateLimit(`user:${userId}`)
+  if (!rl.allowed) {
+    return { authenticated: false, error: 'rate_limited', status: 429 }
+  }
+
+  const user = await findUserById(userId)
+  if (!user) {
+    return { authenticated: false, error: 'invalid_token', status: 401 }
+  }
 
   return {
     authenticated: true,

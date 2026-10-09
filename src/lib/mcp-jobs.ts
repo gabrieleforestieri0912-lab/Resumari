@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import { fetchTranscriptForVideo, getVideoDetails, getYouTubeVideoId } from './youtube'
-import { getServiceClient } from './supabase'
+import { getServiceClient, TABLES } from './supabase'
+import { CREDIT_COSTS, deductCredits } from './credits'
 
 /**
  * Definizione di un job di trascrizione.
@@ -9,6 +10,8 @@ import { getServiceClient } from './supabase'
 export type TranscribeJob = {
   job_id: string
   video_id: string
+  /** Utente che ha avviato il job: i crediti vengono scalati dal suo pool. */
+  user_id?: string | null
   status: 'processing' | 'completed' | 'failed'
   created_at: number
   result?: {
@@ -19,6 +22,8 @@ export type TranscribeJob = {
     language: string
   }
   error?: string
+  /** Crediti effettivamente addebitati (0 se il job è fallito). */
+  credits_charged?: number
 }
 
 /**
@@ -35,14 +40,16 @@ const jobs = new Map<string, TranscribeJob>()
 async function persistJobSnapshot(job: TranscribeJob): Promise<void> {
   try {
     await getServiceClient()
-      .from('mcp_jobs')
+      .from(TABLES.MCP_JOBS)
       .upsert(
         {
           job_id: job.job_id,
           video_id: job.video_id,
+          user_id: job.user_id ?? null,
           status: job.status,
           result: job.result ?? null,
           error: job.error ?? null,
+          credits_charged: job.credits_charged ?? 0,
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'job_id' },
@@ -55,10 +62,11 @@ async function persistJobSnapshot(job: TranscribeJob): Promise<void> {
 /**
  * Inizializza e salva un nuovo job di trascrizione.
  */
-export function createJob(videoId: string): TranscribeJob {
+export function createJob(videoId: string, userId?: string | null): TranscribeJob {
   const job: TranscribeJob = {
     job_id: crypto.randomBytes(8).toString('hex'),
     video_id: videoId,
+    user_id: userId ?? null,
     status: 'processing',
     created_at: Date.now(),
   }
@@ -87,7 +95,7 @@ export async function getJobAsync(jobId: string): Promise<TranscribeJob | undefi
   if (mem) return mem
   try {
     const { data } = await getServiceClient()
-      .from('mcp_jobs')
+      .from(TABLES.MCP_JOBS)
       .select()
       .eq('job_id', jobId)
       .single()
@@ -95,10 +103,12 @@ export async function getJobAsync(jobId: string): Promise<TranscribeJob | undefi
     const job: TranscribeJob = {
       job_id: data.job_id,
       video_id: data.video_id,
+      user_id: data.user_id ?? null,
       status: data.status,
       created_at: new Date(data.created_at).getTime(),
       result: data.result ?? undefined,
       error: data.error ?? undefined,
+      credits_charged: data.credits_charged ?? 0,
     }
     jobs.set(job.job_id, job)
     return job
@@ -127,6 +137,7 @@ export function failJob(jobId: string, error: string) {
   if (job) {
     job.status = 'failed'
     job.error = error
+    job.credits_charged = 0
     void persistJobSnapshot(job).catch(() => {})
   }
 }
@@ -135,6 +146,9 @@ export function failJob(jobId: string, error: string) {
  * Processo principale di elaborazione di un job di trascrizione.
  * Usa il layer condiviso `@/lib/youtube` (3 fallback: timedtext →
  * pacchetto youtube-transcript → kome.ai) invece della copia locale.
+ *
+ * I crediti vengono addebitati solo se la trascrizione è andata a buon
+ * fine, come per `POST /api/v1/transcript`: un job fallito non consuma nulla.
  */
 export async function processJob(job: TranscribeJob) {
   try {
@@ -155,6 +169,21 @@ export async function processJob(job: TranscribeJob) {
       duration: s.duration,
     }))
     const text = transcript.map((s) => s.text).join(' ')
+
+    // Addebito atomico: se nel frattempo i crediti sono finiti non si
+    // consegna la trascrizione "in ombra".
+    let creditsCharged = 0
+    if (job.user_id) {
+      const remaining = await deductCredits(job.user_id, CREDIT_COSTS.transcriptionApi)
+      if (remaining === null) {
+        failJob(job.job_id, 'insufficient_credits: crediti esauriti prima della trascrizione')
+        return
+      }
+      creditsCharged = CREDIT_COSTS.transcriptionApi
+    }
+
+    const stored = jobs.get(job.job_id)
+    if (stored) stored.credits_charged = creditsCharged
 
     completeJob(job.job_id, {
       title: details?.title || 'Video',

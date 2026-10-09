@@ -2,9 +2,7 @@ import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { getAuthenticatedUser } from '@/lib/auth'
 import { findApiKeysByUserId, createApiKey } from '@/lib/db'
-
-// Prefisso utilizzato per identificare le chiavi API di Resumari
-const KEY_PREFIX = 'rsm_live_'
+import { KEY_PREFIX, MAX_API_KEYS_PER_USER } from '@/lib/api-keys'
 
 /**
  * Genera una nuova chiave API sicura.
@@ -54,6 +52,21 @@ export async function POST(request: Request) {
   const body = await request.json()
   const name = (body.name || '').trim()
   if (!name) return NextResponse.json({ message: 'Nome richiesto' }, { status: 400 })
+
+  // Le chiavi revocate non contano: si può revocare e ricreare. Il limite è
+  // quello dichiarato nella pagina /api-keys.
+  const existing = (await findApiKeysByUserId(user.id)) || []
+  const active = existing.filter((k) => !k.revoked)
+  if (active.length >= MAX_API_KEYS_PER_USER) {
+    return NextResponse.json(
+      {
+        message: `Puoi avere al massimo ${MAX_API_KEYS_PER_USER} chiavi API attive. Revocane una per crearne un'altra.`,
+        code: 'KEY_LIMIT_REACHED',
+        limit: MAX_API_KEYS_PER_USER,
+      },
+      { status: 400 },
+    )
+  }
 
   const { fullKey, prefix, hash } = generateApiKey()
 
