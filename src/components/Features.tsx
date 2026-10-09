@@ -13,8 +13,7 @@ import {
   Sparkles,
   ArrowRight,
 } from "lucide-react";
-
-const slugs = ["video-summary", "file-synthesis", "ai-agent", "advanced-customization", "multilingual-analysis", "smart-export"];
+import { FEATURE_SLUGS } from "@/lib/features-detail";
 
 interface Feature {
   title: string;
@@ -154,10 +153,12 @@ export default function FeaturesSection() {
         </div>
 
         {/* Griglia uniforme: ogni card è un blocco a sé, senza span che le
-            facciano sembrare un'unica griglia bento. */}
+            facciano sembrare un'unica griglia bento. Lo slug viene dalla stessa
+            fonte delle pagine di dettaglio: se mancasse, il link porta a una
+            pagina inesistente. */}
         <div className="grid gap-6 md:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
           {features.map((feature, index) => (
-            <Link key={index} href={`/features/${slugs[index]}`} className="block h-full">
+            <Link key={feature.title} href={`/features/${FEATURE_SLUGS[index]}`} className="block h-full">
               <FeatureCard index={index} {...feature} />
             </Link>
           ))}

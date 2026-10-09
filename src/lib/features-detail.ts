@@ -126,3 +126,12 @@ export const featureDetails: FeatureDetail[] = [
 export function getFeatureBySlug(slug: string) {
   return featureDetails.find((f) => f.slug === slug);
 }
+
+/**
+ * Slug in ordine di mostrare sulla home.
+ *
+ * Vive qui e non nella sezione "Funzionalità" della landing: due elenchi
+ * paralleli possono divergere e il sintomo è una card che porta a una pagina
+ * inesistente (404 silenzioso).
+ */
+export const FEATURE_SLUGS: string[] = featureDetails.map((f) => f.slug);

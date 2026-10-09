@@ -10,14 +10,21 @@ export function generateStaticParams() {
   return featureDetails.map((f) => ({ slug: f.slug }));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
-  const f = getFeatureBySlug(params.slug);
+/**
+ * `params` è una Promise (Next 15+): senza `await` lo slug è `undefined`,
+ * `getFeatureBySlug` non trova nulla e la pagina renderizza la 404. Per questo
+ * il link dalla card in home sembrava non portare da nessuna parte.
+ */
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const f = getFeatureBySlug(slug);
   if (!f) return {};
   return { title: `${f.title} | Resumari`, description: f.longDesc };
 }
 
-export default function FeaturePage({ params }: { params: { slug: string } }) {
-  const f = getFeatureBySlug(params.slug);
+export default async function FeaturePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const f = getFeatureBySlug(slug);
   if (!f) notFound();
   const Icon = f.icon;
 
