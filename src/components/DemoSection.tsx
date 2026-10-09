@@ -260,7 +260,6 @@ export default function DemoSection() {
   const [likedMessages, setLikedMessages] = useState<Set<number>>(new Set());
   const [dislikedMessages, setDislikedMessages] = useState<Set<number>>(new Set());
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
-  const [showFloatingBadge, setShowFloatingBadge] = useState(false);
   const addToast = useToast();
 
   const fetchSuggestions = useCallback(async (channelName?: string) => {
@@ -350,23 +349,6 @@ export default function DemoSection() {
     window.addEventListener(AUTH_STATE_EVENT_NAME, handleAuthChange);
     return () => window.removeEventListener(AUTH_STATE_EVENT_NAME, handleAuthChange);
   }, [fetchChannels]);
-
-  // Il badge "Prova la demo" segue lo scroll: compare fisso all'angolo del
-  // viewport quando la sezione demo esce dalla vista e riporta alla demo.
-  useEffect(() => {
-    const el = document.getElementById("demo");
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setShowFloatingBadge(!entry.isIntersecting),
-      { threshold: 0.08 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  const scrollToDemo = useCallback(() => {
-    document.getElementById("demo")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
 
   const addMessage = useCallback((text: string, sender: "user" | "system", extra: Partial<Message> = {}) => {
     setMessages((prev) => [
@@ -614,9 +596,12 @@ export default function DemoSection() {
 
         <div className="flex gap-4 min-[1920px]:gap-6 min-[2560px]:gap-8 items-start">
           <div className="flex-1 min-w-0 relative">
-            {/* Etichetta inchiodata proprio all'angolo superiore sinistro della card. */}
-            <div className="absolute left-0 top-0 z-20 bg-gradient-to-r from-purple-600 to-red-600 text-white text-[11px] font-black tracking-wider uppercase px-4 py-1.5 shadow-lg shadow-purple-500/25 rounded-tl-2xl min-[1920px]:rounded-tl-3xl rounded-br-xl pointer-events-none select-none">
-              Prova la demo
+            {/* Etichetta diagonale a 45° inchiodata all'angolo superiore
+                sinistro della card: l'unico richiamo "prova la demo". */}
+            <div className="absolute -left-3 -top-3 z-20 -rotate-45 origin-top-left pointer-events-none select-none">
+              <div className="bg-gradient-to-r from-purple-600 to-red-600 text-white text-[11px] font-black tracking-wider uppercase leading-none px-5 py-1.5 rounded-md shadow-lg shadow-purple-500/30">
+                Prova la demo
+              </div>
             </div>
             <div className={`bg-white dark:bg-zinc-900 rounded-2xl min-[1920px]:rounded-3xl border shadow-xl overflow-hidden transition-all duration-500 ${selectedChannel ? "border-purple-200 dark:border-purple-800 shadow-purple-500/15 shadow-2xl" : "border-gray-200 dark:border-zinc-800 shadow-purple-500/5"}`}>
               {/* Altezze compatte su laptop (fino a 1536px): la demo deve stare
@@ -784,7 +769,7 @@ export default function DemoSection() {
                                   msg.sender === "user"
                                     ? msg.cancelled
                                       ? "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 rounded-br-sm border border-red-100 dark:border-red-900"
-                                      : "bg-gray-900 dark:bg-purple-600 text-white rounded-br-sm"
+                                      : "bg-gray-50/50 dark:bg-zinc-950/60 text-gray-800 dark:text-gray-200 rounded-br-sm border border-gray-100 dark:border-zinc-800"
                                     : msg.cancelled
                                       ? "bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 rounded-bl-sm border border-orange-100 dark:border-orange-900"
                                       : "bg-gray-50/50 dark:bg-zinc-950/60 text-gray-800 dark:text-gray-200 rounded-bl-sm border border-gray-100 dark:border-zinc-800"
@@ -908,14 +893,16 @@ export default function DemoSection() {
             </div>
           </div>
 
-          <div className="hidden 2xl:block w-[520px] min-[1920px]:w-[600px] min-[2560px]:w-[680px] shrink-0 self-start">
+          {/* Preview video: colonna stretta, il player mantiene il 16:9 e
+              si riduce insieme alla card. */}
+          <div className="hidden 2xl:block w-[360px] min-[1920px]:w-[420px] min-[2560px]:w-[480px] shrink-0 self-start">
             <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-200 dark:border-zinc-800 shadow-xl shadow-purple-500/5 overflow-hidden">
-              <div className="p-4 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
-                <span className="text-xs font-black text-gray-900 dark:text-gray-100 uppercase tracking-wider">
+              <div className="px-4 py-2.5 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
+                <span className="text-[11px] font-black text-gray-900 dark:text-gray-100 uppercase tracking-wider">
                   Video in riproduzione
                 </span>
               </div>
-              <div className="p-4">
+              <div className="p-3">
                 {currentVideo ? (
                   <YoutubeEmbed
                     videoId={currentVideo}
@@ -923,11 +910,11 @@ export default function DemoSection() {
                     onClose={() => { setCurrentVideo(null); setVideoStartTime(null); }}
                   />
                 ) : (
-                  <div className="aspect-video rounded-2xl bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 flex flex-col items-center justify-center text-center p-6">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" className="text-gray-300 mb-2">
-                      <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.55 9.38.55 9.38.55s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z" />
+                  <div className="aspect-video rounded-2xl bg-gray-50 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 flex flex-col items-center justify-center text-center p-4">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-gray-300 mb-2">
+                      <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.55 9.38.55 9.38.55s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z"/>
                     </svg>
-                    <p className="text-[11px] font-semibold text-gray-400">
+                    <p className="text-[10px] font-semibold text-gray-400">
                       Nessun video selezionato
                     </p>
                     <p className="text-[9px] text-gray-300 mt-1">
@@ -1012,24 +999,6 @@ export default function DemoSection() {
               </div>
             </motion.div>
           </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Etichetta che segue lo scroll: fissa all'angolo del viewport quando
-          la demo non è visibile, cliccandola si torna alla demo. */}
-      <AnimatePresence>
-        {showFloatingBadge && (
-          <motion.button
-            type="button"
-            onClick={scrollToDemo}
-            initial={{ opacity: 0, x: -16 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -16 }}
-            transition={{ duration: 0.2 }}
-            className="fixed left-0 top-24 md:top-28 z-40 bg-gradient-to-r from-purple-600 to-red-600 text-white text-[11px] font-black tracking-wider uppercase pl-4 pr-5 py-2 shadow-xl shadow-purple-500/30 rounded-r-full hover:pr-6 transition-all cursor-pointer"
-          >
-            Prova la demo
-          </motion.button>
         )}
       </AnimatePresence>
     </section>

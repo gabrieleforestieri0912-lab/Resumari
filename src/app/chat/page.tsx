@@ -2153,7 +2153,7 @@ function ChatContent() {
                                     <div
                                       className={`px-5 py-3.5 rounded-2xl text-sm leading-relaxed break-words ${
                                         msg.sender === "user"
-                                          ? "bg-gray-900 text-white dark:bg-zinc-800 dark:text-white rounded-br-sm"
+                                          ? "bg-purple-50 dark:bg-purple-950 text-gray-800 dark:text-zinc-200 rounded-br-sm border border-purple-100 dark:border-purple-900"
                                           : "bg-purple-50 dark:bg-purple-950 text-gray-800 dark:text-zinc-200 rounded-bl-sm border border-purple-100 dark:border-purple-900"
                                       }`}
                                     >
