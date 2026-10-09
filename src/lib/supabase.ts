@@ -66,4 +66,8 @@ export const TABLES = {
   VERIFICATION_TOKENS: 'nextauth_verification_tokens',
   API_KEYS: 'api_keys',
   TRANSCRIPTS: 'transcripts',
+  /** Contatore richieste usato dal rate limit di API key e chat. */
+  RATE_LIMITS: 'rate_limits',
+  /** Snapshot dei job di trascrizione esposti via MCP. */
+  MCP_JOBS: 'mcp_jobs',
 } as const

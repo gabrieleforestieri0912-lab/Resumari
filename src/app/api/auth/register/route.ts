@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { getServiceClient, TABLES } from '@/lib/supabase';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
 import { getPlanLimit } from '@/lib/credits';
@@ -54,6 +55,10 @@ export async function POST(request: Request) {
     const { data: newUser, error } = await client
       .from(TABLES.USERS)
       .insert({
+        // `id` esplicito: se nel database la colonna non ha un default
+        // (uuid_generate_v4()/gen_random_uuid()) l'inserimento fallirebbe con
+        // un not-null violation e la registrazione resterebbe impossibile.
+        id: crypto.randomUUID(),
         email: email.toLowerCase(),
         password: hashedPassword,
         name: name || email.split('@')[0],
@@ -66,6 +71,9 @@ export async function POST(request: Request) {
       .single();
 
     if (error || !newUser) {
+      // Log dettagliato: il messaggio all'utente resta generico, ma nei log
+      // Vercel si vede la causa reale (RLS, colonna mancante, vincolo...).
+      console.error('Registration insert failed:', { code: error?.code, message: error?.message, details: error?.details });
       return NextResponse.json(
         { message: 'Errore durante la registrazione. Riprova più tardi.', code: 'REGISTRATION_FAILED' },
         { status: 500 }
