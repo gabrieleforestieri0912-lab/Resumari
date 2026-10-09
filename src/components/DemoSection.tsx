@@ -80,6 +80,10 @@ function parseTimeToSeconds(timeStr: string): number {
   return parts[0] || 0;
 }
 
+// Icona videocamera vera (stile lucide "video"): il link timestamp mostra
+// la camera + testo rosso, mai il triangolo play generico.
+const CAMERA_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-600 shrink-0"><path d="m16 10 6-3v10l-6-3"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>`;
+
 function formatTimestampLinks(text: string, videoId?: string | null): string {
   if (!videoId || !text) return text;
   // Match [MM:SS Title] or [HH:MM:SS Title] (bracketed with optional title)
@@ -87,13 +91,13 @@ function formatTimestampLinks(text: string, videoId?: string | null): string {
   let result = text.replace(bracketedRegex, (_, time, labelRaw) => {
     const seconds = parseTimeToSeconds(time);
     const label = labelRaw.trim();
-    return `<button type="button" class="timestamp-link inline-flex items-center gap-1.5 px-2 py-1 my-0.5 rounded-lg bg-red-50 border border-red-200 text-red-700 font-bold text-xs hover:bg-red-100 transition-colors cursor-pointer align-middle" data-seconds="${seconds}" data-videoid="${videoId}" title="Vai a ${time}${label ? ' — ' + label : ''}"><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" class="text-red-500 shrink-0"><path d="m7 4 12 8-12 8V4z"/></svg><span class="font-mono">${time}</span>${label ? `<span class="text-red-600 font-semibold">${label}</span>` : ''}</button>`;
+    return `<button type="button" class="timestamp-link inline-flex items-center gap-1.5 px-2 py-1 my-0.5 rounded-lg bg-red-50 border border-red-200 font-bold text-xs hover:bg-red-100 transition-colors cursor-pointer align-middle" data-seconds="${seconds}" data-videoid="${videoId}" title="Vai a ${time}${label ? ' — ' + label : ''}">${CAMERA_ICON_SVG}<span class="font-mono text-red-700">${time}</span>${label ? `<span class="text-red-600 font-semibold">${label}</span>` : ''}</button>`;
   });
   // Fallback: plain MM:SS not already inside a bracket or button
   const plainRegex = /(?<!\[)(\d{1,2}:\d{2}(?::\d{2})?)(?!\]|[^<]*>)/g;
   result = result.replace(plainRegex, (match) => {
     const seconds = parseTimeToSeconds(match);
-    return `<button type="button" class="timestamp-link inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-red-50 border border-red-200 text-red-700 font-mono font-bold text-xs hover:bg-red-100 transition-colors cursor-pointer" data-seconds="${seconds}" data-videoid="${videoId}" title="Vai a ${match}"><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" class="text-red-500 shrink-0"><path d="m7 4 12 8-12 8V4z"/></svg>${match}</button>`;
+    return `<button type="button" class="timestamp-link inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-red-50 border border-red-200 font-bold text-xs hover:bg-red-100 transition-colors cursor-pointer" data-seconds="${seconds}" data-videoid="${videoId}" title="Vai a ${match}">${CAMERA_ICON_SVG}<span class="font-mono text-red-700">${match}</span></button>`;
   });
   return result;
 }
@@ -407,25 +411,14 @@ export default function DemoSection() {
         const fullText = String(raw).replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu, "");
         const msgId = Date.now() + Math.random();
         const now = new Date().toISOString();
-        setMessages((prev) => [...prev, { id: msgId, text: "", sender: "system" as const, time: now, videoId: data.videoId || activeVideoId || null }]);
+        // Blocco unico: la risposta appare intera in un colpo solo, niente
+        // costruzione progressiva parola per parola (rompeva anche l'HTML).
+        setMessages((prev) => [...prev, { id: msgId, text: fullText, sender: "system" as const, time: now, videoId: data.videoId || activeVideoId || null }]);
         startedTyping = true;
         setLoading(false);
-        const words = fullText.match(/\S+\s*/g) || [fullText];
-        let i = 0;
-        const speed = 40;
-        const typeInterval = setInterval(() => {
-          if (i < words.length) {
-            const partial = words.slice(0, i + 1).join("");
-            setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, text: partial } : m)));
-            i++;
-          } else {
-            clearInterval(typeInterval);
-            setIsProcessingQueue(false);
-            setLoading(false);
-            abortControllerRef.current = null;
-            setMessageQueue((prev) => prev.slice(1));
-          }
-        }, speed);
+        setIsProcessingQueue(false);
+        abortControllerRef.current = null;
+        setMessageQueue((prev) => prev.slice(1));
       } else {
         addMessage((data.message || "Errore durante l'elaborazione."), "system");
       }

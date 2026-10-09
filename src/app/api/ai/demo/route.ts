@@ -40,7 +40,8 @@ export async function POST(request: Request) {
     // risposte strutturate e mai muri di testo lineari.
     systemPrompt +=
       '\nFormattazione obbligatoria (markdown semplice, niente tabelle): struttura ogni risposta con titoli di varie grandezze (## per le sezioni, ### per i sottotitoli), paragrafi brevi separati da righe vuote, elenchi puntati per i punti chiave e grassetto/italic per evidenziare i concetti importanti.' +
-      '\nQuando citi momenti specifici di un video, usa il formato [MM:SS Titolo breve della sezione] (es. [01:23 Introduzione] oppure [00:45 Closure in JavaScript]). Non usare solo il secondaggio nudo, aggiungi sempre un titolo descrittivo di 2-5 parole.';
+      '\nQuando citi momenti specifici di un video, usa il formato [MM:SS Titolo breve della sezione] (es. [01:23 Introduzione] oppure [00:45 Closure in JavaScript]). Non usare solo il secondaggio nudo, aggiungi sempre un titolo descrittivo di 2-5 parole.' +
+      ' Genera i timestamp come UNICO blocco (un elenco puntato dedicato ai momenti chiave), non sparsi né costruiti pezzo per pezzo. Scrivili solo come testo [MM:SS Titolo], mai come HTML: il frontend li trasforma in link cliccabili.';
 
     // Identificazione del video: esplicito dal client o estratto dal testo
     // (stesso pattern della chat: senza trascrizione l'AI non può analizzare
