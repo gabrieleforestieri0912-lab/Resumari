@@ -2,16 +2,33 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mockPostRequest } from './helpers'
 
 const { aiMocks } = vi.hoisted(() => ({
-  aiMocks: { generateChatCompletion: vi.fn(), aiErrorMessage: vi.fn((e: unknown) => 'AI_ERROR') },
+  aiMocks: {
+    generateChatCompletion: vi.fn(),
+    streamChatCompletion: vi.fn(),
+    aiErrorMessage: vi.fn((e: unknown) => 'AI_ERROR'),
+  },
 }))
-const { ytMocks } = vi.hoisted(() => ({
-  ytMocks: { fetchTranscriptForVideo: vi.fn(), getVideoDetails: vi.fn() },
-}))
+const { ytMocks } = vi.hoisted(() => {
+  const fetchTranscriptForVideo = vi.fn()
+  const getVideoDetails = vi.fn()
+  return {
+    ytMocks: {
+      fetchTranscriptForVideo,
+      getVideoDetails,
+      // La route usa il contesto con cache: stesso risultato dei due helper.
+      getVideoContext: vi.fn(async (id: string) => ({
+        transcript: await fetchTranscriptForVideo(id),
+        details: await getVideoDetails(id),
+      })),
+    },
+  }
+})
 
 vi.mock('@/lib/ai', () => aiMocks)
 vi.mock('@/lib/youtube', () => ytMocks)
 
 import { POST } from '@/app/api/ai/demo/route'
+import { readSseStream, type SseEvent } from '@/lib/sse'
 
 const VID = 'dQw4w9WgXcQ'
 const ip = () => `192.168.${Math.floor(Math.random() * 250)}.${Math.floor(Math.random() * 250)}`
@@ -114,5 +131,44 @@ describe('POST /api/ai/demo', () => {
     const res = await POST(mockPostRequest({ message: 'ciao' }, { 'x-forwarded-for': ip() }))
     expect(res.status).toBe(500)
     expect(await res.json()).toEqual({ message: 'AI_ERROR' })
+  })
+})
+
+describe('POST /api/ai/demo — streaming SSE', () => {
+  const sse = (body: unknown) =>
+    mockPostRequest(body, { 'x-forwarded-for': ip(), accept: 'text/event-stream' })
+
+  it('manda meta con video e trascrizione, poi i token e done', async () => {
+    aiMocks.streamChatCompletion.mockImplementation(async function* () {
+      yield 'Risposta '
+      yield 'demo'
+    })
+
+    const res = await POST(sse({ message: `Riassumi https://youtu.be/${VID}` }))
+    const events: SseEvent[] = []
+    await readSseStream(res, (e) => events.push(e))
+
+    expect(events[0].event).toBe('meta')
+    const meta = events[0].data as any
+    expect(meta.videoId).toBe(VID)
+    expect(meta.transcript).toHaveLength(1)
+
+    expect(events.filter((e) => e.event === 'delta').map((e) => (e.data as any).text)).toEqual([
+      'Risposta ',
+      'demo',
+    ])
+    expect(events.at(-1)).toEqual({ event: 'done', data: { response: 'Risposta demo' } })
+    expect(aiMocks.generateChatCompletion).not.toHaveBeenCalled()
+  })
+
+  it('errore del provider: frame error e stream chiuso', async () => {
+    aiMocks.streamChatCompletion.mockImplementation(async function* () {
+      throw new Error('boom')
+    })
+
+    const res = await POST(sse({ message: 'ciao' }))
+    const events: SseEvent[] = []
+    await readSseStream(res, (e) => events.push(e))
+    expect(events.at(-1)).toEqual({ event: 'error', data: { message: 'AI_ERROR' } })
   })
 })

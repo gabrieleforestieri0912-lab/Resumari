@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Resumari - AI Video Summarizer",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Analizza e riassume video YouTube istantaneamente con l'AI di Resumari.",
   "permissions": [
     "storage",

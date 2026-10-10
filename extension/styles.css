@@ -123,26 +123,31 @@ ytd-thumbnail:hover:has(video) .resumari-thumb-btn,
 }
 
 /* Bottone "Trascrivi canale" — testata della pagina canale, accanto a "Iscriviti".
-   Le metriche (altezza, font, radius) restano clonate in JS dalle classi native
-   di YouTube; qui si impone lo stile YT-native comune a tutti i bottoni
-   Resumari: stesso background dei bottoni di YouTube, bordo viola e in hover
-   glow viola ai bordi — identico a thumbnail e watch. */
+   Stesso blocco di .resumari-watch-btn (chip scuro, bordo viola, glow viola in
+   hover): tutti e tre i pulsanti Resumari hanno lo stesso aspetto in ogni tema. */
 .resumari-channel-btn {
+    all: unset !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     gap: 6px !important;
-    box-sizing: border-box !important;
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
-    cursor: pointer !important;
-    vertical-align: middle !important;
-    user-select: none !important;
+    height: 36px !important;
+    padding: 0 16px !important;
+    border-radius: 18px !important;
     background-color: var(--yt-spec-badge-chip-background, rgba(255, 255, 255, 0.1)) !important;
-    background-image: none !important;
     border: 1px solid rgba(168, 85, 247, 0.7) !important;
     color: var(--yt-spec-text-primary, #f1f1f1) !important;
+    font-family: "Roboto", "Segoe UI", Arial, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.2px !important;
+    cursor: pointer !important;
+    box-sizing: border-box !important;
+    margin: 0 0 0 8px !important;
     transition: box-shadow 0.2s ease, border-color 0.2s ease, background-image 0.2s ease !important;
+    flex-shrink: 0 !important;
+    user-select: none !important;
+    white-space: nowrap !important;
 }
 
 .resumari-channel-btn:hover {
@@ -155,14 +160,14 @@ ytd-thumbnail:hover:has(video) .resumari-thumb-btn,
     transform: scale(0.97) !important;
 }
 
+/* Icona: identica a quella del bottone watch (stessa immagine, stesso taglio). */
 .resumari-channel-icon {
-    width: 18px !important;
-    height: 18px !important;
-    border-radius: 50% !important;
-    object-fit: cover !important;
-    display: block !important;
-    flex-shrink: 0 !important;
+    width: 17px !important;
+    height: 17px !important;
+    object-fit: contain !important;
     pointer-events: none !important;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)) !important;
+    display: block !important;
 }
 
 /* Overlay barra di caricamento con progresso (feedback di avvio trascrizione).

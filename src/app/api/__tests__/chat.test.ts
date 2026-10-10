@@ -5,14 +5,28 @@ const { authMock } = vi.hoisted(() => ({ authMock: vi.fn() }))
 const { aiMocks } = vi.hoisted(() => ({
   aiMocks: {
     generateChatCompletion: vi.fn(),
+    streamChatCompletion: vi.fn(),
     aiErrorMessage: vi.fn(() => 'AI_ERROR'),
     DEFAULT_AI_MODEL: 'test-model',
     VISION_AI_MODEL: '',
   },
 }))
-const { ytMocks } = vi.hoisted(() => ({
-  ytMocks: { fetchTranscriptForVideo: vi.fn(), getVideoDetails: vi.fn(), getYouTubeVideoId: vi.fn() },
-}))
+const { ytMocks } = vi.hoisted(() => {
+  const fetchTranscriptForVideo = vi.fn()
+  const getVideoDetails = vi.fn()
+  return {
+    ytMocks: {
+      fetchTranscriptForVideo,
+      getVideoDetails,
+      getYouTubeVideoId: vi.fn(),
+      // La route usa il contesto con cache: stesso risultato dei due helper.
+      getVideoContext: vi.fn(async (id: string) => ({
+        transcript: await fetchTranscriptForVideo(id),
+        details: await getVideoDetails(id),
+      })),
+    },
+  }
+})
 const { creditsMocks } = vi.hoisted(() => ({
   creditsMocks: {
     hasEnoughCredits: vi.fn(),
@@ -33,6 +47,7 @@ vi.mock('@/lib/supabase', async (importOriginal) => {
 })
 
 import { POST } from '@/app/api/ai/chat/route'
+import { readSseStream, type SseEvent } from '@/lib/sse'
 
 const user = { id: 'u1', credits: 5, plan: 'free' }
 
@@ -95,5 +110,66 @@ describe('POST /api/ai/chat', () => {
     supabaseState.client = client
     const res = await POST(mockPostRequest({ message: 'ciao' }))
     expect(res.status).toBe(500)
+  })
+})
+
+describe('POST /api/ai/chat — streaming SSE', () => {
+  const sseRequest = (body: unknown) =>
+    mockPostRequest(body, { accept: 'text/event-stream' })
+
+  it('trasmette i token e poi done con la risposta completa', async () => {
+    aiMocks.streamChatCompletion.mockImplementation(async function* () {
+      yield 'Risposta '
+      yield 'AI'
+    })
+
+    const res = await POST(sseRequest({ message: 'ciao' }))
+    expect(res.headers.get('Content-Type')).toMatch(/text\/event-stream/)
+
+    const events: SseEvent[] = []
+    await readSseStream(res, (e) => events.push(e))
+
+    expect(events.filter((e) => e.event === 'delta').map((e) => (e.data as any).text)).toEqual([
+      'Risposta ',
+      'AI',
+    ])
+    const done = events.find((e) => e.event === 'done')
+    expect(done?.data).toEqual({ response: 'Risposta AI', credits: 4 })
+    // Il JSON "vecchio" non viene usato quando si streamma.
+    expect(aiMocks.generateChatCompletion).not.toHaveBeenCalled()
+    expect(creditsMocks.deductCredits).toHaveBeenCalledWith('u1', 1)
+  })
+
+  it('errore del provider: frame error senza done e senza crediti scalati', async () => {
+    aiMocks.streamChatCompletion.mockImplementation(async function* () {
+      yield 'parziale'
+      throw new Error('boom')
+    })
+
+    const res = await POST(sseRequest({ message: 'ciao' }))
+    const events: SseEvent[] = []
+    await readSseStream(res, (e) => events.push(e))
+
+    expect(events.some((e) => e.event === 'done')).toBe(false)
+    expect(events.at(-1)).toEqual({ event: 'error', data: { message: 'AI_ERROR' } })
+    expect(creditsMocks.deductCredits).not.toHaveBeenCalled()
+  })
+
+  it('salvataggio fallito a metà stream: frame error, nessun credito scalato', async () => {
+    const { client } = mockClient({ chats: { error: new Error('db'), data: null } as any })
+    supabaseState.client = client
+    aiMocks.streamChatCompletion.mockImplementation(async function* () {
+      yield 'testo'
+    })
+
+    const res = await POST(sseRequest({ message: 'ciao' }))
+    const events: SseEvent[] = []
+    await readSseStream(res, (e) => events.push(e))
+
+    expect(events.at(-1)).toEqual({
+      event: 'error',
+      data: { message: 'Errore nel salvataggio della chat' },
+    })
+    expect(creditsMocks.deductCredits).not.toHaveBeenCalled()
   })
 })

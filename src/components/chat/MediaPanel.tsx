@@ -285,7 +285,7 @@ export default function MediaPanel({
                           setPlayerTime(line.time);
                           handleSeekTo(line.time);
                         }}
-                        className="shrink-0 h-fit bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 px-1 rounded font-mono font-bold hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors"
+                        className="shrink-0 h-fit bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 px-1 rounded font-mono font-bold hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
                       >
                         {formatTimestamp(line.time)}
                       </button>

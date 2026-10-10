@@ -352,3 +352,50 @@ export async function fetchTranscriptForVideo(
     clearTimeout(timer);
   }
 }
+
+/**
+ * Cache in memoria di trascrizione + dettagli per video, con TTL.
+ *
+ * Senza, ogni messaggio di una chat riscattrica da YouTube la trascrizione
+ * del video attivo: su un video da 40 minuti sono secondi di attesa *prima*
+ * ancora di iniziare a generare la risposta. Il contenuto di un video non
+ * cambia, quindi pochi minuti di cache tolgono quel costo da ogni turno.
+ */
+const VIDEO_CONTEXT_TTL_MS = 10 * 60 * 1000;
+const VIDEO_CONTEXT_MAX = 20;
+const videoContextCache = new Map<string, { expires: number; value: VideoContext }>();
+
+export type VideoContext = {
+  transcript: TranscriptResult | null;
+  details: VideoDetails | null;
+};
+
+/** Svuota la cache (test e cambi di contenuto forzati). */
+export function clearVideoContextCache(): void {
+  videoContextCache.clear();
+}
+
+/** Trascrizione + dettagli di un video, con cache breve per non rifarli a ogni turno. */
+export async function getVideoContext(videoId: string): Promise<VideoContext> {
+  const cached = videoContextCache.get(videoId);
+  if (cached && cached.expires > Date.now()) {
+    // Riordina: il più usato di recente resta in fondo alla mappa.
+    videoContextCache.delete(videoId);
+    videoContextCache.set(videoId, cached);
+    return cached.value;
+  }
+
+  const [transcript, details] = await Promise.all([
+    fetchTranscriptForVideo(videoId),
+    getVideoDetails(videoId),
+  ]);
+  const value: VideoContext = { transcript, details };
+
+  videoContextCache.set(videoId, { expires: Date.now() + VIDEO_CONTEXT_TTL_MS, value });
+  while (videoContextCache.size > VIDEO_CONTEXT_MAX) {
+    const oldest = videoContextCache.keys().next().value;
+    if (oldest === undefined) break;
+    videoContextCache.delete(oldest);
+  }
+  return value;
+}

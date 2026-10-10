@@ -136,6 +136,30 @@ export async function generateChatCompletion(
   }
 }
 
+/**
+ * Stessa generazione di `generateChatCompletion`, ma token per token.
+ *
+ * Serve alle route che rispondono in SSE: il primo pezzo di testo arriva
+ * subito invece di aspettare la risposta completa.
+ */
+export async function* streamChatCompletion(
+  messages: ChatMessage[],
+  model: string = DEFAULT_AI_MODEL,
+): AsyncGenerator<string> {
+  const validatedModel = validateModelPrefix(model);
+  const stream = await getXkiro().chat.completions.create({
+    model: validatedModel,
+    messages: messages as OpenAI.Chat.ChatCompletionMessageParam[],
+    temperature: 0.7,
+    stream: true,
+  });
+
+  for await (const chunk of stream) {
+    const delta = chunk.choices?.[0]?.delta?.content;
+    if (delta) yield delta;
+  }
+}
+
 export async function transcribeAudio(file: File) {
   try {
     const transcription = await getGroq().audio.transcriptions.create({

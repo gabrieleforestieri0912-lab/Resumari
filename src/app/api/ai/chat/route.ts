@@ -6,10 +6,12 @@ import {
   VISION_AI_MODEL,
   aiErrorMessage,
   generateChatCompletion,
+  streamChatCompletion,
 } from '@/lib/ai';
+import { createSseStream } from '@/lib/sse';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { hasEnoughCredits, deductCredits, CREDIT_COSTS, creditsExhaustedMessage } from '@/lib/credits';
-import { fetchTranscriptForVideo, getVideoDetails, getYouTubeVideoId } from '@/lib/youtube';
+import { getVideoContext, getYouTubeVideoId } from '@/lib/youtube';
 import { buildTimedTranscript, TS_PROMPT_RULES } from '@/lib/timestamps';
 
 /**
@@ -97,10 +99,9 @@ export async function POST(request: Request) {
 
     // Aggiunta del contesto da video (trascrizione con tempi reali e dettagli)
     if (videoId) {
-      const [transcriptData, details] = await Promise.all([
-        fetchTranscriptForVideo(videoId),
-        getVideoDetails(videoId)
-      ]);
+      // Con cache: la trascrizione del video attivo non viene riscaricata da
+      // YouTube a ogni messaggio della conversazione.
+      const { transcript: transcriptData, details } = await getVideoContext(videoId);
       // I tempi viaggiano con il testo: senza secondi nel contesto il modello
       // se li inventa, e il link porta nel punto sbagliato del video.
       const timed = buildTimedTranscript(transcriptData?.transcript);
@@ -132,40 +133,77 @@ export async function POST(request: Request) {
     // Selezione del modello (Vision se è presente un'immagine e se configurato)
     const aiModel = imageDataUrl && VISION_AI_MODEL ? VISION_AI_MODEL : DEFAULT_AI_MODEL;
 
+    // Cronologia + crediti: stessi effetti di prima, condivisi fra i due regimi.
+    const persist = async (aiResponse: string) => {
+      const client = getServiceClient();
+      const { error: saveError } = await client
+        .from(TABLES.CHATS)
+        .insert({
+          user_id: user.id,
+          video_id: videoId || null,
+          chat_id: `ai-${Date.now()}`,
+          title: 'AI Chat',
+          messages: [
+            { role: 'user', content: message, videoId: videoId || undefined },
+            { role: 'assistant', content: aiResponse }
+          ],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+      if (saveError) {
+        console.error('Failed to save chat:', saveError);
+        return { ok: false as const, message: 'Errore nel salvataggio della chat' };
+      }
+
+      const remaining = await deductCredits(user.id, CREDIT_COSTS.chat);
+      if (remaining === null) {
+        return { ok: false as const, message: 'Crediti insufficienti' };
+      }
+      return { ok: true as const, credits: remaining };
+    };
+
+    // Streaming: il client che chiede `text/event-stream` riceve i token via
+    // SSE e mostra la risposta mentre viene scritta, invece di aspettare che
+    // sia completa. Le route restano JSON per tutto il resto (test, client
+    // legacy, gestione errori con status code).
+    if (request.headers.get('accept')?.includes('text/event-stream')) {
+      return createSseStream(async ({ send, close }) => {
+        let aiResponse = '';
+        try {
+          for await (const delta of streamChatCompletion(messages, aiModel)) {
+            aiResponse += delta;
+            send('delta', { text: delta });
+          }
+        } catch (error) {
+          console.error('Chat stream error:', error);
+          send('error', { message: aiErrorMessage(error) });
+          close();
+          return;
+        }
+
+        const result = await persist(aiResponse);
+        if (!result.ok) {
+          send('error', { message: result.message });
+          close();
+          return;
+        }
+        send('done', { response: aiResponse, credits: result.credits });
+        close();
+      });
+    }
+
     // Generazione della risposta tramite xKiro (le emoji dell'AI vengono
     // mantenute: nessun filtro di rimozione)
     const aiResponse = (await generateChatCompletion(messages, aiModel)) || '';
 
-    const client = getServiceClient();
-
-    // Salvataggio della cronologia della chat nel database Supabase
-    const { error: saveError } = await client
-      .from(TABLES.CHATS)
-      .insert({
-        user_id: user.id,
-        video_id: videoId || null,
-        chat_id: `ai-${Date.now()}`,
-        title: 'AI Chat',
-        messages: [
-          { role: 'user', content: message, videoId: videoId || undefined },
-          { role: 'assistant', content: aiResponse }
-        ],
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      });
-
-    if (saveError) {
-      console.error('Failed to save chat:', saveError);
-      return NextResponse.json({ message: 'Errore nel salvataggio della chat' }, { status: 500 });
+    const result = await persist(aiResponse);
+    if (!result.ok) {
+      const status = result.message === 'Crediti insufficienti' ? 403 : 500;
+      return NextResponse.json({ message: result.message }, { status });
     }
 
-    // Detrazione dei crediti dell'utente
-    const remaining = await deductCredits(user.id, CREDIT_COSTS.chat);
-    if (remaining === null) {
-      return NextResponse.json({ message: 'Crediti insufficienti' }, { status: 403 });
-    }
-
-    return NextResponse.json({ response: aiResponse, credits: remaining });
+    return NextResponse.json({ response: aiResponse, credits: result.credits });
   } catch (error: unknown) {
     console.error('Chat API Error:', error);
     return NextResponse.json({ message: aiErrorMessage(error) }, { status: 500 });

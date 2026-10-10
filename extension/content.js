@@ -28,7 +28,7 @@ let contextDead = ICON_URL === null;
 // Versione del content script: serve per diagnosticare in console quale istanza
 // è in esecuzione nella tab (dopo un reload dell'estensione, le tab aperte
 // prima eseguono ancora la vecchia istanza finché non vengono ricaricate).
-const RESUMARI_CONTENT_VERSION = '1.1.5';
+const RESUMARI_CONTENT_VERSION = '1.1.6';
 
 // ---------------------------------------------------------------------------
 // Overlay barra di caricamento con progresso — feedback immediato su YouTube
@@ -422,29 +422,6 @@ function findChannelSubscribeTarget() {
   return null;
 }
 
-// Sceglie il pulsante da cui clonare lo stile nativo:
-// preferisce il pulsante di testo affiancato (es. "Abbonati"/Join, outline),
-// altrimenti lo stesso Iscriviti (filled) — in entrambi i casi lo stile è
-// identico agli altri pulsanti di YouTube, dark e light compresi.
-function pickStyleSource(target) {
-  const { renderer, nativeBtn } = target;
-  const row = (renderer && renderer.parentElement) || nativeBtn.parentElement;
-  if (row) {
-    const candidates = row.querySelectorAll("button, yt-button-shape");
-    for (const node of candidates) {
-      const btn = node.tagName === "BUTTON" ? node : node.querySelector("button");
-      if (!btn || btn === nativeBtn || btn.classList.contains("resumari-channel-btn")) continue;
-      if (renderer && renderer.contains(btn)) continue;
-      const text = (btn.textContent || "").trim();
-      // Solo pulsanti con etichetta breve: esclude campanello e overflow (icon-only)
-      if (text.length >= 3 && text.length <= 24 && !SUBSCRIBE_LABELS.test(text)) {
-        return btn;
-      }
-    }
-  }
-  return nativeBtn;
-}
-
 function injectChannelPageButton() {
   // Solo pagine canale: fuori da lì il bottone va rimosso (navigazione SPA)
   if (!isChannelPage()) {
@@ -458,13 +435,13 @@ function injectChannelPageButton() {
   const target = findChannelSubscribeTarget();
   if (!target || !target.anchor || !target.anchor.parentNode) return;
 
-  const styleSource = pickStyleSource(target);
-
   const btn = document.createElement("button");
   btn.type = "button";
-  // Classi native di YouTube clonate → stesso aspetto di Iscriviti/Abbonati
-  // (font, altezza, border-radius, tema chiaro/scuro e hover identici)
-  btn.className = `${styleSource.className} resumari-channel-btn`.trim();
+  // Stile Resumari identico a thumbnail e watch (definiti per intero in
+  // styles.css: chip scuro, bordo viola, glow viola in hover): nessuna classe
+  // nativa di YouTube viene clonata, quindi il bottone è coerente con gli
+  // altri due in ogni tema.
+  btn.className = "resumari-channel-btn";
 
   const img = document.createElement("img");
   img.src = ICON_URL;
@@ -497,16 +474,9 @@ function injectChannelPageButton() {
     });
   });
 
-  // Spaziatura identica agli altri pulsanti: se il contenitore non ha gap
-  // (container legacy usano i margin), aggiunge un margine equivalente.
-  const row = target.anchor.parentElement;
-  if (row) {
-    const gap = parseFloat(getComputedStyle(row).columnGap || "0") || 0;
-    if (!gap) btn.style.marginLeft = "8px";
-    row.insertBefore(btn, target.anchor.nextSibling);
-  } else {
-    target.anchor.insertAdjacentElement("afterend", btn);
-  }
+  // Spaziatura e ancoraggio gestiti da CSS (margin-left come il bottone watch):
+  // il bottone va subito dopo "Iscriviti", senza dipendere dal gap del contenitore.
+  target.anchor.insertAdjacentElement("afterend", btn);
 }
 
 // Spegne il watcher (observer + debounce): usato quando il contesto muore.

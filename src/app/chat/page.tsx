@@ -11,6 +11,7 @@ import { useLanguage } from "@/components/LanguageContext";
 import { useToast } from "@/components/ToastProvider";
 import { clearSession, useSessionRestored } from "@/lib/session";
 import { alignTimestampsInMarkdown, type TimedSegment } from "@/lib/timestamps";
+import { readSseStream } from "@/lib/sse";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import MediaPanel from "@/components/chat/MediaPanel";
@@ -109,6 +110,10 @@ function formatChatDate(timestamp: string | number) {
 
 const DEFAULT_CHATS: any[] = [];
 
+/** Toglie emoji e sequenze ZWJ dalle risposte AI (la chat resta testuale). */
+const stripEmoji = (text: string) =>
+  text.replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu, "");
+
 /**
  * Converte una stringa di tempo (es: "1:23" o "1:02:34") in secondi totali
  */
@@ -132,16 +137,18 @@ function parseTimeToSeconds(timeStr: string) {
  * link che portano nel posto sbagliato. Poi i timestamp superstiti diventano
  * link markdown con schema `timestamp:` e il componente `a` di ReactMarkdown li
  * rende come bottoni `.timestamp-link`.
+ *
+ * Nel link finisce **solo il secondaggio**: l'etichetta che il modello ha
+ * inventato resta nel testo per l'allineamento, ma non viene mostrata.
  */
 function linkifyTimestampsForMarkdown(text: string, transcript?: TimedSegment[] | null): string {
   if (!text) return text;
   const aligned = alignTimestampsInMarkdown(text, transcript ?? null);
   return aligned.replace(
     /\[(\d{1,3}:\d{2}(?::\d{2})?)([^\]]*?)\]|(\d{1,3}:\d{2}(?::\d{2})?)/g,
-    (match, bracketTime, bracketLabel, bareTime) => {
+    (_match, bracketTime, _bracketLabel, bareTime) => {
       const time = bracketTime || bareTime;
-      const label = bracketTime ? `${bracketTime}${bracketLabel || ""}` : bareTime;
-      return `[${label}](timestamp:${parseTimeToSeconds(time)})`;
+      return `[${time}](timestamp:${parseTimeToSeconds(time)})`;
     },
   );
 }
@@ -969,6 +976,9 @@ function ChatContent() {
       const response = await fetch(`${API_BASE}/chat`, {
         method: "POST",
         headers: {
+          // Lo streaming SSE è il regime normale: i token arrivano via via e la
+          // risposta viene mostrata mentre il modello la scrive.
+          Accept: "text/event-stream",
           ...(requestBody ? {} : { "Content-Type": "application/json" }),
           ...(token && { Authorization: `Bearer ${token}` }),
         },
@@ -1001,113 +1011,121 @@ function ChatContent() {
         return;
       }
 
-      const data = await response.json();
-      setAiStatus("thinking");
+      const newMsgId = `ai-${Date.now()}`;
+      const aiMessage = {
+        id: newMsgId,
+        text: "",
+        videoId: videoId || currentVideoId,
+        sender: "system",
+        time: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      };
 
-      // Sync remaining credits back to the user profile (reflected in navbar/settings).
-      if (typeof data.credits === "number") {
+      // Il messaggio vuota viene creato subito: l'utente vede da subito dove
+      // arriverà la risposta, mentre i token la riempiono.
+      setMessages((prev: any[]) => [...prev, aiMessage]);
+      setCurrentAIMessageIndex(newMsgId);
+      setDisplayedText("");
+      setAiStatus("writing");
+
+      let fullText = "";
+      let streamError: string | null = null;
+      let credits: number | null = null;
+      let videoFromStream: string | null = null;
+      let lastPaint = 0;
+
+      const paint = (text: string) => {
+        setMessages((prev: any[]) =>
+          prev.map((m: any) => (m.id === newMsgId ? { ...m, text } : m)),
+        );
+      };
+
+      await readSseStream(response, ({ event, data }) => {
+        const payload = (data ?? {}) as Record<string, unknown>;
+        if (event === "delta") {
+          fullText += String(payload.text || "");
+          // Ridisegno al massimo ogni ~50ms: senza, React rigenera l'intero
+          // albero dei messaggi a ogni token.
+          const now = Date.now();
+          if (now - lastPaint >= 50) {
+            lastPaint = now;
+            paint(stripEmoji(fullText));
+          }
+        } else if (event === "done") {
+          fullText = String(payload.response ?? fullText);
+          if (typeof payload.credits === "number") credits = payload.credits;
+        } else if (event === "meta") {
+          if (payload.videoId) videoFromStream = String(payload.videoId);
+        } else if (event === "error") {
+          streamError = String(payload.message || "Errore nella risposta dell'IA. Riprova.");
+        }
+      });
+
+      paint(stripEmoji(fullText));
+
+      if (credits !== null) {
         setUser((prev: any) => {
-          const updated = { ...prev, credits: data.credits };
+          const updated = { ...prev, credits };
           localStorage.setItem("user", JSON.stringify(updated));
           return updated;
         });
       }
 
-      if (data.videoId && !currentVideoId) {
-        setCurrentVideoId(data.videoId);
+      if (videoFromStream && !currentVideoId) {
+        setCurrentVideoId(videoFromStream);
         setCurrentVideoStartTime(0);
       }
 
-      if (data.response) {
-        const newMsgId = `ai-${Date.now()}`;
-
-        const fullText = String(data.response).replace(/[\\p{Extended_Pictographic}\\uFE0F\\u200D]/gu, "");
-        setAiStatus("writing");
-
-        const aiMessage = {
-          id: newMsgId,
-          text: "",
-          videoId: videoId || currentVideoId,
-          sender: "system",
-          time: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        };
-
+      if (streamError && !fullText.trim()) {
         setMessages((prev: any[]) => {
-          const next = [...prev, aiMessage];
-          return next;
-        });
-
-        setCurrentAIMessageIndex(newMsgId);
-        setDisplayedText("");
-
-        const words = fullText.match(/\S+\s*/g) || [];
-        let i = 0;
-        const speed = 40;
-        const typeInterval = setInterval(() => {
-          if (i < words.length) {
-            const partialText = words.slice(0, i + 1).join("");
-            setDisplayedText(partialText);
-            setMessages((prev: any[]) =>
-              prev.map((m: any) =>
-                m.id === newMsgId ? { ...m, text: partialText } : m,
-              ),
-            );
-            i++;
-          } else {
-            clearInterval(typeInterval);
-            setCurrentAIMessageIndex(null);
-            setDisplayedText("");
-
-            setMessages((prev: any[]) => {
-              const finalMessages = prev.map((m: any) =>
-                m.id === newMsgId ? { ...m, text: fullText } : m,
-              );
-              updateChatMessagesMap(currentChatId, finalMessages);
-              syncToServer(currentChatId, chatTitle, finalMessages);
-              return finalMessages;
-            });
-            setIsTyping(false);
-            setAiStatus("idle");
-            setIsProcessingQueue(false);
-            setMessageQueue((prev) => prev.slice(1));
-            // La risposta è andata a buon fine: se i crediti erano finiti (rinnovo
-            // mensile o upgrade) l'avviso di blocco non ha più motivo di restare.
-            if (creditsBlocked) setCreditsBlocked(null);
-          }
-        }, speed);
-      } else if (data.message) {
-        setIsTyping(false);
-        setAiStatus("idle");
-        const sysMsg = { text: data.message, sender: "system", time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) };
-        setMessages((prev: any[]) => {
-          const next = [...prev, sysMsg];
+          const next = [
+            ...prev.filter((m: any) => m.id !== newMsgId),
+            { text: streamError!, sender: "system", time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) },
+          ];
           updateChatMessagesMap(currentChatId, next);
           return next;
         });
-        setIsProcessingQueue(false);
-        setMessageQueue((prev) => prev.slice(1));
       } else {
-        setIsTyping(false);
-        setAiStatus("idle");
-        const sysMsg = { text: "Errore nella risposta dell'IA. Riprova.", sender: "system", time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) };
         setMessages((prev: any[]) => {
-          const next = [...prev, sysMsg];
-          updateChatMessagesMap(currentChatId, next);
-          return next;
+          const finalMessages = prev.map((m: any) =>
+            m.id === newMsgId ? { ...m, text: stripEmoji(fullText) } : m,
+          );
+          if (streamError) {
+            finalMessages.push({
+              text: streamError,
+              sender: "system",
+              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            });
+          }
+          updateChatMessagesMap(currentChatId, finalMessages);
+          syncToServer(currentChatId, chatTitle, finalMessages);
+          return finalMessages;
         });
-        setIsProcessingQueue(false);
-        setMessageQueue((prev) => prev.slice(1));
       }
+
+      setCurrentAIMessageIndex(null);
+      setDisplayedText("");
+      setIsTyping(false);
+      setAiStatus("idle");
+      setIsProcessingQueue(false);
+      setMessageQueue((prev) => prev.slice(1));
+      // La risposta è andata a buon fine: se i crediti erano finiti (rinnovo
+      // mensile o upgrade) l'avviso di blocco non ha più motivo di restare.
+      if (creditsBlocked) setCreditsBlocked(null);
     } catch (err: any) {
       if (err.name === "AbortError") {
-        setMessages((prev: any[]) =>
-          prev.map((m: any, i: number) =>
-            i === prev.length - 1 && m.sender === "user" ? { ...m, cancelled: true } : m,
-          ),
-        );
+        // Interrotto a metà: la bolla vuota del messaggio AI sparisce, quella
+        // dell'utente resta segnalata come annullato.
+        setMessages((prev: any[]) => {
+          const kept = prev.filter(
+            (m: any) => !(typeof m.id === "string" && m.id.startsWith("ai-") && !m.text),
+          );
+          return kept.map((m: any, i: number) =>
+            i === kept.length - 1 && m.sender === "user" ? { ...m, cancelled: true } : m,
+          );
+        });
       } else {
         const sysMsg = { text: "Errore di rete. Assicurati che il server sia attivo.", sender: "system", time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) };
         setMessages((prev: any[]) => {
@@ -1803,8 +1821,9 @@ function ChatContent() {
       );
     },
     // Link `timestamp:<secondi>` generati da linkifyTimestampsForMarkdown:
-    // bottoni rossi cliccabili che spostano la preview (stesso handler
-    // documentale dei vecchi .timestamp-link). Gli altri link restano anchor.
+    // bottoni viola cliccabili che spostano la preview (stesso handler
+    // documentale dei vecchi .timestamp-link). Mostrano solo il secondaggio.
+    // Gli altri link restano anchor.
     a: ({ href, children, ...props }: any) => {
       if (href && String(href).startsWith("timestamp:")) {
         const seconds = parseInt(String(href).slice("timestamp:".length), 10) || 0;
@@ -1812,10 +1831,10 @@ function ChatContent() {
           <button
             type="button"
             data-seconds={seconds}
-            title="Vai al momento nel video"
-            className="timestamp-link bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 px-1.5 py-0.5 rounded-md font-mono font-bold hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors cursor-pointer inline-flex items-center gap-1"
+            title={`Vai al secondo ${seconds} del video`}
+            className="timestamp-link bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded-md font-mono font-bold hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors cursor-pointer inline-flex items-center gap-1"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-red-500 dark:text-red-400 shrink-0"><path d="m7 4 12 8-12 8V4z" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-purple-500 dark:text-purple-400 shrink-0"><path d="m7 4 12 8-12 8V4z" /></svg>
             {children}
           </button>
         );

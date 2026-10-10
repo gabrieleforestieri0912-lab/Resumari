@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { aiErrorMessage, generateChatCompletion } from '@/lib/ai';
+import { aiErrorMessage, generateChatCompletion, streamChatCompletion } from '@/lib/ai';
+import { createSseStream } from '@/lib/sse';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
 import { extractYouTubeVideoId } from '@/lib/youtube-ids';
-import { fetchTranscriptForVideo, getVideoDetails } from '@/lib/youtube';
+import { getVideoContext } from '@/lib/youtube';
 import { buildTimedTranscript, TS_PROMPT_RULES, type TimedSegment } from '@/lib/timestamps';
 
 /**
@@ -59,10 +60,9 @@ export async function POST(request: Request) {
     // citati nella risposta.
     let timedSegments: TimedSegment[] = [];
     if (videoId) {
-      const [transcriptData, details] = await Promise.all([
-        fetchTranscriptForVideo(videoId),
-        getVideoDetails(videoId),
-      ]);
+      // Cache: nella demo il video è quasi sempre lo stesso, quindi la
+      // trascrizione viene scaricata da YouTube solo alla prima domanda.
+      const { transcript: transcriptData, details } = await getVideoContext(videoId);
       const timed = buildTimedTranscript(transcriptData?.transcript);
 
       if (timed.text) {
@@ -91,6 +91,34 @@ export async function POST(request: Request) {
       { role: 'system' as const, content: systemPrompt },
       { role: 'user' as const, content: userText },
     ];
+
+    // Streaming SSE: il client riceve subito i metadati del video analizzato
+    // (`meta`) e poi i token (`delta`), invece di aspettare la risposta intera
+    // per vederla comparire di colpo.
+    if (request.headers.get('accept')?.includes('text/event-stream')) {
+      return createSseStream(async ({ send, close }) => {
+        send('meta', {
+          videoId: videoId || undefined,
+          videoTitle,
+          transcript: timedSegments.length > 0 ? timedSegments : undefined,
+        });
+
+        let response = '';
+        try {
+          for await (const delta of streamChatCompletion(messages)) {
+            response += delta;
+            send('delta', { text: delta });
+          }
+        } catch (error) {
+          console.error('Demo stream error:', error);
+          send('error', { message: aiErrorMessage(error) });
+          close();
+          return;
+        }
+        send('done', { response });
+        close();
+      });
+    }
 
     // Generazione della risposta tramite Groq (emoji dell'AI mantenute)
     const aiResponse = (await generateChatCompletion(messages)) || '';

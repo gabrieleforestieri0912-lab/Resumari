@@ -7,7 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "./ToastProvider";
 import { AUTH_STATE_EVENT_NAME, type AuthStateDetail } from "@/lib/auth-sync";
 import { extractYouTubeVideoId } from "@/lib/youtube-ids";
-import { alignTimestampsInMarkdown } from "@/lib/timestamps";
+import { alignTimestampsInMarkdown, type TimedSegment } from "@/lib/timestamps";
+import { readSseStream } from "@/lib/sse";
 import {
   Send,
   Sparkles,
@@ -82,17 +83,17 @@ function parseTimeToSeconds(timeStr: string): number {
 }
 
 // Icona videocamera vera (stile lucide "video"): il link timestamp mostra
-// la camera + testo rosso, mai il triangolo play generico.
+// la camera + il solo secondaggio, in rosso come prima.
 const CAMERA_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-600 shrink-0"><path d="m16 10 6-3v10l-6-3"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>`;
 
 function formatTimestampLinks(text: string, videoId?: string | null): string {
   if (!videoId || !text) return text;
-  // Match [MM:SS Title] or [HH:MM:SS Title] (bracketed with optional title)
+  // `[MM:SS Titolo]` o `[HH:MM:SS Titolo]`: il bottone mostra solo il
+  // secondaggio, l'etichetta serve solo al testo del link.
   const bracketedRegex = /\[(\d{1,2}:\d{2}(?::\d{2})?)([^\]]*?)\]/g;
-  let result = text.replace(bracketedRegex, (_, time, labelRaw) => {
+  let result = text.replace(bracketedRegex, (_, time) => {
     const seconds = parseTimeToSeconds(time);
-    const label = labelRaw.trim();
-    return `<button type="button" class="timestamp-link inline-flex items-center gap-1.5 px-2 py-1 my-0.5 rounded-lg bg-red-50 border border-red-200 font-bold text-xs hover:bg-red-100 transition-colors cursor-pointer align-middle" data-seconds="${seconds}" data-videoid="${videoId}" title="Vai a ${time}${label ? ' — ' + label : ''}">${CAMERA_ICON_SVG}<span class="font-mono text-red-700">${time}</span>${label ? `<span class="text-red-600 font-semibold">${label}</span>` : ''}</button>`;
+    return `<button type="button" class="timestamp-link inline-flex items-center gap-1.5 px-2 py-1 my-0.5 rounded-lg bg-red-50 border border-red-200 font-bold text-xs hover:bg-red-100 transition-colors cursor-pointer align-middle" data-seconds="${seconds}" data-videoid="${videoId}" title="Vai a ${time}">${CAMERA_ICON_SVG}<span class="font-mono text-red-700">${time}</span></button>`;
   });
   // Fallback: plain MM:SS not already inside a bracket or button
   const plainRegex = /(?<!\[)(\d{1,2}:\d{2}(?::\d{2})?)(?!\]|[^<]*>)/g;
@@ -228,7 +229,11 @@ function YoutubeEmbed({ videoId, startTime }: { videoId: string; startTime?: num
   );
 }
 
-const DEMO_EXAMPLE_VIDEO = "DHjqpvDnNGE";
+// Video di esempio della demo: intervista startup/product di 42 minuti
+// ("The Solo-Founder Playbook: How to Run a $1M ARR SaaS With One Person",
+// ProductLed). Scelto al posto di un video da 100 secondi perché la demo deve
+// mostrare il caso d'uso reale: riassumere e interrogare un contenuto lungo.
+const DEMO_EXAMPLE_VIDEO = "2i0mZevfErY";
 // Messaggio di benvenuto reale: niente riassunti inventati. La demo parte con
 // il video di esempio già nel player e invita a incollare un link o a
 // scegliere un canale: le analisi vere arrivano dall'AI via /api/ai/demo.
@@ -364,14 +369,13 @@ export default function DemoSection() {
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
-    let startedTyping = false;
     // Il video incollato nel messaggio ha priorità su quello già in riproduzione.
     const activeVideoId = item.videoId || currentVideo || undefined;
 
     try {
       const response = await fetch("/api/ai/demo", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
         body: JSON.stringify({
           message: item.text,
           context: item.context,
@@ -380,34 +384,69 @@ export default function DemoSection() {
         signal: controller.signal,
       });
 
-      const data = await response.json();
-      // Il backend conferma il video analizzato: lo si mostra nel player.
-      if (data.videoId) {
-        setCurrentVideo(data.videoId);
-        setVideoStartTime(null);
-      }
-      if (response.ok) {
-        let raw = data.response || data.message || "";
-        // I timestamp arrivano dal modello inventati: prima di renderizzarli
-        // vengono riallineati alla trascrizione reale restituita dal backend.
-        // Quello che non si verifica viene rimosso, non mostrato.
-        raw = alignTimestampsInMarkdown(raw, data.transcript ?? null);
-        raw = formatYouTubeLinks(raw);
-        raw = formatTimestampLinks(raw, data.videoId || activeVideoId || null);
-        raw = cleanResponse(raw);
-        const fullText = String(raw).replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu, "");
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        addMessage(data?.message || "Errore durante l'elaborazione.", "system");
+      } else {
+        // Streaming: i token arrivano via via e il messaggio si riempie in
+        // tempo reale invece di comparire tutto insieme alla fine.
         const msgId = Date.now() + Math.random();
         const now = new Date().toISOString();
-        // Blocco unico: la risposta appare intera in un colpo solo, niente
-        // costruzione progressiva parola per parola (rompeva anche l'HTML).
-        setMessages((prev) => [...prev, { id: msgId, text: fullText, sender: "system" as const, time: now, videoId: data.videoId || activeVideoId || null }]);
-        startedTyping = true;
-        setLoading(false);
-        setIsProcessingQueue(false);
-        abortControllerRef.current = null;
-        setMessageQueue((prev) => prev.slice(1));
-      } else {
-        addMessage((data.message || "Errore durante l'elaborazione."), "system");
+        let raw = "";
+        let meta: { videoId?: string; videoTitle?: string | null; transcript?: TimedSegment[] | null } = {};
+        let streamError: string | null = null;
+        let lastPaint = 0;
+
+        const paint = (text: string) => {
+          // I timestamp arrivano dal modello inventati: prima di renderizzarli
+          // vengono riallineati alla trascrizione reale, e i secondaggi
+          // superstiti diventano link rossi cliccabili.
+          let html = text;
+          html = alignTimestampsInMarkdown(html, meta.transcript ?? null);
+          html = formatYouTubeLinks(html);
+          html = formatTimestampLinks(html, meta.videoId || activeVideoId || null);
+          html = cleanResponse(html);
+          html = html.replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu, "");
+          setMessages((prev) =>
+            prev.some((m) => m.id === msgId)
+              ? prev.map((m) => (m.id === msgId ? { ...m, text: html } : m))
+              : [
+                  ...prev,
+                  { id: msgId, text: html, sender: "system" as const, time: now, videoId: meta.videoId || activeVideoId || null },
+                ],
+          );
+        };
+
+        await readSseStream(response, ({ event, data }) => {
+          const payload = (data ?? {}) as Record<string, unknown>;
+          if (event === "meta") {
+            meta = payload as typeof meta;
+            if (meta.videoId) {
+              setCurrentVideo(meta.videoId);
+              setVideoStartTime(null);
+            }
+            setLoading(false);
+          } else if (event === "delta") {
+            raw += String(payload.text || "");
+            const tick = Date.now();
+            if (tick - lastPaint >= 50) {
+              lastPaint = tick;
+              paint(raw);
+            }
+          } else if (event === "done") {
+            raw = String(payload.response ?? raw);
+          } else if (event === "error") {
+            streamError = String(payload.message || "Errore durante l'elaborazione.");
+          }
+        });
+
+        paint(raw);
+        if (streamError && !raw.trim()) {
+          setMessages((prev) => prev.filter((m) => m.id !== msgId));
+          addMessage(streamError, "system");
+        } else if (streamError) {
+          addMessage(streamError, "system");
+        }
       }
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
@@ -420,12 +459,12 @@ export default function DemoSection() {
         addMessage("Errore di rete. Assicurati che il server sia in esecuzione.", "system");
       }
     } finally {
-      if (!startedTyping) {
-        setIsProcessingQueue(false);
-        setLoading(false);
-        abortControllerRef.current = null;
-        setMessageQueue((prev) => prev.slice(1));
-      }
+      // La coda avanza sempre: lo stream può finire con successo, con errore
+      // o essere stato interrotto dall'utente.
+      setLoading(false);
+      setIsProcessingQueue(false);
+      abortControllerRef.current = null;
+      setMessageQueue((prev) => prev.slice(1));
     }
   }, [currentVideo, addMessage]);
 
