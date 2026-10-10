@@ -169,15 +169,13 @@ export default function Hero() {
           <Link
             href="#demo"
             aria-label="Guarda la demo di Resumari"
-            className="group rounded-2xl bg-linear-to-r from-purple-600 to-red-600 p-[2px] transition-all transform hover:-translate-y-1 hover:shadow-2xl active:scale-95 shadow-xl shadow-purple-500/25"
+            className="group flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl bg-white text-gray-950 font-black text-base transition-all transform hover:-translate-y-1 hover:shadow-2xl active:scale-95 shadow-xl shadow-gray-500/20"
           >
-            <span className="flex items-center justify-center gap-2 px-7 py-[12px] rounded-[14px] bg-white text-gray-950 font-black text-base">
-              Guarda la demo
-              <ArrowRight
-                size={18}
-                className="group-hover:translate-x-1 transition-transform"
-              />
-            </span>
+            Guarda la demo
+            <ArrowRight
+              size={18}
+              className="group-hover:translate-x-1 transition-transform"
+            />
           </Link>
           <AddToChromeButton variant="hero" />
         </motion.div>
