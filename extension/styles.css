@@ -17,7 +17,7 @@
     cursor: pointer !important;
     /* Z-index 2147483647 garantisce che resti SEMPRE sopra a ytd-inline-preview-player e overlay vari */
     z-index: 2147483647 !important;
-    /* Compare solo al passaggio col mouse con transizione fluida */
+    /* Nascosto di default con transizione fluida (compare su hover o con preview attiva) */
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
@@ -29,10 +29,14 @@
     overflow: hidden !important;
 }
 
-/* Mostra il bottone al passaggio del mouse su qualsiasi renderer/thumbnail.
-   Il bottone vive in ytd-thumbnail (sibling della preview, non dentro l'anchor),
-   quindi resta visibile anche mentre ytd-inline-preview-player copre la thumbnail:
-   l'hover sul player è comunque hover sugli antenati (renderer + ytd-thumbnail). */
+/* Visibilità del bottone.
+   - Hover (renderer/thumbnail): comportamento standard, compare al passaggio.
+   - Preview attiva (`ytd-thumbnail:has(ytd-inline-preview-player)`, SENZA
+     :hover): quando parte l'anteprima video il bottone resta visibile e
+     cliccabile anche se l'hover sfarfalla o il player cattura il puntatore.
+     Il player viene smontato al mouseleave, quindi la regola smette di
+     applicarsi da sola. */
+ytd-thumbnail:has(ytd-inline-preview-player) .resumari-thumb-btn,
 ytd-rich-item-renderer:hover .resumari-thumb-btn,
 ytd-video-renderer:hover .resumari-thumb-btn,
 ytd-compact-video-renderer:hover .resumari-thumb-btn,
@@ -46,7 +50,6 @@ ytd-thumbnail:hover .resumari-thumb-btn,
 #thumbnail:hover .resumari-thumb-btn,
 /* Compat: vecchie iniezioni dentro l'anchor + nuove nell'host stabile */
 a:hover > .resumari-thumb-btn,
-ytd-thumbnail:has(ytd-inline-preview-player:hover) .resumari-thumb-btn,
 ytd-thumbnail:hover:has(video) .resumari-thumb-btn,
 .resumari-thumb-btn:hover,
 .resumari-thumb-btn:focus-visible {
@@ -69,10 +72,26 @@ ytd-thumbnail:hover:has(video) .resumari-thumb-btn,
 .resumari-thumb-icon {
     width: 18px !important;
     height: 18px !important;
-    object-fit: contain !important;
     pointer-events: none !important;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)) !important;
     display: block !important;
+}
+
+/* Playlist (pagina /playlist e pannello laterale del watch): le miniature
+   sono molto più piccole (~100-160px), quindi il bottone standard da 32px
+   le coprirebbe quasi per intero. Versione ridotta ancorata alla miniatura. */
+ytd-playlist-video-renderer .resumari-thumb-btn,
+ytd-playlist-panel-video-renderer .resumari-thumb-btn {
+    top: 4px !important;
+    right: 4px !important;
+    width: 26px !important;
+    height: 26px !important;
+}
+
+ytd-playlist-video-renderer .resumari-thumb-icon,
+ytd-playlist-panel-video-renderer .resumari-thumb-icon {
+    width: 15px !important;
+    height: 15px !important;
 }
 
 /* Bottone "Trascrivi" sotto al video (tra Like e Condividi).
@@ -116,7 +135,6 @@ ytd-thumbnail:hover:has(video) .resumari-thumb-btn,
 .resumari-watch-icon {
     width: 17px !important;
     height: 17px !important;
-    object-fit: contain !important;
     pointer-events: none !important;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)) !important;
     display: block !important;
@@ -164,7 +182,6 @@ ytd-thumbnail:hover:has(video) .resumari-thumb-btn,
 .resumari-channel-icon {
     width: 17px !important;
     height: 17px !important;
-    object-fit: contain !important;
     pointer-events: none !important;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)) !important;
     display: block !important;
@@ -199,11 +216,15 @@ ytd-thumbnail:hover:has(video) .resumari-thumb-btn,
     margin-bottom: 10px !important;
 }
 
+/* Logo dell'overlay: ora è uno <svg> inline (non più una <img> con URL
+   chrome-extension://, che YouTube bloccava con "Unsafe attempt to load URL").
+   Le regole valgono sia per img che per svg, ma object-fit non esiste per
+   svg: si usa border-radius + aspect-ratio per tenere il ritorno arrotondato. */
 .resumari-progress-logo {
     width: 28px !important;
     height: 28px !important;
-    border-radius: 50% !important;
-    object-fit: cover !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
     flex-shrink: 0 !important;
 }
 

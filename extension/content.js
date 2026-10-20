@@ -8,27 +8,90 @@ const getYouTubeVideoId = (url) => {
 
 const RESUMARI_BASE_URL = 'https://resumari.vercel.app';
 
-// Icona risolta UNA SOLA VOLTA a caricamento, quando il contesto è ancora valido.
+// Contesto dell'estensione: verificato UNA volta sola a caricamento.
 // Dopo un reload/update dell'estensione con la tab aperta, ogni accesso
 // successivo a chrome.runtime lancia "Extension context invalidated" e uccide
-// tutte le iniezioni: memorizzando la stringa qui, non si tocca più
-// chrome.runtime in nessuna chiamata successiva.
-const ICON_URL = (() => {
+// tutte le iniezioni: qui il controllo avviene subito e il risultato viene
+// memorizzato in una variabile, senza piu toccare chrome.runtime.
+let contextDead = false;
+try {
+  contextDead = !chrome.runtime?.id;
+} catch {
+  contextDead = true;
+}
+
+// ---------------------------------------------------------------------------
+// Icona Resumari — SVG INLINE, non <img> con URL chrome-extension://.
+//
+// Perche: le <img> iniettate nel DOM della pagina vengono caricate dal
+// contesto di YouTube (https://www.youtube.com) e ogni caricamento di una
+// risorsa chrome-extension:// fallisce con:
+//   "Unsafe attempt to load URL chrome-extension://<id>/icons/icon128.png
+//    from frame with URL https://www.youtube.com/...
+//    Domains, protocols and ports must match."
+// (un errore per ogni bottone iniettato, e uno nuovo a ogni re-iniezione
+// fatta dal MutationObserver). Lo stesso accadrebbe con qualunque URL
+// assoluto: la soluzione e non chiedere ALCUNA risorsa esterna.
+//
+// Uno SVG inline vive nel DOM, non e una risorsa caricata: niente CSP della
+// pagina, niente blocchi cross-origin, niente web_accessible_resources.
+// E anche piu nitido a 17-18px del PNG 1024x1024 compresso a 18px.
+// ---------------------------------------------------------------------------
+let iconUidCounter = 0;
+
+// Crea l'icona Resumari come elemento <svg> pronto da iniettare.
+// `className` riceve la stessa classe usata prima per la <img>, cosi il CSS
+// esistente (dimensioni, drop-shadow, pointer-events) continua a valere.
+function createResumariIcon(className) {
+  // id univoco per il gradiente: piu icone nella stessa pagina non devono
+  // condividere lo stesso id (il DOM di YouTube e vasto e non controllato).
+  const uid = `resumari-grad-${++iconUidCounter}`;
+
+  const markup =
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" ` +
+    `class="${className}" aria-hidden="true" focusable="false">` +
+    `<defs>` +
+    `<linearGradient id="${uid}" x1="0" y1="0" x2="1" y2="1">` +
+    `<stop offset="0" stop-color="#c084fc"/>` +
+    `<stop offset="0.55" stop-color="#a855f7"/>` +
+    `<stop offset="1" stop-color="#6d28d9"/>` +
+    `</linearGradient>` +
+    `</defs>` +
+    // Documento con bordo viola
+    `<rect x="13" y="5" width="38" height="54" rx="7" fill="#150a2e" ` +
+    `stroke="url(#${uid})" stroke-width="2.4"/>` +
+    // Angolo piegato
+    `<path d="M37 5 L51 19 L37 19 Z" fill="#2e1461" ` +
+    `stroke="url(#${uid})" stroke-width="2.2" stroke-linejoin="round"/>` +
+    // Righe di testo
+    `<rect x="20" y="26" width="24" height="4.4" rx="2.2" fill="url(#${uid})"/>` +
+    `<rect x="20" y="35" width="19" height="4.4" rx="2.2" fill="url(#${uid})" opacity="0.82"/>` +
+    `<rect x="20" y="44" width="14" height="4.4" rx="2.2" fill="url(#${uid})" opacity="0.64"/>` +
+    // Scintillio principale
+    `<path d="M10 4 C10 8 11 9 15 9 C11 9 10 10 10 14 C10 10 9 9 5 9 ` +
+    `C9 9 10 8 10 4 Z" fill="#e9d5ff"/>` +
+    // Scintillio secondario
+    `<path d="M49 43 C49 46 49.8 46.8 52.8 46.8 C49.8 46.8 49 47.6 49 50.6 ` +
+    `C49 47.6 48.2 46.8 45.2 46.8 C48.2 46.8 49 46 49 43 Z" fill="#c084fc"/>` +
+    `</svg>`;
+
   try {
-    return chrome.runtime.getURL('icons/icon128.png');
+    // DOMParser + importNode invece di innerHTML: la creazione di elementi
+    // tramite innerHTML puo essere bloccata dalla Trusted Types policy di
+    // YouTube, mentre il parsing di una stringa XML e sempre ammesso.
+    const parsed = new DOMParser().parseFromString(markup, 'image/svg+xml');
+    const root = parsed.documentElement;
+    if (!root || root.nodeName === 'parsererror') return null;
+    return document.importNode(root, true);
   } catch {
     return null;
   }
-})();
-
-// true quando il contesto dell'estensione è morto: le iniezioni vengono
-// annullate in silenzio invece di lanciare eccezioni non catturate.
-let contextDead = ICON_URL === null;
+}
 
 // Versione del content script: serve per diagnosticare in console quale istanza
 // è in esecuzione nella tab (dopo un reload dell'estensione, le tab aperte
 // prima eseguono ancora la vecchia istanza finché non vengono ricaricate).
-const RESUMARI_CONTENT_VERSION = '1.1.6';
+const RESUMARI_CONTENT_VERSION = '1.1.9';
 
 // ---------------------------------------------------------------------------
 // Overlay barra di caricamento con progresso — feedback immediato su YouTube
@@ -50,10 +113,10 @@ function showResumariProgressOverlay({ title, subtitle }) {
     const header = document.createElement('div');
     header.className = 'resumari-progress-header';
 
-    const logo = document.createElement('img');
-    logo.className = 'resumari-progress-logo';
-    logo.alt = 'Resumari';
-    try { logo.src = ICON_URL; } catch {}
+    const logo = createResumariIcon('resumari-progress-logo');
+    if (logo) {
+      try { header.appendChild(logo); } catch {}
+    }
 
     const texts = document.createElement('div');
     texts.className = 'resumari-progress-texts';
@@ -79,7 +142,6 @@ function showResumariProgressOverlay({ title, subtitle }) {
 
     texts.appendChild(titleEl);
     texts.appendChild(subEl);
-    header.appendChild(logo);
     header.appendChild(texts);
     header.appendChild(close);
 
@@ -123,10 +185,27 @@ function ensureRelativePosition(el) {
   } catch {}
 }
 
-function findThumbHost(anchor) {
-  // Preferisce il container stabile che contiene sia anchor che preview player.
-  const stable = anchor.closest('ytd-thumbnail');
-  if (stable) return stable;
+function findThumbHost(anchor, renderer) {
+  // Caso standard (home/search/correlati): l'anchor è DENTRO ytd-thumbnail.
+  const ancestor = anchor.closest('ytd-thumbnail');
+  if (ancestor) return ancestor;
+  // Caso playlist (ytd-playlist-video-renderer,
+  // ytd-playlist-panel-video-renderer): l'anchor #thumbnail AVVOLGE
+  // ytd-thumbnail (è un antenato, non un discendente), quindi closest()
+  // fallisce e il fallback a parentElement ancorava il bottone alla riga
+  // intera — da qui il posizionamento errato in alto a destra del testo.
+  // Si usa lo ytd-thumbnail discendente, che ha le dimensioni della sola
+  // miniatura.
+  try {
+    const inner = anchor.querySelector('ytd-thumbnail');
+    if (inner) return inner;
+  } catch {}
+  try {
+    const inRenderer = renderer
+      ? renderer.querySelector('ytd-thumbnail')
+      : null;
+    if (inRenderer) return inRenderer;
+  } catch {}
   // Shorts / layout nuovi: il parent diretto dell'anchor è comunque più
   // stabile dell'anchor stessa (il cui innerHTML viene riscritto).
   return anchor.parentElement;
@@ -149,8 +228,6 @@ function injectThumbnailButtons() {
     ytd-playlist-panel-video-renderer
   `);
 
-  const iconUrl = ICON_URL;
-
   renderers.forEach(renderer => {
     // Cerca il link o il contenitore cliccabile della thumbnail
     const anchor = renderer.querySelector('a#thumbnail, a.ytd-thumbnail, a[href*="/watch"], a[href*="/shorts"]');
@@ -161,7 +238,7 @@ function injectThumbnailButtons() {
     if (!videoId) return;
 
     // Host stabile (sopravvive a preview + re-render): mai l'anchor stessa.
-    const host = findThumbHost(anchor);
+    const host = findThumbHost(anchor, renderer);
     if (!host) return;
     ensureRelativePosition(host);
 
@@ -175,6 +252,11 @@ function injectThumbnailButtons() {
       }
       if (existing.parentElement !== host) {
         host.appendChild(existing);
+      } else if (host.querySelector('ytd-inline-preview-player') && host.lastElementChild !== existing) {
+        // La preview monta ytd-inline-preview-player DOPO il nostro bottone:
+        // lo si riporta in fondo così resta l'ultimo figlio e dipinge sopra
+        // al player (a parità di stacking, vince l'ordine nel DOM).
+        host.appendChild(existing);
       }
       return;
     }
@@ -187,12 +269,8 @@ function injectThumbnailButtons() {
     btn.setAttribute('aria-label', 'Trascrivi con Resumari');
     btn.dataset.videoId = videoId;
 
-    const img = document.createElement('img');
-    img.src = iconUrl;
-    img.alt = 'Resumari';
-    img.className = 'resumari-thumb-icon';
-
-    btn.appendChild(img);
+    const icon = createResumariIcon('resumari-thumb-icon');
+    if (icon) btn.appendChild(icon);
 
     btn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -239,7 +317,6 @@ function injectVideoPageButtons() {
     return;
   }
 
-  const iconUrl = ICON_URL;
 
   const transcriptBtn = document.createElement('button');
   transcriptBtn.type = 'button';
@@ -248,15 +325,12 @@ function injectVideoPageButtons() {
   transcriptBtn.setAttribute('aria-label', 'Trascrivi con Resumari');
   transcriptBtn.dataset.videoId = videoId;
 
-  const img = document.createElement('img');
-  img.src = iconUrl;
-  img.alt = 'Resumari';
-  img.className = 'resumari-watch-icon';
+  const icon = createResumariIcon('resumari-watch-icon');
+  if (icon) transcriptBtn.appendChild(icon);
 
   const label = document.createElement('span');
   label.textContent = 'Trascrivi';
 
-  transcriptBtn.appendChild(img);
   transcriptBtn.appendChild(label);
 
   transcriptBtn.addEventListener('click', (e) => {
@@ -443,11 +517,8 @@ function injectChannelPageButton() {
   // altri due in ogni tema.
   btn.className = "resumari-channel-btn";
 
-  const img = document.createElement("img");
-  img.src = ICON_URL;
-  img.alt = "";
-  img.draggable = false;
-  img.className = "resumari-channel-icon";
+  const icon = createResumariIcon('resumari-channel-icon');
+  if (icon) btn.appendChild(icon);
 
   const label = document.createElement("span");
   label.textContent = "Trascrivi canale";
